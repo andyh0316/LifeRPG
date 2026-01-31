@@ -4,6 +4,8 @@
   "scripts": {
     "db:generate": "pnpm --filter @life-rpg/database generate",
     "db:migrate": "pnpm --filter @life-rpg/database migrate",
-    "db:studio": "pnpm --filter @life-rpg/database studio"
+    "db:studio": "pnpm --filter @life-rpg/database studio",
+    "dev:api": "pnpm --filter @life-rpg/api start:dev",
+    "build:api": "pnpm --filter @life-rpg/api build"
   }
 }
