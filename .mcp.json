@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "postgres": {
+    "postgres-docker": {
       "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-postgres",
-        "postgresql://haitianhong:@localhost:5432/life_rpg"
+        "postgresql://haitianhong:@localhost:5433/life_rpg"
       ]
     }
   }
