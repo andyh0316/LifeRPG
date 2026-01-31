@@ -22,6 +22,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.0.0
         version: 11.1.12(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.12)
+      '@nestjs/swagger':
+        specifier: ^11.2.5
+        version: 11.2.5(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.12)(reflect-metadata@0.2.2)
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
@@ -723,6 +726,9 @@ packages:
     resolution: {integrity: sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA==}
     engines: {node: '>=8'}
 
+  '@microsoft/tsdoc@0.16.0':
+    resolution: {integrity: sha512-xgAyonlVVS+q7Vc7qLW0UrJU7rSFcETRWsqdXZtjzRU8dF+6CkozTK4V4y1LwOX7j8r/vHphjDeMeGI4tNGeGA==}
+
   '@nestjs/cli@11.0.16':
     resolution: {integrity: sha512-P0H+Vcjki6P5160E5QnMt3Q0X5FTg4PZkP99Ig4lm/4JWqfw32j3EXv3YBTJ2DmxLwOQ/IS9F7dzKpMAgzKTGg==}
     engines: {node: '>= 20.11'}
@@ -767,6 +773,19 @@ packages:
       '@nestjs/websockets':
         optional: true
 
+  '@nestjs/mapped-types@2.1.0':
+    resolution: {integrity: sha512-W+n+rM69XsFdwORF11UqJahn4J3xi4g/ZEOlJNL6KoW5ygWSmBB2p0S2BZ4FQeS/NDH72e6xIcu35SfJnE8bXw==}
+    peerDependencies:
+      '@nestjs/common': ^10.0.0 || ^11.0.0
+      class-transformer: ^0.4.0 || ^0.5.0
+      class-validator: ^0.13.0 || ^0.14.0
+      reflect-metadata: ^0.1.12 || ^0.2.0
+    peerDependenciesMeta:
+      class-transformer:
+        optional: true
+      class-validator:
+        optional: true
+
   '@nestjs/platform-express@11.1.12':
     resolution: {integrity: sha512-GYK/vHI0SGz5m8mxr7v3Urx8b9t78Cf/dj5aJMZlGd9/1D9OI1hAl00BaphjEXINUJ/BQLxIlF2zUjrYsd6enQ==}
     peerDependencies:
@@ -778,6 +797,23 @@ packages:
     peerDependencies:
       typescript: '>=4.8.2'
 
+  '@nestjs/swagger@11.2.5':
+    resolution: {integrity: sha512-wCykbEybMqiYcvkyzPW4SbXKcwra9AGdajm0MvFgKR3W+gd1hfeKlo67g/s9QCRc/mqUU4KOE5Qtk7asMeFuiA==}
+    peerDependencies:
+      '@fastify/static': ^8.0.0 || ^9.0.0
+      '@nestjs/common': ^11.0.1
+      '@nestjs/core': ^11.0.1
+      class-transformer: '*'
+      class-validator: '*'
+      reflect-metadata: ^0.1.12 || ^0.2.0
+    peerDependenciesMeta:
+      '@fastify/static':
+        optional: true
+      class-transformer:
+        optional: true
+      class-validator:
+        optional: true
+
   '@nuxt/opencollective@0.4.1':
     resolution: {integrity: sha512-GXD3wy50qYbxCJ652bDrDzgMr3NFEkIS374+IgFQKkCvk9yiYcLvX2XDYr7UyQxf4wK0e+yqDYRubZ0DtOxnmQ==}
     engines: {node: ^14.18.0 || >=16.10.0, npm: '>=5.10.0'}
@@ -785,6 +821,9 @@ packages:
 
   '@petamoriken/float16@3.9.3':
     resolution: {integrity: sha512-8awtpHXCx/bNpFt4mt2xdkgtgVvKqty8VbjHI/WWWQuEw+KLzFot3f4+LkQY9YmOtq7A5GdOnqoIC8Pdygjk2g==}
+
+  '@scarf/scarf@1.4.0':
+    resolution: {integrity: sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==}
 
   '@tokenizer/inflate@0.4.1':
     resolution: {integrity: sha512-2mAv+8pkG6GIZiF1kNg1jAjh27IDxEPKwdGul3snfztFerfPGI1LjDezZp3i7BElXompqEtPmoPx6c2wgtWsOA==}
@@ -1480,6 +1519,9 @@ packages:
     resolution: {integrity: sha512-IWqP2SCPhyVFTBtRcgMHdzlf9ul25NwaFx4wCEH/KjAXuuHY4yNjvPXsBokp8jCB936PyWRaPKUNh8NvylLp2Q==}
     engines: {node: '>=6.11.5'}
 
+  lodash@4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+
   lodash@4.17.23:
     resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
@@ -1807,6 +1849,9 @@ packages:
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
+
+  swagger-ui-dist@5.31.0:
+    resolution: {integrity: sha512-zSUTIck02fSga6rc0RZP3b7J7wgHXwLea8ZjgLA3Vgnb8QeOl3Wou2/j5QkzSGeoz6HusP/coYuJl33aQxQZpg==}
 
   symbol-observable@4.0.0:
     resolution: {integrity: sha512-b19dMThMV4HVFynSAM1++gBHAbk2Tc/osgLIBZMKsyqh34jb2e8Os7T6ZW/Bt3pJFdBTd2JwAnAAEQV7rSNvcQ==}
@@ -2422,6 +2467,8 @@ snapshots:
 
   '@lukeed/csprng@1.1.0': {}
 
+  '@microsoft/tsdoc@0.16.0': {}
+
   '@nestjs/cli@11.0.16(@types/node@22.19.7)':
     dependencies:
       '@angular-devkit/core': 19.2.19(chokidar@4.0.3)
@@ -2474,6 +2521,11 @@ snapshots:
     optionalDependencies:
       '@nestjs/platform-express': 11.1.12(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.12)
 
+  '@nestjs/mapped-types@2.1.0(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)':
+    dependencies:
+      '@nestjs/common': 11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      reflect-metadata: 0.2.2
+
   '@nestjs/platform-express@11.1.12(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.12)':
     dependencies:
       '@nestjs/common': 11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -2497,11 +2549,25 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
+  '@nestjs/swagger@11.2.5(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.12)(reflect-metadata@0.2.2)':
+    dependencies:
+      '@microsoft/tsdoc': 0.16.0
+      '@nestjs/common': 11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 11.1.12(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.12)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/mapped-types': 2.1.0(@nestjs/common@11.1.12(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)
+      js-yaml: 4.1.1
+      lodash: 4.17.21
+      path-to-regexp: 8.3.0
+      reflect-metadata: 0.2.2
+      swagger-ui-dist: 5.31.0
+
   '@nuxt/opencollective@0.4.1':
     dependencies:
       consola: 3.4.2
 
   '@petamoriken/float16@3.9.3': {}
+
+  '@scarf/scarf@1.4.0': {}
 
   '@tokenizer/inflate@0.4.1':
     dependencies:
@@ -3206,6 +3272,8 @@ snapshots:
 
   loader-runner@4.3.1: {}
 
+  lodash@4.17.21: {}
+
   lodash@4.17.23: {}
 
   log-symbols@4.1.0:
@@ -3534,6 +3602,10 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+
+  swagger-ui-dist@5.31.0:
+    dependencies:
+      '@scarf/scarf': 1.4.0
 
   symbol-observable@4.0.0: {}
 
