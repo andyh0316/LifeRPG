@@ -26,9 +26,11 @@ Requires a `.env` file in `apps/api/` — see `.env.example`.
 Uses Drizzle ORM with PostgreSQL.
 
 ```bash
-pnpm db:generate      # generate migration from schema changes
-pnpm db:migrate       # run pending migrations
-pnpm db:studio        # open Drizzle Studio (DB browser)
+pnpm db:generate              # generate migration from schema changes
+pnpm db:migrate               # run pending migrations
+pnpm db:studio                # open Drizzle Studio (DB browser)
+pnpm db:seed                  # insert sample data (dev only)
+pnpm db:destroy-and-recreate  # wipe DB, recreate, migrate, and seed
 ```
 
 Requires a `.env` file in `packages/database/` — see `.env.example`.
