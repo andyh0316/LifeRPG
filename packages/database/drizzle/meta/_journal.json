@@ -15,6 +15,13 @@
       "when": 1769984229054,
       "tag": "0001_robust_ink",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769984712365,
+      "tag": "0002_dry_logan",
+      "breakpoints": true
     }
   ]
 }
