@@ -12,7 +12,8 @@
     "generate": "pnpm generate:spec && pnpm generate:types"
   },
   "dependencies": {
-    "openapi-fetch": "^0.13.5"
+    "openapi-fetch": "^0.15.0",
+    "openapi-react-query": "^0.5.1"
   },
   "devDependencies": {
     "openapi-typescript": "^7.8.0",
