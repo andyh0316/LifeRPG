@@ -10,9 +10,9 @@ export class UserResponseDto {
   @ApiProperty()
   fullName!: string;
 
-  @ApiProperty()
-  createdAt!: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  createdAt!: Date | null;
 
-  @ApiProperty()
-  updatedAt!: Date;
+  @ApiProperty({ type: Date, nullable: true })
+  updatedAt!: Date | null;
 }

@@ -20,8 +20,8 @@ type UserRow = {
   email: string;
   firstName: string;
   lastName: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 };
 
 function toUserResponse(row: UserRow): UserResponseDto {
