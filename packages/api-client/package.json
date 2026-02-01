@@ -1,0 +1,22 @@
+{
+  "name": "@life-rpg/api-client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate:spec": "tsx scripts/generate-spec.ts",
+    "generate:types": "openapi-typescript openapi.json -o generated/openapi.d.ts",
+    "generate": "pnpm generate:spec && pnpm generate:types"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.13.5"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.8.0",
+    "tsx": "^4.19.4",
+    "typescript": "~5.9.3"
+  }
+}

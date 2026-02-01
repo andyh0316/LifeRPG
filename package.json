@@ -14,7 +14,8 @@
     "build:api": "pnpm --filter @life-rpg/api build",
     "dev:web": "pnpm --filter @life-rpg/web dev",
     "build:web": "pnpm --filter @life-rpg/web build",
-    "test": "pnpm --filter @life-rpg/api test"
+    "test": "pnpm --filter @life-rpg/api test",
+    "generate:api-client": "pnpm --filter @life-rpg/api-client generate"
   },
   "devDependencies": {
     "prettier": "^3.8.1"
