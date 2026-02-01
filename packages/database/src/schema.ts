@@ -21,6 +21,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name", { length: 255 }).notNull(),
   lastName: varchar("last_name", { length: 255 }),
   displayName: varchar("display_name", { length: 255 }).notNull(),
+  genderId: integer("gender_id").references(() => genders.id),
   level: integer("level").notNull().default(1),
   xp: integer("xp").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })

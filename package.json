@@ -9,7 +9,6 @@
     "db:migrate": "pnpm --filter @life-rpg/database migrate",
     "db:studio": "pnpm --filter @life-rpg/database studio",
     "db:seed": "pnpm --filter @life-rpg/database seed",
-    "db:destroy-and-recreate": "pnpm docker:nuke && pnpm docker:up && pnpm db:migrate && pnpm db:seed",
     "test-db:migrate": "pnpm --filter @life-rpg/database test-db:migrate",
     "dev:api": "pnpm --filter @life-rpg/api start:dev",
     "build:api": "pnpm --filter @life-rpg/api build",

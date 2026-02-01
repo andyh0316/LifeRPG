@@ -1,9 +1,49 @@
 {
-  "id": "e7623819-50b6-4251-aab7-2231f805b137",
+  "id": "5d5d962a-4654-4f71-adc3-52f0e74bdfc7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.genders": {
+      "name": "genders",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "genders_name_unique": {
+          "name": "genders_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -39,6 +79,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "gender_id": {
+          "name": "gender_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "level": {
           "name": "level",
           "type": "integer",
@@ -69,7 +115,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "users_gender_id_genders_id_fk": {
+          "name": "users_gender_id_genders_id_fk",
+          "tableFrom": "users",
+          "tableTo": "genders",
+          "columnsFrom": [
+            "gender_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "users_email_unique": {
