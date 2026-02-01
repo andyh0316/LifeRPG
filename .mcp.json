@@ -7,6 +7,12 @@
         "@modelcontextprotocol/server-postgres",
         "postgresql://haitianhong:@localhost:5433/life_rpg"
       ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
     }
   }
 }
