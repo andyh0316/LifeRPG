@@ -5,13 +5,14 @@ import {
   varchar,
   integer,
   timestamp,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 
 const auditColumns = {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().$onUpdate(() => new Date()),
-  createdByUserId: uuid('created_by_user_id'),
-  updatedByUserId: uuid('updated_by_user_id'),
+  createdByUserId: uuid('created_by_user_id').references((): AnyPgColumn => users.id),
+  updatedByUserId: uuid('updated_by_user_id').references((): AnyPgColumn => users.id),
 };
 
 export const genders = pgTable('genders', {
