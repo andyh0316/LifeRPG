@@ -7,8 +7,9 @@
     "db:studio": "pnpm --filter @life-rpg/database studio",
     "db:seed": "pnpm --filter @life-rpg/database seed",
     "db:destroy-and-recreate": "docker compose down -v && docker compose up -d && pnpm db:migrate && pnpm db:seed",
-    "test:db:migrate": "pnpm --filter @life-rpg/database test:db:migrate",
+    "test-db:migrate": "pnpm --filter @life-rpg/database test-db:migrate",
     "dev:api": "pnpm --filter @life-rpg/api start:dev",
-    "build:api": "pnpm --filter @life-rpg/api build"
+    "build:api": "pnpm --filter @life-rpg/api build",
+    "test": "pnpm --filter @life-rpg/api test"
   }
 }
