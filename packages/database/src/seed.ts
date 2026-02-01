@@ -1,11 +1,21 @@
 import "dotenv/config";
 import { createDb } from "./index.js";
-import { users } from "./schema.js";
+import { users, genders } from "./schema.js";
 
 async function seed() {
   const db = createDb(process.env.DATABASE_URL!);
 
   console.log("Seeding database...");
+
+  await db
+    .insert(genders)
+    .values([
+      { name: "male" },
+      { name: "female" },
+      { name: "non_binary" },
+      { name: "other" },
+    ])
+    .onConflictDoNothing();
 
   await db.insert(users).values({
     email: "alice@example.com",
@@ -14,7 +24,7 @@ async function seed() {
     displayName: "Alice",
   });
 
-  console.log("Seeded 1 user.");
+  console.log("Seeded 4 genders and 1 user.");
   process.exit(0);
 }
 

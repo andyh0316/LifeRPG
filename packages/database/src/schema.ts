@@ -1,10 +1,19 @@
 import {
   pgTable,
   uuid,
+  serial,
   varchar,
   integer,
   timestamp,
 } from "drizzle-orm/pg-core";
+
+export const genders = pgTable("genders", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 50 }).notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),

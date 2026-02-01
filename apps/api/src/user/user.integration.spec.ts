@@ -9,9 +9,11 @@ describe("User Integration", () => {
   const createdUserIds: string[] = [];
 
   beforeAll(async () => {
-    process.env.DATABASE_URL =
-      process.env.TEST_DATABASE_URL ??
-      "postgresql://haitianhong:@localhost:5434/life_rpg_test";
+    // Point the app at the test database
+    if (!process.env.TEST_DATABASE_URL) {
+      throw new Error("TEST_DATABASE_URL must be set");
+    }
+    process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
