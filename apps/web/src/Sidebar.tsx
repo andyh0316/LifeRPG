@@ -29,19 +29,19 @@ export default function Sidebar() {
       </Toolbar>
       <List>
         <ListItemButton component={Link} to="/">
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 32 }}>
             <HomeIcon />
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItemButton>
         <ListItemButton component={Link} to="/earnings">
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 32 }}>
             <AttachMoneyIcon />
           </ListItemIcon>
           <ListItemText primary="Earnings" />
         </ListItemButton>
         <ListItemButton component={Link} to="/rewards">
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 32 }}>
             <EmojiEventsIcon />
           </ListItemIcon>
           <ListItemText primary="Rewards" />
