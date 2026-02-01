@@ -73,6 +73,7 @@ export const taskCompletions = pgTable('task_completions', {
   completedAt: timestamp('completed_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
+  ...auditColumns,
 });
 
 export const rewardRedemptions = pgTable('reward_redemptions', {
@@ -87,4 +88,5 @@ export const rewardRedemptions = pgTable('reward_redemptions', {
   redeemedAt: timestamp('redeemed_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
+  ...auditColumns,
 });
