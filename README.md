@@ -6,8 +6,9 @@
 
 ## Project Overview
 
-pnpm monorepo with two packages:
+pnpm monorepo with three packages:
 - `apps/api` — NestJS REST API
+- `apps/web` — Vite + React + TypeScript frontend
 - `packages/database` — Drizzle ORM schema and database client
 
 ## Docker
@@ -28,6 +29,13 @@ pnpm build:api        # production build
 Swagger UI is available at `http://localhost:3000/api` when the API is running.
 
 Requires a `.env` file in `apps/api/` — see `.env.example`.
+
+## Web (`apps/web`)
+
+```bash
+pnpm dev:web          # start dev server (port 5173)
+pnpm build:web        # production build
+```
 
 ## Database (`packages/database`)
 
