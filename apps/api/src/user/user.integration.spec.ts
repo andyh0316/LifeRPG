@@ -10,8 +10,8 @@ describe("User Integration", () => {
 
   beforeAll(async () => {
     process.env.DATABASE_URL =
-      process.env.DATABASE_URL?.replace(/\/[^/]+$/, "/life_rpg_test") ??
-      "postgresql://haitianhong:@localhost:5433/life_rpg_test";
+      process.env.TEST_DATABASE_URL ??
+      "postgresql://haitianhong:@localhost:5434/life_rpg_test";
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],

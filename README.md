@@ -10,6 +10,14 @@ pnpm monorepo with two packages:
 - `apps/api` — NestJS REST API
 - `packages/database` — Drizzle ORM schema and database client
 
+## Docker
+
+```bash
+pnpm docker:up                # start docker container (e.g. contains db, test-db)
+pnpm docker:down              # stop container
+pnpm docker:nuke              # stop containers and delete volumes (storage)
+```
+
 ## API (`apps/api`)
 
 ```bash
@@ -30,7 +38,7 @@ pnpm db:generate              # generate migration from schema changes
 pnpm db:migrate               # run pending migrations
 pnpm db:studio                # open Drizzle Studio (DB browser)
 pnpm db:seed                  # insert sample data (dev only)
-pnpm db:destroy-and-recreate  # wipe DB, recreate, migrate, and seed
+pnpm db:destroy-and-recreate  # nuke, restart, migrate, and seed
 ```
 
 Requires a `.env` file in `packages/database/` — see `.env.example`.
