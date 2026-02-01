@@ -15,7 +15,14 @@ const userSelect = {
   updatedAt: users.updatedAt,
 };
 
-type UserRow = { id: string; email: string; firstName: string; lastName: string | null; createdAt: Date; updatedAt: Date };
+type UserRow = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 function toUserResponse(row: UserRow): UserResponseDto {
   return {
@@ -37,22 +44,38 @@ export class UserService {
   }
 
   async findOne(id: string): Promise<UserResponseDto | null> {
-    const results = await this.db.select(userSelect).from(users).where(eq(users.id, id));
+    const results = await this.db
+      .select(userSelect)
+      .from(users)
+      .where(eq(users.id, id));
     return results[0] ? toUserResponse(results[0]) : null;
   }
 
   async create(data: CreateUserDto): Promise<UserResponseDto> {
-    const results = await this.db.insert(users).values(data).returning(userSelect);
+    const results = await this.db
+      .insert(users)
+      .values(data)
+      .returning(userSelect);
     return toUserResponse(results[0]);
   }
 
-  async update(id: string, data: UpdateUserDto): Promise<UserResponseDto | null> {
-    const results = await this.db.update(users).set(data).where(eq(users.id, id)).returning(userSelect);
+  async update(
+    id: string,
+    data: UpdateUserDto,
+  ): Promise<UserResponseDto | null> {
+    const results = await this.db
+      .update(users)
+      .set(data)
+      .where(eq(users.id, id))
+      .returning(userSelect);
     return results[0] ? toUserResponse(results[0]) : null;
   }
 
   async remove(id: string): Promise<UserResponseDto | null> {
-    const results = await this.db.delete(users).where(eq(users.id, id)).returning(userSelect);
+    const results = await this.db
+      .delete(users)
+      .where(eq(users.id, id))
+      .returning(userSelect);
     return results[0] ? toUserResponse(results[0]) : null;
   }
 }

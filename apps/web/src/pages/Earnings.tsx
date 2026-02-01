@@ -1,5 +1,5 @@
-import Typography from '@mui/material/Typography'
+import Typography from '@mui/material/Typography';
 
 export default function Earnings() {
-  return <Typography variant="h4">Earnings</Typography>
+  return <Typography variant="h4">Earnings</Typography>;
 }

@@ -35,9 +35,7 @@
         "genders_name_unique": {
           "name": "genders_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -120,12 +118,8 @@
           "name": "users_gender_id_genders_id_fk",
           "tableFrom": "users",
           "tableTo": "genders",
-          "columnsFrom": [
-            "gender_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["gender_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -135,9 +129,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

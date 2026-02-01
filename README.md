@@ -1,4 +1,5 @@
 ## Objectives
+
 - Learn to build with agentic coding: go wild
 - Learn about proper architecture: e.g. nestJS, DI, testing, etc
 - Learn about devops: github actions, AWS infra
@@ -7,6 +8,7 @@
 ## Project Overview
 
 pnpm monorepo with three packages:
+
 - `apps/api` — NestJS REST API
 - `apps/web` — Vite + React + TypeScript frontend
 - `packages/database` — Drizzle ORM schema and database client

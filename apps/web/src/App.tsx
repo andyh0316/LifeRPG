@@ -1,10 +1,10 @@
-import Box from '@mui/material/Box'
-import CssBaseline from '@mui/material/CssBaseline'
-import { Routes, Route } from 'react-router-dom'
-import Sidebar from './Sidebar'
-import Home from './pages/Home'
-import Earnings from './pages/Earnings'
-import Rewards from './pages/Rewards'
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import { Routes, Route } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import Home from './pages/Home';
+import Earnings from './pages/Earnings';
+import Rewards from './pages/Rewards';
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
         </Routes>
       </Box>
     </Box>
-  )
+  );
 }
 
-export default App
+export default App;

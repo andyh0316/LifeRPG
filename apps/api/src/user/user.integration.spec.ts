@@ -1,17 +1,17 @@
-import "dotenv/config";
-import { Test } from "@nestjs/testing";
-import { INestApplication, ValidationPipe } from "@nestjs/common";
-import request from "supertest";
-import { AppModule } from "../app.module";
+import 'dotenv/config';
+import { Test } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import request from 'supertest';
+import { AppModule } from '../app.module';
 
-describe("User Integration", () => {
+describe('User Integration', () => {
   let app: INestApplication;
   const createdUserIds: string[] = [];
 
   beforeAll(async () => {
     // Point the app at the test database
     if (!process.env.TEST_DATABASE_URL) {
-      throw new Error("TEST_DATABASE_URL must be set");
+      throw new Error('TEST_DATABASE_URL must be set');
     }
     process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
 
@@ -32,28 +32,28 @@ describe("User Integration", () => {
     await app.close();
   });
 
-  it("POST /users then GET /users/:id", async () => {
+  it('POST /users then GET /users/:id', async () => {
     const createBody = {
-      email: "integration-test@example.com",
-      firstName: "Integration",
-      lastName: "Test",
-      displayName: "IntegrationTest",
+      email: 'integration-test@example.com',
+      firstName: 'Integration',
+      lastName: 'Test',
+      displayName: 'IntegrationTest',
     };
 
     // Create user
     const createRes = await request(app.getHttpServer())
-      .post("/users")
+      .post('/users')
       .send(createBody)
       .expect(201);
 
     const created = createRes.body;
     createdUserIds.push(created.id);
 
-    expect(created).toHaveProperty("id");
-    expect(created).toHaveProperty("fullName");
-    expect(created).toHaveProperty("email", createBody.email);
-    expect(created).toHaveProperty("createdAt");
-    expect(created).toHaveProperty("updatedAt");
+    expect(created).toHaveProperty('id');
+    expect(created).toHaveProperty('fullName');
+    expect(created).toHaveProperty('email', createBody.email);
+    expect(created).toHaveProperty('createdAt');
+    expect(created).toHaveProperty('updatedAt');
 
     // Fetch user
     const getRes = await request(app.getHttpServer())

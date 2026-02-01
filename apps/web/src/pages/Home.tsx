@@ -1,5 +1,5 @@
-import Typography from '@mui/material/Typography'
+import Typography from '@mui/material/Typography';
 
 export default function Home() {
-  return <Typography variant="h4">Home</Typography>
+  return <Typography variant="h4">Home</Typography>;
 }
