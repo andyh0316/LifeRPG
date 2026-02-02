@@ -48,6 +48,9 @@ importers:
         specifier: ^7.8.1
         version: 7.8.2
     devDependencies:
+      '@life-rpg/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.16(@types/node@22.19.7)(esbuild@0.27.2)

@@ -24,6 +24,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@life-rpg/api-client": "workspace:*",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/testing": "^11.1.12",
     "@types/jest": "^30.0.0",

@@ -3,7 +3,8 @@ import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import type { Db } from '@life-rpg/database';
 import createClient from 'openapi-fetch';
-import type { paths } from '../../../../packages/api-client/generated/openapi';
+// @ts-expect-error — CJS/ESM boundary; only types are imported at compile time
+import type { paths } from '@life-rpg/api-client';
 import type { AddressInfo } from 'net';
 import { AppModule } from '../app.module';
 
