@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { users } from '@life-rpg/database';
-import type { createDb } from '@life-rpg/database';
+import type { Db } from '@life-rpg/database';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetailDto } from './dto/user-detail.dto';
@@ -62,7 +62,7 @@ function toUserProfile(row: UserProfileRow): UserProfileDto {
 
 @Injectable()
 export class UserService {
-  constructor(@Inject('DATABASE') private db: ReturnType<typeof createDb>) {}
+  constructor(@Inject('DATABASE') private db: Db) {}
 
   async findAll(): Promise<UserDetailDto[]> {
     const results = await this.db.select(userSelect).from(users);

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { createDb } from '@life-rpg/database';
+import type { Db } from '@life-rpg/database';
 import createClient from 'openapi-fetch';
 import type { paths } from '../../../../packages/api-client/generated/openapi';
 import type { AddressInfo } from 'net';
@@ -12,7 +12,7 @@ export type ApiClient = ReturnType<typeof createClient<paths>>;
 /** Bootstraps a NestJS app listening on a random port and returns the app, db, and typed API client. */
 export async function createIntegrationApp(): Promise<{
   app: INestApplication;
-  db: ReturnType<typeof createDb>;
+  db: Db;
   client: ApiClient;
 }> {
   // Validate that the test database URL is configured
@@ -40,7 +40,7 @@ export async function createIntegrationApp(): Promise<{
   });
 
   // Extract the database provider
-  const db = app.get<ReturnType<typeof createDb>>('DATABASE');
+  const db = app.get<Db>('DATABASE');
 
   return { app, db, client };
 }

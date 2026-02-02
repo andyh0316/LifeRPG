@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
 import { tasks, taskCompletions, users } from '@life-rpg/database';
-import type { createDb } from '@life-rpg/database';
+import type { Db } from '@life-rpg/database';
 import { TaskResponseDto } from './dto/task-response.dto';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 
@@ -25,7 +25,7 @@ const completionSelect = {
 
 @Injectable()
 export class TaskService {
-  constructor(@Inject('DATABASE') private db: ReturnType<typeof createDb>) {}
+  constructor(@Inject('DATABASE') private db: Db) {}
 
   async findAll(): Promise<TaskResponseDto[]> {
     return this.db.select(taskSelect).from(tasks);

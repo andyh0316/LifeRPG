@@ -1,11 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { tasks } from '@life-rpg/database/schema';
-import { createDb } from '@life-rpg/database';
+import type { Db } from '@life-rpg/database';
 import { ApiClient, createIntegrationApp } from '../test/setup-integration';
 
 describe('Task Integration', () => {
   let app: INestApplication;
-  let db: ReturnType<typeof createDb>;
+  let db: Db;
   let client: ApiClient;
   let testTaskId: number;
   let testUserId: string;
