@@ -36,20 +36,20 @@ export default function ProfileCard() {
         Level {profile.level}
       </Typography> */}
 
-      {/* Total XP and coin balance */}
+      {/* Coin balance and total XP */}
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
-        <Chip
-          icon={<StarIcon />}
-          label={`${profile.xp} XP`}
-          size="small"
-          color="primary"
-          variant="outlined"
-        />
         <Chip
           icon={<MonetizationOnIcon />}
           label={profile.coins}
           size="small"
           color="warning"
+          variant="outlined"
+        />
+        <Chip
+          icon={<StarIcon />}
+          label={`${profile.xp} XP`}
+          size="small"
+          color="primary"
           variant="outlined"
         />
       </Box>

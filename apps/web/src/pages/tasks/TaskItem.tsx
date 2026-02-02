@@ -60,8 +60,9 @@ export default function TaskItem({
     },
   });
 
-  // Sends the complete request for this task.
+  // Asks for confirmation, then sends the complete request.
   const handleClick = () => {
+    if (!window.confirm(`Complete "${name}"?`)) return;
     completeTask.mutate({
       params: { path: { id } },
       body: { userId },
@@ -69,7 +70,7 @@ export default function TaskItem({
   };
 
   return (
-    <ListItem disablePadding>
+    <ListItem disablePadding sx={{ maxWidth: 500 }}>
       <ListItemButton onClick={handleClick}>
         <ListItemIcon sx={{ minWidth: 40, fontSize: 24 }}>
           {icon ?? '📋'}
@@ -78,17 +79,17 @@ export default function TaskItem({
         {/* Reward chips */}
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Chip
-            icon={<StarIcon />}
-            label={`${xpReward} XP`}
-            size="small"
-            color="primary"
-            variant="outlined"
-          />
-          <Chip
             icon={<MonetizationOnIcon />}
             label={`${coinReward}`}
             size="small"
             color="warning"
+            variant="outlined"
+          />
+          <Chip
+            icon={<StarIcon />}
+            label={`${xpReward} XP`}
+            size="small"
+            color="primary"
             variant="outlined"
           />
         </Box>
