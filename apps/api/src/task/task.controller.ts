@@ -1,9 +1,15 @@
-import { Controller, Get, Post, Param, Body, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { TaskService } from './task.service';
-import { CompleteTaskDto } from './dto/complete-task.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
-import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 
 @Controller('tasks')
 export class TaskController {
@@ -15,12 +21,15 @@ export class TaskController {
     return this.taskService.findAll();
   }
 
-  @Post(':id/complete')
-  @ApiCreatedResponse({ type: TaskCompletionResponseDto })
-  complete(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: CompleteTaskDto,
-  ) {
-    return this.taskService.complete(id, body.userId);
+  @Get(':id')
+  @ApiOkResponse({ type: TaskResponseDto })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.taskService.findOne(id);
+  }
+
+  @Post()
+  @ApiCreatedResponse({ type: TaskResponseDto })
+  create(@Body() body: CreateTaskDto) {
+    return this.taskService.create(body);
   }
 }

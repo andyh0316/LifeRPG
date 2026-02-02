@@ -8,7 +8,6 @@ describe('Task Integration', () => {
   let db: Db;
   let client: ApiClient;
   let testTaskId: number;
-  let testUserId: string;
 
   beforeAll(async () => {
     // Bootstrap the shared integration app and typed client
@@ -26,19 +25,6 @@ describe('Task Integration', () => {
       })
       .returning();
     testTaskId = testTask.id;
-
-    // Create a test user via the typed client
-    const uniqueEmail = `task-integration-${Date.now()}@example.com`;
-    const { data: user, error } = await client.POST('/users', {
-      body: {
-        email: uniqueEmail,
-        firstName: 'Task',
-        lastName: 'Tester',
-        displayName: 'TaskTester',
-      },
-    });
-    if (error) throw new Error(`Failed to create test user: ${JSON.stringify(error)}`);
-    testUserId = user.id;
   });
 
   afterAll(async () => {
@@ -61,41 +47,5 @@ describe('Task Integration', () => {
     expect(found!.xpReward).toBe(50);
     expect(found!.coinReward).toBe(10);
     expect(found!.icon).toBe('test_icon');
-  });
-
-  it('POST /tasks/:id/complete — completes the task and returns correct response', async () => {
-    const { data: completion, error } = await client.POST(
-      '/tasks/{id}/complete',
-      {
-        params: { path: { id: testTaskId } },
-        body: { userId: testUserId },
-      },
-    );
-
-    // Verify no error and response shape
-    expect(error).toBeUndefined();
-    expect(completion!.taskId).toBe(testTaskId);
-    expect(completion!.userId).toBe(testUserId);
-    expect(completion!.xpEarned).toBe(50);
-    expect(completion!.coinsEarned).toBe(10);
-    expect(completion!.completedAt).toBeDefined();
-  });
-
-  it('POST /tasks/:id/complete — returns error for invalid task ID', async () => {
-    const { error } = await client.POST('/tasks/{id}/complete', {
-      params: { path: { id: 999999 } },
-      body: { userId: testUserId },
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('POST /tasks/:id/complete — returns error for invalid userId', async () => {
-    const { error } = await client.POST('/tasks/{id}/complete', {
-      params: { path: { id: testTaskId } },
-      body: { userId: 'not-a-uuid' },
-    });
-
-    expect(error).toBeDefined();
   });
 });
