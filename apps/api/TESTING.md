@@ -1,21 +1,17 @@
-# @life-rpg/api
+# Testing
 
-NestJS backend for LifeRpg.
-
-## Testing
-
-### Prerequisites
+## Prerequisites
 
 - Docker must be running
 - `TEST_DATABASE_URL` must be set in `packages/database/.env` (points to the `db-test` container on port 5434)
 
-### Running tests
+## Running tests
 
 ```sh
 pnpm test
 ```
 
-### What happens when you run `pnpm test`
+## What happens when you run `pnpm test`
 
 The test database is fully reset before every test run. Here's the implicit workflow:
 
@@ -29,15 +25,28 @@ The test database is fully reset before every test run. Here's the implicit work
 
 5. **Migrations run** — `drizzle-kit migrate` applies all migrations from `packages/database/drizzle/` against the fresh test database, rebuilding the full schema.
 
-6. **Required data is seeded** — `test-db:seed` inserts reference/lookup data (e.g. genders) needed by the app. Temporary dev data is skipped (`--no-temp`).
+6. **Required data is seeded** — `test-db:seed` inserts reference/lookup data (e.g. genders) needed by the app.
 
 7. **Jest runs** — Each test file uses `createIntegrationApp()` from `src/test/setup-integration.ts` to bootstrap a NestJS app connected to the test database. Tests insert their own data in `beforeAll` and don't need to clean up — the next run starts from scratch.
 
-### Key files
+## Typed API client
+
+Integration tests use `openapi-fetch` with generated types from `@life-rpg/api-client` instead of supertest. This gives full type safety on request bodies, path params, and response data — the same types the web frontend uses.
+
+`createIntegrationApp()` returns a typed `client` that listens on a random port:
+
+```ts
+const { app, db, client } = await createIntegrationApp();
+
+const { data, error } = await client.GET('/tasks');
+// data is typed as TaskResponseDto[]
+```
+
+## Key files
 
 | File | Purpose |
 |---|---|
-| `src/test/setup-integration.ts` | Bootstraps a NestJS app pointing at `TEST_DATABASE_URL` |
+| `src/test/setup-integration.ts` | Bootstraps a NestJS app, listens on a random port, returns a typed API client |
 | `jest.config.ts` | Jest configuration (ts-jest, test matching) |
 | `package.json` (`pretest`) | Triggers `test-db:reset` before every test run |
 | Root `package.json` (`test-db:reset`) | Docker destroy + recreate + migrate + seed chain |

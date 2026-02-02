@@ -1,13 +1,13 @@
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { createIntegrationApp } from '../test/setup-integration';
+import { ApiClient, createIntegrationApp } from '../test/setup-integration';
 
 describe('User Integration', () => {
   let app: INestApplication;
+  let client: ApiClient;
 
   beforeAll(async () => {
-    // Bootstrap the shared integration app
-    ({ app } = await createIntegrationApp());
+    // Bootstrap the shared integration app and typed client
+    ({ app, client } = await createIntegrationApp());
   });
 
   afterAll(async () => {
@@ -16,37 +16,36 @@ describe('User Integration', () => {
 
   it('POST /users then GET /users/:id', async () => {
     const createBody = {
-      email: 'integration-test@example.com',
+      email: `integration-test-${Date.now()}@example.com`,
       firstName: 'Integration',
       lastName: 'Test',
       displayName: 'IntegrationTest',
     };
 
     // Create user
-    const createRes = await request(app.getHttpServer())
-      .post('/users')
-      .send(createBody)
-      .expect(201);
+    const { data: created, error: createError } = await client.POST(
+      '/users',
+      { body: createBody },
+    );
+    expect(createError).toBeUndefined();
 
-    const created = createRes.body;
+    expect(created!.id).toBeDefined();
+    expect(created!.fullName).toBeDefined();
+    expect(created!.email).toBe(createBody.email);
+    expect(created!.createdAt).toBeDefined();
+    expect(created!.updatedAt).toBeDefined();
 
-    expect(created).toHaveProperty('id');
-    expect(created).toHaveProperty('fullName');
-    expect(created).toHaveProperty('email', createBody.email);
-    expect(created).toHaveProperty('createdAt');
-    expect(created).toHaveProperty('updatedAt');
+    // Fetch user by ID
+    const { data: fetched, error: getError } = await client.GET(
+      '/users/{id}',
+      { params: { path: { id: created!.id } } },
+    );
+    expect(getError).toBeUndefined();
 
-    // Fetch user
-    const getRes = await request(app.getHttpServer())
-      .get(`/users/${created.id}`)
-      .expect(200);
-
-    const fetched = getRes.body;
-
-    expect(fetched.id).toBe(created.id);
-    expect(fetched.email).toBe(created.email);
-    expect(fetched.fullName).toBe(created.fullName);
-    expect(fetched.createdAt).toBe(created.createdAt);
-    expect(fetched.updatedAt).toBe(created.updatedAt);
+    expect(fetched!.id).toBe(created!.id);
+    expect(fetched!.email).toBe(created!.email);
+    expect(fetched!.fullName).toBe(created!.fullName);
+    expect(fetched!.createdAt).toBe(created!.createdAt);
+    expect(fetched!.updatedAt).toBe(created!.updatedAt);
   });
 });

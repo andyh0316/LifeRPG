@@ -1,18 +1,18 @@
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
 import { tasks } from '@life-rpg/database/schema';
 import { createDb } from '@life-rpg/database';
-import { createIntegrationApp } from '../test/setup-integration';
+import { ApiClient, createIntegrationApp } from '../test/setup-integration';
 
 describe('Task Integration', () => {
   let app: INestApplication;
   let db: ReturnType<typeof createDb>;
+  let client: ApiClient;
   let testTaskId: number;
   let testUserId: string;
 
   beforeAll(async () => {
-    // Bootstrap the shared integration app
-    ({ app, db } = await createIntegrationApp());
+    // Bootstrap the shared integration app and typed client
+    ({ app, db, client } = await createIntegrationApp());
 
     // Insert a test task directly via Drizzle
     const [testTask] = await db
@@ -27,17 +27,18 @@ describe('Task Integration', () => {
       .returning();
     testTaskId = testTask.id;
 
-    // Create a test user via the API
-    const createRes = await request(app.getHttpServer())
-      .post('/users')
-      .send({
-        email: 'task-integration-test@example.com',
+    // Create a test user via the typed client
+    const uniqueEmail = `task-integration-${Date.now()}@example.com`;
+    const { data: user, error } = await client.POST('/users', {
+      body: {
+        email: uniqueEmail,
         firstName: 'Task',
         lastName: 'Tester',
         displayName: 'TaskTester',
-      })
-      .expect(201);
-    testUserId = createRes.body.id;
+      },
+    });
+    if (error) throw new Error(`Failed to create test user: ${JSON.stringify(error)}`);
+    testUserId = user.id;
   });
 
   afterAll(async () => {
@@ -45,51 +46,56 @@ describe('Task Integration', () => {
   });
 
   it('GET /tasks — returns the test task with expected fields', async () => {
-    const res = await request(app.getHttpServer()).get('/tasks').expect(200);
+    const { data: taskList, error } = await client.GET('/tasks');
+
+    // Verify no error
+    expect(error).toBeUndefined();
 
     // Find our test task in the response
-    const found = res.body.find(
-      (t: { id: number }) => t.id === testTaskId,
-    );
+    const found = taskList!.find((t) => t.id === testTaskId);
 
     expect(found).toBeDefined();
-    expect(found).toHaveProperty('id', testTaskId);
-    expect(found).toHaveProperty('name', 'Integration Test Task');
-    expect(found).toHaveProperty(
-      'description',
-      'Task created for integration tests',
-    );
-    expect(found).toHaveProperty('xpReward', 50);
-    expect(found).toHaveProperty('coinReward', 10);
-    expect(found).toHaveProperty('icon', 'test_icon');
+    expect(found!.id).toBe(testTaskId);
+    expect(found!.name).toBe('Integration Test Task');
+    expect(found!.description).toBe('Task created for integration tests');
+    expect(found!.xpReward).toBe(50);
+    expect(found!.coinReward).toBe(10);
+    expect(found!.icon).toBe('test_icon');
   });
 
   it('POST /tasks/:id/complete — completes the task and returns correct response', async () => {
-    const res = await request(app.getHttpServer())
-      .post(`/tasks/${testTaskId}/complete`)
-      .send({ userId: testUserId })
-      .expect(201);
+    const { data: completion, error } = await client.POST(
+      '/tasks/{id}/complete',
+      {
+        params: { path: { id: testTaskId } },
+        body: { userId: testUserId },
+      },
+    );
 
-    // Verify the completion response shape and values
-    expect(res.body).toHaveProperty('id');
-    expect(res.body).toHaveProperty('taskId', testTaskId);
-    expect(res.body).toHaveProperty('userId', testUserId);
-    expect(res.body).toHaveProperty('xpEarned', 50);
-    expect(res.body).toHaveProperty('coinsEarned', 10);
-    expect(res.body).toHaveProperty('completedAt');
+    // Verify no error and response shape
+    expect(error).toBeUndefined();
+    expect(completion!.taskId).toBe(testTaskId);
+    expect(completion!.userId).toBe(testUserId);
+    expect(completion!.xpEarned).toBe(50);
+    expect(completion!.coinsEarned).toBe(10);
+    expect(completion!.completedAt).toBeDefined();
   });
 
-  it('POST /tasks/:id/complete — returns 404 for invalid task ID', async () => {
-    await request(app.getHttpServer())
-      .post('/tasks/999999/complete')
-      .send({ userId: testUserId })
-      .expect(404);
+  it('POST /tasks/:id/complete — returns error for invalid task ID', async () => {
+    const { error } = await client.POST('/tasks/{id}/complete', {
+      params: { path: { id: 999999 } },
+      body: { userId: testUserId },
+    });
+
+    expect(error).toBeDefined();
   });
 
-  it('POST /tasks/:id/complete — returns 400 for invalid userId', async () => {
-    await request(app.getHttpServer())
-      .post(`/tasks/${testTaskId}/complete`)
-      .send({ userId: 'not-a-uuid' })
-      .expect(400);
+  it('POST /tasks/:id/complete — returns error for invalid userId', async () => {
+    const { error } = await client.POST('/tasks/{id}/complete', {
+      params: { path: { id: testTaskId } },
+      body: { userId: 'not-a-uuid' },
+    });
+
+    expect(error).toBeDefined();
   });
 });

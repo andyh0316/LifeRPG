@@ -28,9 +28,8 @@
     "@nestjs/testing": "^11.1.12",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.0.0",
-    "@types/supertest": "^6.0.3",
     "jest": "^30.2.0",
-    "supertest": "^7.2.2",
+    "openapi-fetch": "^0.15.0",
     "ts-jest": "^29.4.6",
     "typescript": "^5.7.0"
   }
