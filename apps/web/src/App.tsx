@@ -3,7 +3,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Home from './pages/Home';
-import Earnings from './pages/Earnings';
+import Tasks from './pages/Tasks';
 import Rewards from './pages/Rewards';
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
       <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/earnings" element={<Earnings />} />
+          <Route path="/tasks" element={<Tasks />} />
           <Route path="/rewards" element={<Rewards />} />
         </Routes>
       </Box>

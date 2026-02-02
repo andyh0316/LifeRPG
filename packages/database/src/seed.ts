@@ -14,10 +14,10 @@ async function seed() {
   const db = createDb(process.env.DATABASE_URL!);
   console.log('Seeding database...');
 
-  // Seed permanent reference/lookup data
+  // Seed permanent reference/lookup data: modifiable by ongoing migrations
   await runRequiredSeeders(db);
 
-  // Seed temporary dev/test data
+  // Seed temporary dev/test data: NEVER modify by migrations
   await runTempSeeders(db);
 
   console.log('Seeding complete.');

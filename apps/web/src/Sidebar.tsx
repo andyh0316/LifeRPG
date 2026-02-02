@@ -6,7 +6,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { Link } from 'react-router-dom';
 
@@ -34,11 +34,11 @@ export default function Sidebar() {
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItemButton>
-        <ListItemButton component={Link} to="/earnings">
+        <ListItemButton component={Link} to="/tasks">
           <ListItemIcon sx={{ minWidth: 32 }}>
-            <AttachMoneyIcon />
+            <TaskAltIcon />
           </ListItemIcon>
-          <ListItemText primary="Earnings" />
+          <ListItemText primary="Tasks" />
         </ListItemButton>
         <ListItemButton component={Link} to="/rewards">
           <ListItemIcon sx={{ minWidth: 32 }}>
