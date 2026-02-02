@@ -24,23 +24,24 @@ const auditColumns = {
 
 export const genders = pgTable('genders', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 50 }).notNull().unique(),
   ...auditColumns,
+  name: varchar('name', { length: 50 }).notNull().unique(),
 });
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
+  ...auditColumns,
   email: varchar('email', { length: 255 }).notNull().unique(),
   firstName: varchar('first_name', { length: 255 }).notNull(),
   lastName: varchar('last_name', { length: 255 }),
   displayName: varchar('display_name', { length: 255 }).notNull(),
   genderId: integer('gender_id').references(() => genders.id),
-  ...auditColumns,
 });
 
 /** Stores RPG progression state for a user (1:1 with users). */
 export const userCharacter = pgTable('user_character', {
   id: serial('id').primaryKey(),
+  ...auditColumns,
   userId: uuid('user_id')
     .notNull()
     .unique()
@@ -48,30 +49,32 @@ export const userCharacter = pgTable('user_character', {
   level: integer('level').notNull().default(1),
   xp: integer('xp').notNull().default(0),
   coins: integer('coins').notNull().default(0),
-  ...auditColumns,
+  dailyXpTarget: integer('daily_xp_target'),
+  weeklyXpTarget: integer('weekly_xp_target'),
 });
 
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
+  ...auditColumns,
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   xpReward: integer('xp_reward').notNull().default(0),
   coinReward: integer('coin_reward').notNull().default(0),
   icon: varchar('icon', { length: 50 }),
-  ...auditColumns,
 });
 
 export const rewards = pgTable('rewards', {
   id: serial('id').primaryKey(),
+  ...auditColumns,
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   coinCost: integer('coin_cost').notNull(),
   icon: varchar('icon', { length: 50 }),
-  ...auditColumns,
 });
 
 export const taskCompletions = pgTable('task_completions', {
   id: serial('id').primaryKey(),
+  ...auditColumns,
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id),
@@ -83,11 +86,11 @@ export const taskCompletions = pgTable('task_completions', {
   completedAt: timestamp('completed_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-  ...auditColumns,
 });
 
 export const rewardRedemptions = pgTable('reward_redemptions', {
   id: serial('id').primaryKey(),
+  ...auditColumns,
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id),
@@ -98,5 +101,4 @@ export const rewardRedemptions = pgTable('reward_redemptions', {
   redeemedAt: timestamp('redeemed_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-  ...auditColumns,
 });
