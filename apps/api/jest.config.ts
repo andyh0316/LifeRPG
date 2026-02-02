@@ -6,6 +6,7 @@ const config: Config = {
   rootDir: 'src',
   testMatch: ['**/*.spec.ts'],
   moduleFileExtensions: ['ts', 'js', 'json'],
+  globalSetup: '<rootDir>/test/global-setup.ts',
 };
 
 export default config;

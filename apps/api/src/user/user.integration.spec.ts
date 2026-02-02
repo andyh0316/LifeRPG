@@ -1,34 +1,16 @@
-import 'dotenv/config';
-import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { AppModule } from '../app.module';
+import { createIntegrationApp } from '../test/setup-integration';
 
 describe('User Integration', () => {
   let app: INestApplication;
-  const createdUserIds: string[] = [];
 
   beforeAll(async () => {
-    // Point the app at the test database
-    if (!process.env.TEST_DATABASE_URL) {
-      throw new Error('TEST_DATABASE_URL must be set');
-    }
-    process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
-
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    await app.init();
+    // Bootstrap the shared integration app
+    ({ app } = await createIntegrationApp());
   });
 
   afterAll(async () => {
-    // Clean up created users
-    // for (const id of createdUserIds) {
-    //   await request(app.getHttpServer()).delete(`/users/${id}`);
-    // }
     await app.close();
   });
 
@@ -47,7 +29,6 @@ describe('User Integration', () => {
       .expect(201);
 
     const created = createRes.body;
-    createdUserIds.push(created.id);
 
     expect(created).toHaveProperty('id');
     expect(created).toHaveProperty('fullName');

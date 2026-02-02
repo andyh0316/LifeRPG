@@ -10,6 +10,7 @@
     "db:studio": "pnpm --filter @life-rpg/database studio",
     "db:seed": "pnpm --filter @life-rpg/database seed",
     "test-db:migrate": "pnpm --filter @life-rpg/database test-db:migrate",
+    "test-db:seed": "pnpm --filter @life-rpg/database test-db:seed",
     "dev:api": "pnpm --filter @life-rpg/api start:dev",
     "build:api": "pnpm --filter @life-rpg/api build",
     "dev:web": "pnpm --filter @life-rpg/web dev",
