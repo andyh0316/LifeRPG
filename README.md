@@ -38,6 +38,8 @@ Swagger UI is available at `http://localhost:3000/api` when the API is running.
 
 Requires a `.env` file in `apps/api/` — see `.env.example`.
 
+See [`apps/api/README.md`](apps/api/README.md) for testing details.
+
 ## Web (`apps/web`)
 
 ```bash
