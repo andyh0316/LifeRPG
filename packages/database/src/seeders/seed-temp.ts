@@ -28,12 +28,17 @@ async function seedTasks(db: Db) {
   await db
     .insert(tasks)
     .values([
-      { name: 'Morning Run', description: 'Go for a 30-minute run', xpReward: 50, coinReward: 10 },
-      { name: 'Read a Book', description: 'Read for at least 30 minutes', xpReward: 30, coinReward: 5 },
-      { name: 'Meditate', description: '10 minutes of mindfulness meditation', xpReward: 20, coinReward: 5 },
-      { name: 'Cook a Meal', description: 'Prepare a homemade meal', xpReward: 40, coinReward: 8 },
-      { name: 'Clean Room', description: 'Tidy up and organize your room', xpReward: 25, coinReward: 5 },
+      { name: 'Meditate 15min', coinReward: 10, xpReward: 10 },
+      { name: 'Work 30 min', coinReward: 10, xpReward: 10 },
+      { name: 'Work 1 hour', coinReward: 20, xpReward: 20 },
+      { name: 'Study 30 min', coinReward: 15, xpReward: 15 },
+      { name: 'Study 1 hour', coinReward: 30, xpReward: 30 },
+      { name: 'Chores 30 min', coinReward: 10, xpReward: 10 },
+      { name: 'Chores 1 hour', coinReward: 20, xpReward: 20 },
+      { name: 'Eat Vitamins', coinReward: 5, xpReward: 5 },
+      { name: 'Walk 30 min', coinReward: 20, xpReward: 20 },
+      { name: 'Gym 60 min', coinReward: 40, xpReward: 40 },
     ])
     .onConflictDoNothing();
-  console.log('Seeded 5 tasks.');
+  console.log('Seeded 10 tasks.');
 }
