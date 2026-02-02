@@ -13,6 +13,12 @@ pnpm monorepo with three packages:
 - `apps/web` — Vite + React + TypeScript frontend
 - `packages/database` — Drizzle ORM schema and database client
 
+## Quick Start
+
+```bash
+pnpm run menu          # interactive script picker (type to filter)
+```
+
 ## Docker
 
 ```bash

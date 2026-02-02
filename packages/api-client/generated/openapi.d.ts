@@ -36,6 +36,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TaskController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["TaskController_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -45,9 +77,9 @@ export interface components {
             email: string;
             fullName: string;
             /** Format: date-time */
-            createdAt: string;
+            createdAt: string | null;
             /** Format: date-time */
-            updatedAt: string;
+            updatedAt: string | null;
         };
         CreateUserDto: {
             email: string;
@@ -60,6 +92,26 @@ export interface components {
             firstName?: string;
             lastName?: string;
             displayName?: string;
+        };
+        TaskResponseDto: {
+            id: number;
+            name: string;
+            description?: Record<string, never>;
+            xpReward: number;
+            coinReward: number;
+            icon?: Record<string, never>;
+        };
+        CompleteTaskDto: {
+            userId: string;
+        };
+        TaskCompletionResponseDto: {
+            id: number;
+            taskId: number;
+            userId: string;
+            xpEarned: number;
+            coinsEarned: number;
+            /** Format: date-time */
+            completedAt: string;
         };
     };
     responses: never;
@@ -175,6 +227,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+        };
+    };
+    TaskController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponseDto"][];
+                };
+            };
+        };
+    };
+    TaskController_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompleteTaskDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskCompletionResponseDto"];
                 };
             };
         };
