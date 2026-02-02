@@ -2,9 +2,9 @@ import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import Home from './pages/Home';
-import Tasks from './pages/Tasks';
-import Rewards from './pages/Rewards';
+import Home from './pages/home/Home';
+import Tasks from './pages/tasks/Tasks';
+import Rewards from './pages/rewards/Rewards';
 
 function App() {
   return (
