@@ -10,6 +10,15 @@ export class UserDetailDto {
   @ApiProperty()
   fullName!: string;
 
+  @ApiProperty()
+  level!: number;
+
+  @ApiProperty()
+  xp!: number;
+
+  @ApiProperty()
+  coins!: number;
+
   @ApiProperty({ type: Date, nullable: true })
   createdAt!: Date | null;
 

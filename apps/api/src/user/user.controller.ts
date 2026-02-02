@@ -12,7 +12,6 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetailDto } from './dto/user-detail.dto';
-import { UserProfileDto } from './dto/user-profile.dto';
 
 @Controller('users')
 export class UserController {
@@ -25,7 +24,7 @@ export class UserController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: UserProfileDto })
+  @ApiOkResponse({ type: UserDetailDto })
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
