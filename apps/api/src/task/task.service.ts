@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
-import { tasks, taskCompletions, users } from '@life-rpg/database';
+import { tasks, taskCompletions, userCharacter } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import { TaskResponseDto } from './dto/task-response.dto';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
@@ -60,14 +60,14 @@ export class TaskService {
         })
         .returning(completionSelect);
 
-      // Add the task's rewards to the user's totals
+      // Add the task's rewards to the user's character totals
       await tx
-        .update(users)
+        .update(userCharacter)
         .set({
-          xp: sql`${users.xp} + ${task.xpReward}`,
-          coins: sql`${users.coins} + ${task.coinReward}`,
+          xp: sql`${userCharacter.xp} + ${task.xpReward}`,
+          coins: sql`${userCharacter.coins} + ${task.coinReward}`,
         })
-        .where(eq(users.id, userId));
+        .where(eq(userCharacter.userId, userId));
 
       return completion;
     });

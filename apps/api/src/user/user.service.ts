@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { users } from '@life-rpg/database';
+import { users, userCharacter } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,9 +12,9 @@ const userSelect = {
   email: users.email,
   firstName: users.firstName,
   lastName: users.lastName,
-  level: users.level,
-  xp: users.xp,
-  coins: users.coins,
+  level: userCharacter.level,
+  xp: userCharacter.xp,
+  coins: userCharacter.coins,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
 };
@@ -49,9 +49,12 @@ function toUserDetail(row: UserRow): UserDetailDto {
 export class UserService {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  /** Returns all users. */
+  /** Returns all users with their character data. */
   async findAll(): Promise<UserDetailDto[]> {
-    const results = await this.db.select(userSelect).from(users);
+    const results = await this.db
+      .select(userSelect)
+      .from(users)
+      .innerJoin(userCharacter, eq(users.id, userCharacter.userId));
     return results.map(toUserDetail);
   }
 
@@ -60,17 +63,28 @@ export class UserService {
     const results = await this.db
       .select(userSelect)
       .from(users)
+      .innerJoin(userCharacter, eq(users.id, userCharacter.userId))
       .where(eq(users.id, id));
     return results[0] ? toUserDetail(results[0]) : null;
   }
 
-  /** Creates a new user and returns it. */
+  /** Creates a new user and their character row in a single transaction. */
   async create(data: CreateUserDto): Promise<UserDetailDto> {
-    const results = await this.db
-      .insert(users)
-      .values(data)
-      .returning(userSelect);
-    return toUserDetail(results[0]);
+    return this.db.transaction(async (tx) => {
+      // Insert the user record
+      const [user] = await tx.insert(users).values(data).returning();
+
+      // Insert the 1:1 character record with default stats
+      await tx.insert(userCharacter).values({ userId: user.id });
+
+      // Return the joined result
+      const results = await tx
+        .select(userSelect)
+        .from(users)
+        .innerJoin(userCharacter, eq(users.id, userCharacter.userId))
+        .where(eq(users.id, user.id));
+      return toUserDetail(results[0]);
+    });
   }
 
   /** Updates a user by ID and returns the updated record, or null if not found. */
@@ -82,16 +96,24 @@ export class UserService {
       .update(users)
       .set(data)
       .where(eq(users.id, id))
-      .returning(userSelect);
-    return results[0] ? toUserDetail(results[0]) : null;
+      .returning();
+    if (!results[0]) return null;
+
+    // Re-fetch with character join
+    return this.findOne(id);
   }
 
   /** Deletes a user by ID and returns the deleted record, or null if not found. */
   async remove(id: string): Promise<UserDetailDto | null> {
-    const results = await this.db
-      .delete(users)
-      .where(eq(users.id, id))
-      .returning(userSelect);
-    return results[0] ? toUserDetail(results[0]) : null;
+    // Fetch the full detail before deleting
+    const detail = await this.findOne(id);
+    if (!detail) return null;
+
+    // Delete character row first (FK constraint), then user
+    await this.db
+      .delete(userCharacter)
+      .where(eq(userCharacter.userId, id));
+    await this.db.delete(users).where(eq(users.id, id));
+    return detail;
   }
 }

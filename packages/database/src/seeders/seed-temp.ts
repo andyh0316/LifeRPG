@@ -1,4 +1,4 @@
-import { users, tasks } from '../schema.js';
+import { users, userCharacter, tasks } from '../schema.js';
 import type { Db } from './types.js';
 
 /** Runs all temporary dev/test seeders that insert sample data (will be removed later). */
@@ -7,10 +7,10 @@ export async function runTempSeeders(db: Db) {
   await seedTasks(db);
 }
 
-/** Seeds a sample user for local development and testing. */
+/** Seeds a sample user and their character row for local development and testing. */
 async function seedUsers(db: Db) {
   // Insert a sample user, skipping if the email already exists
-  await db
+  const [user] = await db
     .insert(users)
     .values({
       email: 'alice@example.com',
@@ -18,7 +18,16 @@ async function seedUsers(db: Db) {
       lastName: 'Johnson',
       displayName: 'Alice',
     })
-    .onConflictDoNothing();
+    .onConflictDoNothing()
+    .returning({ id: users.id });
+
+  // Create the 1:1 character row if the user was newly inserted
+  if (user) {
+    await db
+      .insert(userCharacter)
+      .values({ userId: user.id })
+      .onConflictDoNothing();
+  }
   console.log('Seeded 1 user.');
 }
 

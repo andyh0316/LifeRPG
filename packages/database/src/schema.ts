@@ -35,6 +35,16 @@ export const users = pgTable('users', {
   lastName: varchar('last_name', { length: 255 }),
   displayName: varchar('display_name', { length: 255 }).notNull(),
   genderId: integer('gender_id').references(() => genders.id),
+  ...auditColumns,
+});
+
+/** Stores RPG progression state for a user (1:1 with users). */
+export const userCharacter = pgTable('user_character', {
+  id: serial('id').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .unique()
+    .references(() => users.id),
   level: integer('level').notNull().default(1),
   xp: integer('xp').notNull().default(0),
   coins: integer('coins').notNull().default(0),
