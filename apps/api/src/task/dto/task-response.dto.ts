@@ -7,7 +7,7 @@ export class TaskResponseDto {
   @ApiProperty()
   name!: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: String, nullable: true })
   description!: string | null;
 
   @ApiProperty()
@@ -16,6 +16,6 @@ export class TaskResponseDto {
   @ApiProperty()
   coinReward!: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: String, nullable: true })
   icon!: string | null;
 }

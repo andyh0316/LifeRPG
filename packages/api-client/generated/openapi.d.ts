@@ -96,10 +96,10 @@ export interface components {
         TaskResponseDto: {
             id: number;
             name: string;
-            description?: Record<string, never>;
+            description?: string | null;
             xpReward: number;
             coinReward: number;
-            icon?: Record<string, never>;
+            icon?: string | null;
         };
         CompleteTaskDto: {
             userId: string;

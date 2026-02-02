@@ -26,11 +26,11 @@ export default function Tasks() {
         {tasks.map((task) => (
           <ListItem key={task.id}>
             <ListItemIcon sx={{ minWidth: 40, fontSize: 24 }}>
-              {(task.icon as unknown as string) ?? '📋'}
+              {task.icon ?? '📋'}
             </ListItemIcon>
             <ListItemText
               primary={task.name}
-              secondary={task.description as unknown as string}
+              secondary={task.description}
             />
             {/* Reward chips */}
             <Box sx={{ display: 'flex', gap: 1 }}>

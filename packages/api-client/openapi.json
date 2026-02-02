@@ -305,7 +305,8 @@
             "type": "string"
           },
           "description": {
-            "type": "object"
+            "type": "string",
+            "nullable": true
           },
           "xpReward": {
             "type": "number"
@@ -314,7 +315,8 @@
             "type": "number"
           },
           "icon": {
-            "type": "object"
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
