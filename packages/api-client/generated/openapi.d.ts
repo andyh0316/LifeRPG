@@ -72,7 +72,7 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        UserResponseDto: {
+        UserDetailDto: {
             id: string;
             email: string;
             fullName: string;
@@ -80,6 +80,18 @@ export interface components {
             createdAt: string | null;
             /** Format: date-time */
             updatedAt: string | null;
+        };
+        UserProfileDto: {
+            id: string;
+            email: string;
+            fullName: string;
+            /** Format: date-time */
+            createdAt: string | null;
+            /** Format: date-time */
+            updatedAt: string | null;
+            level: number;
+            xp: number;
+            coins: number;
         };
         CreateUserDto: {
             email: string;
@@ -136,7 +148,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponseDto"][];
+                    "application/json": components["schemas"]["UserDetailDto"][];
                 };
             };
         };
@@ -159,7 +171,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
+                    "application/json": components["schemas"]["UserDetailDto"];
                 };
             };
         };
@@ -180,7 +192,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
+                    "application/json": components["schemas"]["UserProfileDto"];
                 };
             };
         };
@@ -205,7 +217,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
+                    "application/json": components["schemas"]["UserDetailDto"];
                 };
             };
         };
@@ -226,7 +238,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
+                    "application/json": components["schemas"]["UserDetailDto"];
                 };
             };
         };

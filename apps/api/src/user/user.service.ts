@@ -4,7 +4,8 @@ import { users } from '@life-rpg/database';
 import type { createDb } from '@life-rpg/database';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserResponseDto } from './dto/user-response.dto';
+import { UserDetailDto } from './dto/user-detail.dto';
+import { UserProfileDto } from './dto/user-profile.dto';
 
 const userSelect = {
   id: users.id,
@@ -13,6 +14,14 @@ const userSelect = {
   lastName: users.lastName,
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
+};
+
+// Includes game-related stats on top of the base fields.
+const userProfileSelect = {
+  ...userSelect,
+  level: users.level,
+  xp: users.xp,
+  coins: users.coins,
 };
 
 type UserRow = {
@@ -24,7 +33,14 @@ type UserRow = {
   updatedAt: Date | null;
 };
 
-function toUserResponse(row: UserRow): UserResponseDto {
+type UserProfileRow = UserRow & {
+  level: number;
+  xp: number;
+  coins: number;
+};
+
+/** Maps a database row to a UserDetailDto. */
+function toUserDetail(row: UserRow): UserDetailDto {
   return {
     id: row.id,
     email: row.email,
@@ -34,48 +50,58 @@ function toUserResponse(row: UserRow): UserResponseDto {
   };
 }
 
+/** Maps a database row to a UserProfileDto with game stats. */
+function toUserProfile(row: UserProfileRow): UserProfileDto {
+  return {
+    ...toUserDetail(row),
+    level: row.level,
+    xp: row.xp,
+    coins: row.coins,
+  };
+}
+
 @Injectable()
 export class UserService {
   constructor(@Inject('DATABASE') private db: ReturnType<typeof createDb>) {}
 
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAll(): Promise<UserDetailDto[]> {
     const results = await this.db.select(userSelect).from(users);
-    return results.map(toUserResponse);
+    return results.map(toUserDetail);
   }
 
-  async findOne(id: string): Promise<UserResponseDto | null> {
+  async findOne(id: string): Promise<UserProfileDto | null> {
     const results = await this.db
-      .select(userSelect)
+      .select(userProfileSelect)
       .from(users)
       .where(eq(users.id, id));
-    return results[0] ? toUserResponse(results[0]) : null;
+    return results[0] ? toUserProfile(results[0]) : null;
   }
 
-  async create(data: CreateUserDto): Promise<UserResponseDto> {
+  async create(data: CreateUserDto): Promise<UserDetailDto> {
     const results = await this.db
       .insert(users)
       .values(data)
       .returning(userSelect);
-    return toUserResponse(results[0]);
+    return toUserDetail(results[0]);
   }
 
   async update(
     id: string,
     data: UpdateUserDto,
-  ): Promise<UserResponseDto | null> {
+  ): Promise<UserDetailDto | null> {
     const results = await this.db
       .update(users)
       .set(data)
       .where(eq(users.id, id))
       .returning(userSelect);
-    return results[0] ? toUserResponse(results[0]) : null;
+    return results[0] ? toUserDetail(results[0]) : null;
   }
 
-  async remove(id: string): Promise<UserResponseDto | null> {
+  async remove(id: string): Promise<UserDetailDto | null> {
     const results = await this.db
       .delete(users)
       .where(eq(users.id, id))
       .returning(userSelect);
-    return results[0] ? toUserResponse(results[0]) : null;
+    return results[0] ? toUserDetail(results[0]) : null;
   }
 }

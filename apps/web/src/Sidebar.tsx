@@ -8,7 +8,9 @@ import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import Divider from '@mui/material/Divider';
 import { Link } from 'react-router-dom';
+import ProfileCard from './components/ProfileCard';
 
 const DRAWER_WIDTH = 240;
 
@@ -27,6 +29,8 @@ export default function Sidebar() {
       <Toolbar>
         <Typography variant="h6">LifeRPG</Typography>
       </Toolbar>
+      <ProfileCard />
+      <Divider />
       <List>
         <ListItemButton component={Link} to="/">
           <ListItemIcon sx={{ minWidth: 32 }}>

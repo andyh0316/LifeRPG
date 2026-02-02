@@ -13,7 +13,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserResponseDto"
+                    "$ref": "#/components/schemas/UserDetailDto"
                   }
                 }
               }
@@ -43,7 +43,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponseDto"
+                  "$ref": "#/components/schemas/UserDetailDto"
                 }
               }
             }
@@ -73,7 +73,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponseDto"
+                  "$ref": "#/components/schemas/UserProfileDto"
                 }
               }
             }
@@ -111,7 +111,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponseDto"
+                  "$ref": "#/components/schemas/UserDetailDto"
                 }
               }
             }
@@ -139,7 +139,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponseDto"
+                  "$ref": "#/components/schemas/UserDetailDto"
                 }
               }
             }
@@ -225,7 +225,7 @@
   "servers": [],
   "components": {
     "schemas": {
-      "UserResponseDto": {
+      "UserDetailDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -254,6 +254,49 @@
           "fullName",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "UserProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "level": {
+            "type": "number"
+          },
+          "xp": {
+            "type": "number"
+          },
+          "coins": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "fullName",
+          "createdAt",
+          "updatedAt",
+          "level",
+          "xp",
+          "coins"
         ]
       },
       "CreateUserDto": {
