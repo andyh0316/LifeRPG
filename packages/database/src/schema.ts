@@ -20,6 +20,7 @@ const auditColumns = {
   updatedByUserId: uuid('updated_by_user_id').references(
     (): AnyPgColumn => users.id,
   ),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
 };
 
 export const genders = pgTable('genders', {
