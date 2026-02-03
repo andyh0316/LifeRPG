@@ -1,51 +1,57 @@
 import { INestApplication } from '@nestjs/common';
-import { tasks } from '@life-rpg/database/schema';
 import type { Db } from '@life-rpg/database';
-import { ApiClient, createIntegrationApp } from '../test/setup-integration';
+import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { TaskResponseDto } from './dto/task-response.dto';
 
 describe('Task Integration', () => {
   let app: INestApplication;
   let db: Db;
-  let client: ApiClient;
-  let testTaskId: number;
+  let request: TestAgent;
 
   beforeAll(async () => {
-    // Bootstrap the shared integration app and typed client
-    ({ app, db, client } = await createIntegrationApp());
-
-    // Insert a test task directly via Drizzle
-    const [testTask] = await db
-      .insert(tasks)
-      .values({
-        name: 'Integration Test Task',
-        description: 'Task created for integration tests',
-        xpReward: 50,
-        coinReward: 10,
-        icon: 'test_icon',
-      })
-      .returning();
-    testTaskId = testTask.id;
+    ({ app, db, request } = await createIntegrationApp());
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it('GET /tasks — returns the test task with expected fields', async () => {
-    const { data: taskList, error } = await client.GET('/tasks');
+  // Shared request createTaskInput used across tests
+  const createTaskInput: CreateTaskDto = {
+    name: 'Test Task',
+    description: 'A test task description',
+    xpReward: 10,
+    coinReward: 5,
+    icon: 'sword',
+  };
 
-    // Verify no error
-    expect(error).toBeUndefined();
+  let createdTaskId: number;
 
-    // Find our test task in the response
-    const found = taskList!.find((t) => t.id === testTaskId);
+  /** Verifies that POST /tasks creates a task and returns the correct shape. */
+  it('POST /tasks - creates a task', async () => {
+    const res = await request.post('/tasks').send(createTaskInput).expect(201);
 
-    expect(found).toBeDefined();
-    expect(found!.id).toBe(testTaskId);
-    expect(found!.name).toBe('Integration Test Task');
-    expect(found!.description).toBe('Task created for integration tests');
-    expect(found!.xpReward).toBe(50);
-    expect(found!.coinReward).toBe(10);
-    expect(found!.icon).toBe('test_icon');
+    const task: TaskResponseDto = res.body;
+    expect(task.id).toBeDefined();
+    createdTaskId = task.id;
+    expect(task.name).toBe(createTaskInput.name);
+    expect(task.xpReward).toBe(createTaskInput.xpReward);
+    expect(task.coinReward).toBe(createTaskInput.coinReward);
+    expect(task.description).toBe(createTaskInput.description);
+    expect(task.icon).toBe(createTaskInput.icon);
+  });
+
+  /** Verifies that GET /tasks/:id returns the previously created task. */
+  it('GET /tasks/:id - finds a task by id', async () => {
+    const res = await request.get(`/tasks/${createdTaskId}`).expect(200);
+
+    const found: TaskResponseDto = res.body;
+    expect(found.id).toBe(createdTaskId);
+    expect(found.name).toBe(createTaskInput.name);
+    expect(found.description).toBe(createTaskInput.description);
+    expect(found.xpReward).toBe(createTaskInput.xpReward);
+    expect(found.coinReward).toBe(createTaskInput.coinReward);
+    expect(found.icon).toBe(createTaskInput.icon);
   });
 });

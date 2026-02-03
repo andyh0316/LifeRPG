@@ -45,6 +45,22 @@ export interface paths {
         };
         get: operations["TaskController_findAll"];
         put?: never;
+        post: operations["TaskController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tasks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TaskController_findOne"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -61,7 +77,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["TaskController_complete"];
+        post: operations["TaskCompletionController_complete"];
         delete?: never;
         options?: never;
         head?: never;
@@ -76,22 +92,13 @@ export interface components {
             id: string;
             email: string;
             fullName: string;
-            /** Format: date-time */
-            createdAt: string | null;
-            /** Format: date-time */
-            updatedAt: string | null;
-        };
-        UserProfileDto: {
-            id: string;
-            email: string;
-            fullName: string;
-            /** Format: date-time */
-            createdAt: string | null;
-            /** Format: date-time */
-            updatedAt: string | null;
             level: number;
             xp: number;
             coins: number;
+            /** Format: date-time */
+            createdAt: string | null;
+            /** Format: date-time */
+            updatedAt: string | null;
         };
         CreateUserDto: {
             email: string;
@@ -110,6 +117,15 @@ export interface components {
             name: string;
             description?: string | null;
             xpReward: number;
+            coinReward: number;
+            icon?: string | null;
+        };
+        CreateTaskDto: {
+            name: string;
+            description?: string | null;
+            /** @default 0 */
+            xpReward: number;
+            /** @default 0 */
             coinReward: number;
             icon?: string | null;
         };
@@ -192,7 +208,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserProfileDto"];
+                    "application/json": components["schemas"]["UserDetailDto"];
                 };
             };
         };
@@ -262,7 +278,51 @@ export interface operations {
             };
         };
     };
-    TaskController_complete: {
+    TaskController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTaskDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponseDto"];
+                };
+            };
+        };
+    };
+    TaskController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponseDto"];
+                };
+            };
+        };
+    };
+    TaskCompletionController_complete: {
         parameters: {
             query?: never;
             header?: never;

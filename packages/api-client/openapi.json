@@ -73,7 +73,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserProfileDto"
+                  "$ref": "#/components/schemas/UserDetailDto"
                 }
               }
             }
@@ -172,11 +172,70 @@
         "tags": [
           "Task"
         ]
+      },
+      "post": {
+        "operationId": "TaskController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "operationId": "TaskController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Task"
+        ]
       }
     },
     "/tasks/{id}/complete": {
       "post": {
-        "operationId": "TaskController_complete",
+        "operationId": "TaskCompletionController_complete",
         "parameters": [
           {
             "name": "id",
@@ -210,7 +269,7 @@
           }
         },
         "tags": [
-          "Task"
+          "TaskCompletion"
         ]
       }
     }
@@ -237,47 +296,6 @@
           "fullName": {
             "type": "string"
           },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "email",
-          "fullName",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "UserProfileDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "fullName": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          },
           "level": {
             "type": "number"
           },
@@ -286,17 +304,27 @@
           },
           "coins": {
             "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
           "email",
           "fullName",
-          "createdAt",
-          "updatedAt",
           "level",
           "xp",
-          "coins"
+          "coins",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "CreateUserDto": {
@@ -367,6 +395,33 @@
           "name",
           "xpReward",
           "coinReward"
+        ]
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "xpReward": {
+            "type": "number",
+            "default": 0
+          },
+          "coinReward": {
+            "type": "number",
+            "default": 0
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "CompleteTaskDto": {

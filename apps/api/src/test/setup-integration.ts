@@ -2,19 +2,16 @@ import 'dotenv/config';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import type { Db } from '@life-rpg/database';
-import createClient from 'openapi-fetch';
-// @ts-expect-error — CJS/ESM boundary; only types are imported at compile time
-import type { paths } from '@life-rpg/api-client';
-import type { AddressInfo } from 'net';
+import supertest from 'supertest';
 import { AppModule } from '../app.module';
 
-export type ApiClient = ReturnType<typeof createClient<paths>>;
+export type TestAgent = supertest.Agent;
 
-/** Bootstraps a NestJS app listening on a random port and returns the app, db, and typed API client. */
+/** Bootstraps a NestJS app and returns the app, db, and supertest agent. */
 export async function createIntegrationApp(): Promise<{
   app: INestApplication;
   db: Db;
-  client: ApiClient;
+  request: TestAgent;
 }> {
   // Validate that the test database URL is configured
   if (!process.env.TEST_DATABASE_URL) {
@@ -31,17 +28,11 @@ export async function createIntegrationApp(): Promise<{
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.init();
 
-  // Listen on a random free port so the typed client can make real HTTP calls
-  await app.listen(0);
-  const addr = app.getHttpServer().address() as AddressInfo;
-
-  // Create a typed OpenAPI client pointing at the test server
-  const client = createClient<paths>({
-    baseUrl: `http://127.0.0.1:${addr.port}`,
-  });
+  // Create a supertest agent bound to the app's HTTP server
+  const request = supertest.agent(app.getHttpServer());
 
   // Extract the database provider
   const db = app.get<Db>('DATABASE');
 
-  return { app, db, client };
+  return { app, db, request };
 }
