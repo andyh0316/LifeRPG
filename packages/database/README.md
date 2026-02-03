@@ -1,6 +1,6 @@
 # @life-rpg/database
 
-Database schema, migrations, and seed data using Drizzle ORM with PostgreSQL.
+Database schema, migrations, and client using Drizzle ORM with PostgreSQL.
 
 ## Environment variables
 
@@ -22,5 +22,4 @@ All commands can be run from the monorepo root with the `pnpm --filter @life-rpg
 | `pnpm migrate`         | Apply pending migrations to the dev database             |
 | `pnpm push`            | Push schema directly to dev database (no migration file) |
 | `pnpm studio`          | Open Drizzle Studio (database GUI)                       |
-| `pnpm seed`            | Run the seed script (`src/seed.ts`)                      |
 | `pnpm test-db:migrate` | Apply pending migrations to the test database            |
