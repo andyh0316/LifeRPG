@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserDetailDto {
-  @ApiProperty()
-  id!: string;
+  @ApiProperty({ type: Number })
+  id!: number;
 
   @ApiProperty()
   email!: string;

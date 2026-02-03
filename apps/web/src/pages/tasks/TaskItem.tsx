@@ -19,7 +19,7 @@ export interface TaskItemProps {
   xpReward: number;
   coinReward: number;
   icon?: string | null;
-  userId: string;
+  userId: number;
 }
 
 /** Renders a single task row with icon, name, and reward chips. Handles its own completion flow. */

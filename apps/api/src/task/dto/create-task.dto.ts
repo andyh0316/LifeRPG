@@ -2,6 +2,10 @@ import { IsString, IsOptional, IsInt, Min, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateTaskDto {
+  @ApiProperty({ type: Number })
+  @IsInt()
+  userId!: number;
+
   @ApiProperty()
   @IsString()
   @MaxLength(255)

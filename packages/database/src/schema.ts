@@ -1,6 +1,5 @@
 import {
   pgTable,
-  uuid,
   serial,
   varchar,
   integer,
@@ -14,36 +13,28 @@ const auditColumns = {
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .$onUpdate(() => new Date()),
-  createdByUserId: uuid('created_by_user_id').references(
+  createdByUserId: integer('created_by_user_id').references(
     (): AnyPgColumn => users.id,
   ),
-  updatedByUserId: uuid('updated_by_user_id').references(
+  updatedByUserId: integer('updated_by_user_id').references(
     (): AnyPgColumn => users.id,
   ),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 };
 
-export const genders = pgTable('genders', {
-  id: serial('id').primaryKey(),
-  ...auditColumns,
-  name: varchar('name', { length: 50 }).notNull().unique(),
-});
-
 export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: serial('id').primaryKey(),
   ...auditColumns,
   email: varchar('email', { length: 255 }).notNull().unique(),
   firstName: varchar('first_name', { length: 255 }).notNull(),
   lastName: varchar('last_name', { length: 255 }),
-  displayName: varchar('display_name', { length: 255 }).notNull(),
-  genderId: integer('gender_id').references(() => genders.id),
 });
 
 /** Stores RPG progression state for a user (1:1 with users). */
 export const userCharacter = pgTable('user_character', {
   id: serial('id').primaryKey(),
   ...auditColumns,
-  userId: uuid('user_id')
+  userId: integer('user_id')
     .notNull()
     .unique()
     .references(() => users.id),
@@ -57,6 +48,9 @@ export const userCharacter = pgTable('user_character', {
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   ...auditColumns,
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   xpReward: integer('xp_reward').notNull().default(0),
@@ -76,7 +70,7 @@ export const rewards = pgTable('rewards', {
 export const taskCompletions = pgTable('task_completions', {
   id: serial('id').primaryKey(),
   ...auditColumns,
-  userId: uuid('user_id')
+  userId: integer('user_id')
     .notNull()
     .references(() => users.id),
   taskId: integer('task_id')
@@ -92,7 +86,7 @@ export const taskCompletions = pgTable('task_completions', {
 export const rewardRedemptions = pgTable('reward_redemptions', {
   id: serial('id').primaryKey(),
   ...auditColumns,
-  userId: uuid('user_id')
+  userId: integer('user_id')
     .notNull()
     .references(() => users.id),
   rewardId: integer('reward_id')

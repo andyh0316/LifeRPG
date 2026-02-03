@@ -7,8 +7,8 @@ export class TaskCompletionResponseDto {
   @ApiProperty()
   taskId!: number;
 
-  @ApiProperty()
-  userId!: string;
+  @ApiProperty({ type: Number })
+  userId!: number;
 
   @ApiProperty()
   xpEarned!: number;

@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import type { Db } from '@life-rpg/database';
+import { users } from '@life-rpg/database';
 import { TestAgent, createIntegrationApp } from '../test/setup-integration';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
@@ -8,9 +9,21 @@ describe('Task Integration', () => {
   let app: INestApplication;
   let db: Db;
   let request: TestAgent;
+  let testUserId: number;
 
   beforeAll(async () => {
     ({ app, db, request } = await createIntegrationApp());
+
+    // Create a test user directly in the database
+    const [user] = await db
+      .insert(users)
+      .values({
+        email: 'tasktest@example.com',
+        firstName: 'Task',
+        lastName: 'Tester',
+      })
+      .returning({ id: users.id });
+    testUserId = user.id;
   });
 
   afterAll(async () => {
@@ -18,23 +31,27 @@ describe('Task Integration', () => {
   });
 
   // Shared request createTaskInput used across tests
-  const createTaskInput: CreateTaskDto = {
-    name: 'Test Task',
-    desc: 'A test task description',
-    xpReward: 10,
-    coinReward: 5,
-    icon: 'sword',
-  };
+  let createTaskInput: CreateTaskDto;
 
   let createdTaskId: number;
 
   /** Verifies that POST /tasks creates a task and returns the correct shape. */
   it('POST /tasks - creates a task', async () => {
+    createTaskInput = {
+      userId: testUserId,
+      name: 'Test Task',
+      desc: 'A test task description',
+      xpReward: 10,
+      coinReward: 5,
+      icon: 'sword',
+    };
+
     const res = await request.post('/tasks').send(createTaskInput).expect(201);
 
     const task: TaskResponseDto = res.body;
     expect(task.id).toBeDefined();
     createdTaskId = task.id;
+    expect(task.userId).toBe(testUserId);
     expect(task.name).toBe(createTaskInput.name);
     expect(task.xpReward).toBe(createTaskInput.xpReward);
     expect(task.coinReward).toBe(createTaskInput.coinReward);
@@ -48,6 +65,7 @@ describe('Task Integration', () => {
 
     const found: TaskResponseDto = res.body;
     expect(found.id).toBe(createdTaskId);
+    expect(found.userId).toBe(testUserId);
     expect(found.name).toBe(createTaskInput.name);
     expect(found.desc).toBe(createTaskInput.desc);
     expect(found.xpReward).toBe(createTaskInput.xpReward);
@@ -72,6 +90,7 @@ describe('Task Integration', () => {
 
     const task: TaskResponseDto = res.body;
     expect(task.id).toBe(createdTaskId);
+    expect(task.userId).toBe(testUserId);
     expect(task.name).toBe(updateInput.name);
     expect(task.desc).toBe(updateInput.desc);
     expect(task.xpReward).toBe(updateInput.xpReward);
