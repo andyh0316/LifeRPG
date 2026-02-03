@@ -20,7 +20,7 @@ const userSelect = {
 };
 
 type UserRow = {
-  id: string;
+  id: number;
   email: string;
   firstName: string;
   lastName: string | null;
@@ -59,7 +59,7 @@ export class UserService {
   }
 
   /** Returns a single user by ID, or null if not found. */
-  async findOne(id: string): Promise<UserDetailDto | null> {
+  async findOne(id: number): Promise<UserDetailDto | null> {
     const results = await this.db
       .select(userSelect)
       .from(users)
@@ -89,7 +89,7 @@ export class UserService {
 
   /** Updates a user by ID and returns the updated record, or null if not found. */
   async update(
-    id: string,
+    id: number,
     data: UpdateUserDto,
   ): Promise<UserDetailDto | null> {
     const results = await this.db
@@ -104,7 +104,7 @@ export class UserService {
   }
 
   /** Deletes a user by ID and returns the deleted record, or null if not found. */
-  async remove(id: string): Promise<UserDetailDto | null> {
+  async remove(id: number): Promise<UserDetailDto | null> {
     // Fetch the full detail before deleting
     const detail = await this.findOne(id);
     if (!detail) return null;

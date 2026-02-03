@@ -22,7 +22,7 @@ export class TaskCompletionService {
   // within a single transaction so rewards stay consistent.
   async complete(
     taskId: number,
-    userId: string,
+    userId: number,
   ): Promise<TaskCompletionResponseDto> {
     return this.db.transaction(async (tx) => {
       // Fetch the task's XP and coin rewards

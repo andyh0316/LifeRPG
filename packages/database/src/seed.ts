@@ -1,6 +1,6 @@
 // Seed entry point: this file contains the initial data right after first migrations are applied. After that, any new data should be directly in the migration sql files
 
-// Required seeders — reference/lookup data the app needs to function (e.g. genders).
+// Required seeders — reference/lookup data the app needs to function.
 //                    These are permanent and should always be run.
 // Temp seeders    — temporary test/dev data that will be removed later (e.g. sample users, tasks).
 

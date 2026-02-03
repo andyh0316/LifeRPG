@@ -16,7 +16,6 @@ async function seedUsers(db: Db) {
       email: 'alice@example.com',
       firstName: 'Alice',
       lastName: 'Johnson',
-      displayName: 'Alice',
     })
     .onConflictDoNothing()
     .returning({ id: users.id });

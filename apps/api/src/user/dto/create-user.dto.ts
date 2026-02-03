@@ -23,10 +23,4 @@ export class CreateUserDto {
   @IsOptional()
   @MaxLength(255)
   lastName?: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  displayName!: string;
 }

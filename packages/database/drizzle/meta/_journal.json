@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1769930749801,
-      "tag": "0000_sticky_blackheart",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1769984229054,
-      "tag": "0001_robust_ink",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1769984712365,
-      "tag": "0002_dry_logan",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1769986326360,
-      "tag": "0003_sour_terror",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1770048716350,
-      "tag": "0004_handy_gateway",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1770048716351,
-      "tag": "0005_backfill_user_character",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1770049868359,
-      "tag": "0006_curved_lightspeed",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1770075278706,
-      "tag": "0007_romantic_tigra",
+      "when": 1770155967248,
+      "tag": "0000_zippy_yellow_claw",
       "breakpoints": true
     }
   ]
