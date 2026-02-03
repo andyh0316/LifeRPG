@@ -8,7 +8,7 @@ export class TaskResponseDto {
   name!: string;
 
   @ApiPropertyOptional({ type: String, nullable: true })
-  description!: string | null;
+  desc!: string | null;
 
   @ApiProperty()
   xpReward!: number;

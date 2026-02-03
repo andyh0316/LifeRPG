@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Param,
   Body,
   ParseIntPipe,
@@ -9,6 +10,7 @@ import {
 import { ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
 
 @Controller('tasks')
@@ -31,5 +33,11 @@ export class TaskController {
   @ApiCreatedResponse({ type: TaskResponseDto })
   create(@Body() body: CreateTaskDto) {
     return this.taskService.create(body);
+  }
+
+  @Patch(':id')
+  @ApiOkResponse({ type: TaskResponseDto })
+  update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateTaskDto) {
+    return this.taskService.update(id, body);
   }
 }
