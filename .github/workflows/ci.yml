@@ -1,0 +1,93 @@
+name: CI
+
+# Trigger on pushes to main or pull requests targeting main
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ============================================
+  # BUILD & TEST
+  # ============================================
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      # Spin up test postgres db in docker, on github
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: life_rpg_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U testuser"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      # Clone the repository into the runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install pnpm package manager
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      # Install Node.js and configure pnpm cache for faster installs
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm' # Caches pnpm store between runs
+
+      # Install all dependencies from lockfile (fails if lockfile outdated)
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Build all packages in the monorepo (database, api, web)
+      - name: Build all packages
+        run: pnpm build
+
+      # Apply database schema migrations to the test database
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
+          TEST_DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
+        run: pnpm db:migrate
+
+      # Run the test suite against the test database
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
+          TEST_DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
+        run: pnpm test
+
+  # ============================================
+  # DEPLOY API (placeholder - not active yet)
+  # ============================================
+  # deploy-api:
+  #   needs: build-and-test  # Only runs if build-and-test succeeds
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'  # Only on main push, not PRs
+  #   steps:
+  #     - name: Deploy to Railway/Render
+  #       run: echo "TODO: Add deployment step"
+
+  # ============================================
+  # DEPLOY WEB (placeholder - not active yet)
+  # ============================================
+  # deploy-web:
+  #   needs: build-and-test  # Only runs if build-and-test succeeds
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'  # Only on main push, not PRs
+  #   steps:
+  #     - name: Deploy to Vercel
+  #       run: echo "TODO: Add deployment step"
