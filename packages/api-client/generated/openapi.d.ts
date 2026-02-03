@@ -112,6 +112,7 @@ export interface components {
         };
         TaskResponseDto: {
             id: number;
+            userId: number;
             name: string;
             description?: string | null;
             xpReward: number;
@@ -119,6 +120,7 @@ export interface components {
             icon?: string | null;
         };
         CreateTaskDto: {
+            userId: number;
             name: string;
             description?: string | null;
             /** @default 0 */

@@ -1,11 +1,19 @@
 {
   "mcpServers": {
-    "postgres-docker": {
+    "db:life_rpg": {
       "command": "npx",
       "args": [
         "-y",
         "@modelcontextprotocol/server-postgres",
         "postgresql://haitianhong:@localhost:5433/life_rpg"
+      ]
+    },
+    "db:life_rpg_test": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://haitianhong:@localhost:5434/life_rpg_test"
       ]
     },
     "playwright": {

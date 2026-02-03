@@ -48,6 +48,9 @@ export const userCharacter = pgTable('user_character', {
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   ...auditColumns,
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   xpReward: integer('xp_reward').notNull().default(0),

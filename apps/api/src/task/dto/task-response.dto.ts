@@ -1,8 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class TaskResponseDto {
-  @ApiProperty()
+  @ApiProperty({ type: Number })
   id!: number;
+
+  @ApiProperty({ type: Number })
+  userId!: number;
 
   @ApiProperty()
   name!: string;

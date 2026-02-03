@@ -11,6 +11,7 @@ export class TaskService {
   private toDto(row: TaskRow): TaskResponseDto {
     return {
       id: row.id,
+      userId: row.userId,
       name: row.name,
       desc: row.description,
       xpReward: row.xpReward,
@@ -36,6 +37,7 @@ export class TaskService {
 
   async create(dto: CreateTaskDto): Promise<TaskResponseDto> {
     const row = await this.taskRepository.create({
+      userId: dto.userId,
       name: dto.name,
       description: dto.desc,
       xpReward: dto.xpReward,

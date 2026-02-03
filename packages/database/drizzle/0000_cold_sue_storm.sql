@@ -45,6 +45,7 @@ CREATE TABLE "tasks" (
 	"created_by_user_id" integer,
 	"updated_by_user_id" integer,
 	"deleted_at" timestamp with time zone,
+	"user_id" integer NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"description" text,
 	"xp_reward" integer DEFAULT 0 NOT NULL,
@@ -93,6 +94,7 @@ ALTER TABLE "task_completions" ADD CONSTRAINT "task_completions_user_id_users_id
 ALTER TABLE "task_completions" ADD CONSTRAINT "task_completions_task_id_tasks_id_fk" FOREIGN KEY ("task_id") REFERENCES "public"."tasks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_created_by_user_id_users_id_fk" FOREIGN KEY ("created_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_updated_by_user_id_users_id_fk" FOREIGN KEY ("updated_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_character" ADD CONSTRAINT "user_character_created_by_user_id_users_id_fk" FOREIGN KEY ("created_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_character" ADD CONSTRAINT "user_character_updated_by_user_id_users_id_fk" FOREIGN KEY ("updated_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "user_character" ADD CONSTRAINT "user_character_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -100,5 +102,20 @@ ALTER TABLE "users" ADD CONSTRAINT "users_created_by_user_id_users_id_fk" FOREIG
 ALTER TABLE "users" ADD CONSTRAINT "users_updated_by_user_id_users_id_fk" FOREIGN KEY ("updated_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 
 -- Seed default user
-INSERT INTO "users" ("email", "first_name", "last_name") VALUES ('NoSpamPlease2222@gmail.com', 'Andy', 'Hong');
+INSERT INTO "users" ("id", "email", "first_name", "last_name") VALUES (1, 'NoSpamPlease2222@gmail.com', 'Andy', 'Hong');
 INSERT INTO "user_character" ("user_id") VALUES (1);
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users)); -- Reset sequences after seeding with explicit IDs
+SELECT setval('user_character_id_seq', (SELECT MAX(id) FROM user_character));
+
+-- Seed tasks for user 1
+INSERT INTO "tasks" ("user_id", "name", "xp_reward", "coin_reward") VALUES
+  (1, 'Meditate 15min', 10, 10),
+  (1, 'Work 30 min', 10, 10),
+  (1, 'Work 1 hour', 20, 20),
+  (1, 'Study 30 min', 15, 15),
+  (1, 'Study 1 hour', 30, 30),
+  (1, 'Chores 30 min', 10, 10),
+  (1, 'Chores 1 hour', 20, 20),
+  (1, 'Eat Vitamins', 5, 5),
+  (1, 'Walk 30 min', 20, 20),
+  (1, 'Gym 60 min', 40, 40);
