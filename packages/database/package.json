@@ -20,9 +20,7 @@
     "migrate": "drizzle-kit migrate",
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio",
-    "seed": "source .env && tsx src/seed.ts $DATABASE_URL",
-    "test-db:migrate": "drizzle-kit migrate --config drizzle.config.test.ts",
-    "test-db:seed": "source .env && tsx src/seed.ts $TEST_DATABASE_URL"
+    "test-db:migrate": "drizzle-kit migrate --config drizzle.config.test.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.39.0",

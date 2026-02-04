@@ -55,8 +55,7 @@ Uses Drizzle ORM with PostgreSQL.
 pnpm db:generate              # generate migration from schema changes
 pnpm db:migrate               # run pending migrations
 pnpm db:studio                # open Drizzle Studio (DB browser)
-pnpm db:seed                  # insert sample data (dev only)
-pnpm db:destroy-and-recreate  # nuke, restart, migrate, and seed
+pnpm db:destroy-and-recreate  # nuke, restart, and migrate
 ```
 
 Requires a `.env` file in `packages/database/` — see `.env.example`.
