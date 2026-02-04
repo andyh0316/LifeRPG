@@ -120,11 +120,7 @@ echo "=== Starting application with PM2 ==="
 # 1) Start the app using the PM2 ecosystem config
 # 2) Save the process list so PM2 restores it after reboot
 # 3) Generate and install the systemd startup hook for the current user
-if pm2 describe life-rpg-api > /dev/null 2>&1; then
-  pm2 restart life-rpg-api
-else
-  pm2 start infra/ecosystem.config.cjs
-fi
+pm2 startOrReload infra/ecosystem.config.cjs --update-env
 pm2 save
 pm2 startup systemd -u "$USER" --hp "$HOME" | tail -1 | sudo bash
 
