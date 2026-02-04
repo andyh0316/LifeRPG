@@ -36,13 +36,14 @@ The frontend is built with `VITE_API_URL=/` so all API calls go to the same orig
 
 1. Create a Lightsail instance: **Ubuntu 22.04**, **$7/mo** (1GB RAM), Dual-stack networking
 2. Attach a **static IP** to the instance (Lightsail → Networking tab — free while attached)
-3. Copy `setup-server.sh` from this computer to the server:
+3. Download the default SSH key (Lightsail → Account → SSH keys) and save the `.pem` file locally
+4. Copy `setup-server.sh` from this computer to the server:
 
    ```bash
    scp -i /path/to/your-lightsail-key.pem infra/setup-server.sh ubuntu@YOUR_STATIC_IP:~/setup-server.sh
    ```
 
-4. SSH into the server:
+5. SSH into the server:
 
    ```bash
    ssh -i /path/to/your-lightsail-key.pem ubuntu@YOUR_STATIC_IP
@@ -50,14 +51,52 @@ The frontend is built with `VITE_API_URL=/` so all API calls go to the same orig
 
    OR use the browser-based SSH terminal in the Lightsail console
 
-5. Run the setup script (it will prompt you for a database password):
+6. Run the setup script — it will prompt you to create a db username and password (find these values in **GitHub repo → Settings → Environments → Variables**):
    ```bash
    bash setup-server.sh
    ```
-6. Add GitHub secrets for automated deploys (see [workflows README](../.github/workflows/README.md)):
-   - `LIGHTSAIL_HOST` → your static IP
-   - `LIGHTSAIL_SSH_KEY` → private key contents (download from Lightsail)
-   - `LIGHTSAIL_USERNAME` → `ubuntu`
+7. Set up `.env` files on the server — see [Environment Configuration](#environment-configuration) below.
+
+## Environment Configuration
+
+The `.env` files are not created by the setup or deploy scripts — you transfer them manually. The values are stored in **GitHub repo → Settings → Environments → Variables** for reference.
+
+Three `.env` files are needed on the server:
+
+```bash
+nano /opt/life-rpg/packages/database/.env
+```
+
+```bash
+nano /opt/life-rpg/apps/api/.env
+```
+
+```bash
+nano /opt/life-rpg/apps/web/.env
+```
+
+These files persist across deploys since `deploy.sh` does a `git pull` (which won't overwrite untracked `.env` files). You only need to redo this if the server is reprovisioned or the files are deleted.
+
+## Automatic Deployment
+
+Add GitHub secrets for automated deploys:
+
+Go to **GitHub repo → Settings → Secrets and variables → Actions → Repository secrets** (not Environment secrets).
+
+| Secret | Value |
+|---|---|
+| `LIGHTSAIL_HOST` | Your static IP (e.g. `3.16.195.30`) |
+| `LIGHTSAIL_USERNAME` | `ubuntu` |
+| `LIGHTSAIL_SSH_KEY` | Full contents of your `.pem` key file (run `cat ~/Desktop/LightsailDefaultKey-us-east-2.pem` and copy everything including the `BEGIN`/`END` lines) |
+
+These must be **repository secrets**, not environment secrets — the deploy workflow references them via `secrets.*` without an `environment:` field.
+
+Deploys happen automatically when you push to `main`:
+
+1. `ci.yml` runs build + tests
+2. If CI passes, `deploy.yml` SSHs into the Lightsail server and runs `infra/deploy.sh`
+
+You can monitor deploy runs at **GitHub repo → Actions → Deploy**.
 
 ## Manual Deployment
 
