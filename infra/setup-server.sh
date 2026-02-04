@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-time server provisioning script for AWS Lightsail (Ubuntu 22.04)
+# Server provisioning script (idempotent — safe to rerun) for AWS Lightsail (Ubuntu 22.04)
 #
 # Provisions: Node.js 20, pnpm 9, PostgreSQL 17, Nginx, PM2
 # Deploys:    NestJS API (PM2) + React SPA (Nginx static files)
@@ -32,21 +32,28 @@ sudo apt-get install -y nginx
 # Ubuntu 22.04 ships PostgreSQL 14; add the PGDG repo to get Postgres 17
 sudo apt-get install -y gnupg2
 echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --yes --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
 sudo apt-get update
 sudo apt-get install -y postgresql-17
 
 echo "=== Configuring PostgreSQL ==="
 
-# Create a dedicated database and user for the app
+# Create a dedicated database and user for the app (idempotent: updates password if user exists)
 sudo -u postgres psql <<SQL
-CREATE USER life_rpg_user WITH PASSWORD '${DB_PASSWORD}';
-CREATE DATABASE life_rpg OWNER life_rpg_user;
+DO \$\$ BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'life_rpg_user') THEN
+    CREATE ROLE life_rpg_user WITH LOGIN PASSWORD '${DB_PASSWORD}';
+  ELSE
+    ALTER ROLE life_rpg_user WITH PASSWORD '${DB_PASSWORD}';
+  END IF;
+END \$\$;
+SELECT 'CREATE DATABASE life_rpg OWNER life_rpg_user'
+  WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'life_rpg')\gexec
 SQL
 
 # Tune Postgres for a 1 GB Lightsail instance — increase these values
 # proportionally if you upgrade to a larger VM
-sudo tee -a /etc/postgresql/17/main/conf.d/tuning.conf > /dev/null <<CONF
+sudo tee /etc/postgresql/17/main/conf.d/tuning.conf > /dev/null <<CONF
 shared_buffers = 128MB
 work_mem = 4MB
 maintenance_work_mem = 64MB
@@ -61,10 +68,16 @@ echo "=== Setting up application ==="
 sudo npm install -g pm2
 
 # Clone into /opt (standard location for third-party apps), then chown
-# back to the SSH user so pnpm install and builds don't require root
-sudo git clone https://github.com/andyh0316/LifeRpg.git "$APP_DIR"
-sudo chown -R "$USER:$USER" "$APP_DIR"
-cd "$APP_DIR"
+# back to the SSH user so pnpm install and builds don't require root.
+# On rerun, pull the latest changes instead of cloning again.
+if [ -d "$APP_DIR/.git" ]; then
+  cd "$APP_DIR"
+  git pull origin main
+else
+  sudo git clone https://github.com/andyh0316/LifeRpg.git "$APP_DIR"
+  sudo chown -R "$USER:$USER" "$APP_DIR"
+  cd "$APP_DIR"
+fi
 
 # Create .env for the database package
 cat > packages/database/.env <<ENV
@@ -113,7 +126,11 @@ echo "=== Starting application with PM2 ==="
 # 1) Start the app using the PM2 ecosystem config
 # 2) Save the process list so PM2 restores it after reboot
 # 3) Generate and install the systemd startup hook for the current user
-pm2 start infra/ecosystem.config.cjs
+if pm2 describe life-rpg-api > /dev/null 2>&1; then
+  pm2 restart life-rpg-api
+else
+  pm2 start infra/ecosystem.config.cjs
+fi
 pm2 save
 pm2 startup systemd -u "$USER" --hp "$HOME" | tail -1 | sudo bash
 

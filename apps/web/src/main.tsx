@@ -6,7 +6,7 @@ import { initApiClient } from '@life-rpg/api-client';
 import './index.css';
 import App from './App';
 
-initApiClient({ baseUrl: import.meta.env.VITE_API_URL ?? '/' });
+initApiClient({ baseUrl: import.meta.env.VITE_API_URL ?? '/api' });
 
 const queryClient = new QueryClient();
 
