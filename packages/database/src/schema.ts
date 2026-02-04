@@ -3,6 +3,7 @@ import {
   serial,
   varchar,
   integer,
+  pgEnum,
   text,
   timestamp,
   type AnyPgColumn,
@@ -45,6 +46,8 @@ export const userCharacter = pgTable('user_character', {
   weeklyXpTarget: integer('weekly_xp_target'),
 });
 
+export const goalUnitEnum = pgEnum('goal_unit', ['minutes']);
+
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   ...auditColumns,
@@ -56,6 +59,19 @@ export const tasks = pgTable('tasks', {
   xpReward: integer('xp_reward').notNull().default(0),
   coinReward: integer('coin_reward').notNull().default(0),
   icon: varchar('icon', { length: 50 }),
+  goalUnit: goalUnitEnum('goal_unit'),
+});
+
+export const taskOptions = pgTable('task_options', {
+  id: serial('id').primaryKey(),
+  ...auditColumns,
+  taskId: integer('task_id')
+    .notNull()
+    .references(() => tasks.id),
+  goal: integer('goal'), // e.g. 30, 60, 2
+  xpReward: integer('xp_reward').notNull().default(0),
+  coinReward: integer('coin_reward').notNull().default(0),
+  sortOrder: integer('sort_order').notNull().default(0),
 });
 
 export const rewards = pgTable('rewards', {
@@ -76,6 +92,7 @@ export const taskCompletions = pgTable('task_completions', {
   taskId: integer('task_id')
     .notNull()
     .references(() => tasks.id),
+  taskOptionId: integer('task_option_id').references(() => taskOptions.id),
   xpEarned: integer('xp_earned').notNull(),
   coinsEarned: integer('coins_earned').notNull(),
   completedAt: timestamp('completed_at', { withTimezone: true })

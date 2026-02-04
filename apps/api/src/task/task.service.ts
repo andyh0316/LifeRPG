@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import type { Db } from '@life-rpg/database';
 import { TaskRepository, TaskRow } from './task.repository';
+import { TaskOptionRepository } from './task-option.repository';
 import { TaskResponseDto } from './dto/task-response.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TaskService {
-  constructor(private readonly taskRepository: TaskRepository) {}
+  constructor(
+    private readonly taskRepository: TaskRepository,
+    private readonly taskOptionRepository: TaskOptionRepository,
+    @Inject('DATABASE') private db: Db,
+  ) {}
 
   private toDto(row: TaskRow): TaskResponseDto {
     return {
@@ -36,13 +42,29 @@ export class TaskService {
   }
 
   async create(dto: CreateTaskDto): Promise<TaskResponseDto> {
-    const row = await this.taskRepository.create({
-      userId: dto.userId,
-      name: dto.name,
-      description: dto.desc,
-      xpReward: dto.xpReward,
-      coinReward: dto.coinReward,
-      icon: dto.icon,
+    const row = await this.db.transaction(async (tx) => {
+      const task = await this.taskRepository.create(
+        {
+          userId: dto.userId,
+          name: dto.name,
+          description: dto.desc,
+          xpReward: dto.xpReward,
+          coinReward: dto.coinReward,
+          icon: dto.icon,
+        },
+        tx,
+      );
+
+      await this.taskOptionRepository.create(
+        {
+          taskId: task.id,
+          xpReward: dto.xpReward,
+          coinReward: dto.coinReward,
+        },
+        tx,
+      );
+
+      return task;
     });
 
     return this.toDto(row);

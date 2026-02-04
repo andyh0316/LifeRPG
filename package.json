@@ -7,6 +7,8 @@
     "docker:nuke": "docker compose down -v",
     "db:generate": "pnpm --filter @life-rpg/database generate",
     "db:migrate": "pnpm --filter @life-rpg/database migrate",
+    "db:backup": "pnpm --filter @life-rpg/database backup",
+    "db:restore": "pnpm --filter @life-rpg/database restore",
     "db:studio": "pnpm --filter @life-rpg/database studio",
     "db:reset": "docker compose down -v && docker compose up -d && docker compose exec db sh -c 'until pg_isready -U haitianhong; do sleep 0.2; done' && pnpm db:migrate",
     "test-db:migrate": "pnpm --filter @life-rpg/database test-db:migrate",

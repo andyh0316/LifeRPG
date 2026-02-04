@@ -19,8 +19,8 @@ export class TaskRepository {
     return row;
   }
 
-  async create(data: TaskInsert): Promise<TaskRow> {
-    const [row] = await this.db.insert(tasks).values(data).returning();
+  async create(data: TaskInsert, tx?: Db): Promise<TaskRow> {
+    const [row] = await (tx ?? this.db).insert(tasks).values(data).returning();
     return row;
   }
 

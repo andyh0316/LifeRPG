@@ -8,6 +8,13 @@
       "when": 1770156800222,
       "tag": "0000_cold_sue_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770229549647,
+      "tag": "0001_solid_crusher_hogan",
+      "breakpoints": true
     }
   ]
 }
