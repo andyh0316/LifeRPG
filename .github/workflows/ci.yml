@@ -71,23 +71,8 @@ jobs:
         run: pnpm test
 
   # ============================================
-  # DEPLOY API (placeholder - not active yet)
+  # DEPLOY (Lightsail — triggered via deploy.yml workflow_run)
   # ============================================
-  # deploy-api:
-  #   needs: build-and-test  # Only runs if build-and-test succeeds
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'  # Only on main push, not PRs
-  #   steps:
-  #     - name: Deploy to Railway/Render
-  #       run: echo "TODO: Add deployment step"
-
-  # ============================================
-  # DEPLOY WEB (placeholder - not active yet)
-  # ============================================
-  # deploy-web:
-  #   needs: build-and-test  # Only runs if build-and-test succeeds
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'  # Only on main push, not PRs
-  #   steps:
-  #     - name: Deploy to Vercel
-  #       run: echo "TODO: Add deployment step"
+  # Deployment runs automatically after CI passes on main.
+  # See .github/workflows/deploy.yml for the deploy job.
+  # Required secrets: LIGHTSAIL_HOST, LIGHTSAIL_SSH_KEY, LIGHTSAIL_USERNAME
