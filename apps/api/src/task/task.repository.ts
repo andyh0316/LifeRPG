@@ -27,8 +27,9 @@ export class TaskRepository {
   async update(
     id: number,
     data: Partial<TaskInsert>,
+    tx?: Db,
   ): Promise<TaskRow | undefined> {
-    const [row] = await this.db
+    const [row] = await (tx ?? this.db)
       .update(tasks)
       .set(data)
       .where(eq(tasks.id, id))

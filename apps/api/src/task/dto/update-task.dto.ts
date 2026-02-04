@@ -1,5 +1,16 @@
-import { IsString, IsOptional, IsInt, Min, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsIn,
+  IsArray,
+  ValidateNested,
+  Min,
+  MaxLength,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { CreateTaskOptionDto } from './create-task-option.dto';
 
 export class UpdateTaskDto {
   @ApiPropertyOptional({ type: String })
@@ -30,4 +41,16 @@ export class UpdateTaskDto {
   @IsString()
   @MaxLength(50)
   icon?: string | null;
+
+  @ApiPropertyOptional({ enum: ['minutes'], nullable: true })
+  @IsOptional()
+  @IsIn(['minutes'])
+  goalUnit?: 'minutes' | null;
+
+  @ApiPropertyOptional({ type: [CreateTaskOptionDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateTaskOptionDto)
+  options?: CreateTaskOptionDto[];
 }
