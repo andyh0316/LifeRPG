@@ -8,7 +8,7 @@
 #   - Fresh Ubuntu 22.04 Lightsail instance with SSH access
 #   - Git installed (comes pre-installed on Lightsail Ubuntu)
 #
-# Usage: ssh user@host 'bash -s' < infra/setup-server.sh
+# Usage: ssh user@host 'bash -s' < infra/lightsail/setup-server.sh
 #        (you'll be prompted for database credentials)
 set -euo pipefail
 
@@ -95,7 +95,7 @@ echo "=== Configuring Nginx ==="
 # Nginx uses a sites-available/sites-enabled symlink pattern:
 # configs live in sites-available, and only symlinked ones in sites-enabled are active.
 # Remove the default site so our config is the only one serving traffic.
-sudo cp infra/nginx.conf /etc/nginx/sites-available/life-rpg
+sudo cp infra/lightsail/nginx.conf /etc/nginx/sites-available/life-rpg
 sudo ln -sf /etc/nginx/sites-available/life-rpg /etc/nginx/sites-enabled/life-rpg
 sudo rm -f /etc/nginx/sites-enabled/default
 
@@ -120,7 +120,7 @@ echo "=== Starting application with PM2 ==="
 # 1) Start the app using the PM2 ecosystem config
 # 2) Save the process list so PM2 restores it after reboot
 # 3) Generate and install the systemd startup hook for the current user
-pm2 startOrReload infra/ecosystem.config.cjs --update-env
+pm2 startOrReload infra/lightsail/ecosystem.config.cjs --update-env
 pm2 save
 pm2 startup systemd -u "$USER" --hp "$HOME" | tail -1 | sudo bash
 

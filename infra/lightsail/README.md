@@ -40,7 +40,7 @@ The frontend is built with `VITE_API_URL=/` so all API calls go to the same orig
 4. Copy `setup-server.sh` from this computer to the server:
 
    ```bash
-   scp -i /path/to/your-lightsail-key.pem infra/setup-server.sh ubuntu@YOUR_STATIC_IP:~/setup-server.sh
+   scp -i /path/to/your-lightsail-key.pem infra/lightsail/setup-server.sh ubuntu@YOUR_STATIC_IP:~/setup-server.sh
    ```
 
 5. SSH into the server:
@@ -94,7 +94,7 @@ These must be **repository secrets**, not environment secrets — the deploy wor
 Deploys happen automatically when you push to `main`:
 
 1. `ci.yml` runs build + tests
-2. If CI passes, `deploy.yml` SSHs into the Lightsail server and runs `infra/deploy.sh`
+2. If CI passes, `deploy.yml` SSHs into the Lightsail server and runs `infra/lightsail/deploy.sh`
 
 You can monitor deploy runs at **GitHub repo → Actions → Deploy**.
 
@@ -103,7 +103,7 @@ You can monitor deploy runs at **GitHub repo → Actions → Deploy**.
 SSH into the server and run:
 
 ```bash
-bash /opt/life-rpg/infra/deploy.sh
+bash /opt/life-rpg/infra/lightsail/deploy.sh
 ```
 
 ## Useful Commands on the Server

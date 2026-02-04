@@ -23,7 +23,7 @@ echo "=== Updating frontend files ==="
 sudo cp -r apps/web/dist/* "$WEB_DIR/"
 
 echo "=== Restarting API ==="
-pm2 startOrReload infra/ecosystem.config.cjs --update-env
+pm2 startOrReload infra/lightsail/ecosystem.config.cjs --update-env
 
 echo "=== Health check ==="
 sleep 3
