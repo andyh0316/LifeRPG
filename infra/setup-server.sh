@@ -9,9 +9,15 @@
 #   - Git installed (comes pre-installed on Lightsail Ubuntu)
 #
 # Usage: ssh user@host 'bash -s' < infra/setup-server.sh
-#        (you'll be prompted for the database password)
+#        (you'll be prompted for database credentials)
 set -euo pipefail
 
+echo "=============================================="
+echo "  TIP: Database credentials can be found at:"
+echo "  GitHub repo → Settings → Environments → prod"
+echo "=============================================="
+echo
+read -rp "Enter database username: " DB_USERNAME
 read -rsp "Enter database password: " DB_PASSWORD
 echo
 APP_DIR="/opt/life-rpg"
@@ -41,13 +47,13 @@ echo "=== Configuring PostgreSQL ==="
 # Create a dedicated database and user for the app (idempotent: updates password if user exists)
 sudo -u postgres psql <<SQL
 DO \$\$ BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'life_rpg_user') THEN
-    CREATE ROLE life_rpg_user WITH LOGIN PASSWORD '${DB_PASSWORD}';
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${DB_USERNAME}') THEN
+    CREATE ROLE ${DB_USERNAME} WITH LOGIN PASSWORD '${DB_PASSWORD}';
   ELSE
-    ALTER ROLE life_rpg_user WITH PASSWORD '${DB_PASSWORD}';
+    ALTER ROLE ${DB_USERNAME} WITH PASSWORD '${DB_PASSWORD}';
   END IF;
 END \$\$;
-SELECT 'CREATE DATABASE life_rpg OWNER life_rpg_user'
+SELECT 'CREATE DATABASE life_rpg OWNER ${DB_USERNAME}'
   WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'life_rpg')\gexec
 SQL
 
@@ -78,18 +84,6 @@ else
   sudo chown -R "$USER:$USER" "$APP_DIR"
   cd "$APP_DIR"
 fi
-
-# Create .env for the database package
-cat > packages/database/.env <<ENV
-DATABASE_URL=postgresql://life_rpg_user:${DB_PASSWORD}@localhost:5432/life_rpg
-ENV
-
-# Create .env for the API
-cat > apps/api/.env <<ENV
-DATABASE_URL=postgresql://life_rpg_user:${DB_PASSWORD}@localhost:5432/life_rpg
-NODE_ENV=production
-PORT=3000
-ENV
 
 # Three-step build pipeline: install deps → build all monorepo packages → apply DB schema
 pnpm install --frozen-lockfile

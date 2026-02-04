@@ -3,10 +3,7 @@ module.exports = {
     {
       name: "life-rpg-api",
       script: "/opt/life-rpg/apps/api/dist/main.js",
-      env: {
-        NODE_ENV: "production",
-        PORT: 3000,
-      },
+      cwd: "/opt/life-rpg/apps/api",
       max_memory_restart: "512M",
       restart_delay: 5000,
       max_restarts: 10,
