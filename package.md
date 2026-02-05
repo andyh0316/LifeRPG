@@ -22,9 +22,9 @@ build # Build all
 build:api # Build API
 build:web # Build Web
 
-test # Unit tests
-test:e2e # E2E tests (headless)
-test:e2e:debug # E2E tests (headed, slow)
+test:api # API integration tests
+test:web # E2E tests (headless)
+test:web:debug # E2E tests (headed, slow)
 
 generate:api-client # Regenerate OpenAPI client
 menu # Interactive picker

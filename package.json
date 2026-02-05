@@ -21,10 +21,10 @@
     "build:api": "pnpm generate:api-client && pnpm --filter @life-rpg/api build",
     "dev:web": "pnpm --filter @life-rpg/web dev",
     "build:web": "pnpm --filter @life-rpg/web build",
-    "test": "pnpm --filter @life-rpg/api test",
+    "test:api": "pnpm --filter @life-rpg/api test",
     "generate:api-client": "pnpm --filter @life-rpg/api-client generate",
-    "test:e2e": "playwright test",
-    "test:e2e:debug": "HEADED=1 SLOW=3 playwright test",
+    "test:web": "playwright test",
+    "test:web:debug": "HEADED=1 SLOW=3 playwright test",
     "menu": "npx ntl -A"
   },
   "devDependencies": {

@@ -68,7 +68,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
           TEST_DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
-        run: pnpm test
+        run: pnpm test:api
 
   # ============================================
   # DEPLOY (Lightsail — triggered via deploy.yml workflow_run)
