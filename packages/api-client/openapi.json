@@ -63,7 +63,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -91,7 +91,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -129,7 +129,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -231,11 +231,9 @@
         "tags": [
           "Task"
         ]
-      }
-    },
-    "/tasks/{id}/complete": {
-      "post": {
-        "operationId": "TaskCompletionController_complete",
+      },
+      "patch": {
+        "operationId": "TaskController_update",
         "parameters": [
           {
             "name": "id",
@@ -246,6 +244,37 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
+    "/task-completions": {
+      "post": {
+        "operationId": "TaskCompletionController_complete",
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -288,7 +317,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "string"
+            "type": "number"
           },
           "email": {
             "type": "string"
@@ -338,15 +367,11 @@
           },
           "lastName": {
             "type": "string"
-          },
-          "displayName": {
-            "type": "string"
           }
         },
         "required": [
           "email",
-          "firstName",
-          "displayName"
+          "firstName"
         ]
       },
       "UpdateUserDto": {
@@ -360,11 +385,31 @@
           },
           "lastName": {
             "type": "string"
-          },
-          "displayName": {
-            "type": "string"
           }
         }
+      },
+      "TaskBlockResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "xpReward": {
+            "type": "number"
+          },
+          "coinReward": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "xpReward",
+          "coinReward"
+        ]
       },
       "TaskResponseDto": {
         "type": "object",
@@ -372,30 +417,57 @@
           "id": {
             "type": "number"
           },
+          "userId": {
+            "type": "number"
+          },
           "name": {
             "type": "string"
           },
-          "description": {
+          "desc": {
             "type": "string",
             "nullable": true
-          },
-          "xpReward": {
-            "type": "number"
-          },
-          "coinReward": {
-            "type": "number"
           },
           "icon": {
             "type": "string",
             "nullable": true
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "minutes"
+            ],
+            "nullable": true
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskBlockResponseDto"
+            }
           }
         },
         "required": [
           "id",
+          "userId",
           "name",
-          "xpReward",
-          "coinReward"
+          "blocks"
         ]
+      },
+      "CreateTaskBlockDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "nullable": true
+          },
+          "xpReward": {
+            "type": "number",
+            "default": 0
+          },
+          "coinReward": {
+            "type": "number",
+            "default": 0
+          }
+        }
       },
       "CreateTaskDto": {
         "type": "object",
@@ -403,8 +475,37 @@
           "name": {
             "type": "string"
           },
-          "description": {
+          "desc": {
             "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "minutes"
+            ],
+            "nullable": true
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateTaskBlockDto"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateTaskBlockDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
             "nullable": true
           },
           "xpReward": {
@@ -415,24 +516,52 @@
             "type": "number",
             "default": 0
           },
+          "id": {
+            "type": "number"
+          },
+          "delete": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateTaskDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string",
+            "nullable": true
+          },
           "icon": {
             "type": "string",
             "nullable": true
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "minutes"
+            ],
+            "nullable": true
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UpdateTaskBlockDto"
+            }
           }
-        },
-        "required": [
-          "name"
-        ]
+        }
       },
       "CompleteTaskDto": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string"
+          "blockId": {
+            "type": "number"
           }
         },
         "required": [
-          "userId"
+          "blockId"
         ]
       },
       "TaskCompletionResponseDto": {
@@ -445,7 +574,7 @@
             "type": "number"
           },
           "userId": {
-            "type": "string"
+            "type": "number"
           },
           "xpEarned": {
             "type": "number"

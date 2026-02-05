@@ -1,5 +1,5 @@
 You will make a commit:
 
-1. view staged changes by running `git diff HEAD`. do not include unstaged changes.
-2. make a commit message, use a few words
-3. make the commit `git commit -m "{message}"`
+1. Run `git diff --staged` to view ONLY staged changes. NEVER use `git diff HEAD` — it includes unstaged changes. If nothing is staged, stop and tell the user.
+2. Make a commit message, use a few words.
+3. Make the commit `git commit -m "{message}"`

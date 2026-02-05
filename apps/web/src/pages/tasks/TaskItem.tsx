@@ -1,24 +1,30 @@
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import StarIcon from '@mui/icons-material/Star';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import EditIcon from '@mui/icons-material/Edit';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
+
+interface Block {
+  id: number;
+  amount?: number | null;
+  xpReward: number;
+  coinReward: number;
+}
 
 export interface TaskItemProps {
   id: number;
   name: string;
-  description?: string | null;
-  xpReward: number;
-  coinReward: number;
+  desc?: string | null;
   icon?: string | null;
+  amountUnit?: string | null;
+  blocks: Block[];
   userId: number;
 }
 
@@ -26,12 +32,13 @@ export interface TaskItemProps {
 export default function TaskItem({
   id,
   name,
-  description,
-  xpReward,
-  coinReward,
+  desc,
   icon,
+  amountUnit,
+  blocks,
   userId,
 }: TaskItemProps) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -39,12 +46,16 @@ export default function TaskItem({
     severity: 'success' | 'error';
   }>({ open: false, message: '', severity: 'success' });
 
-  // Completes this task for the given user.
-  const completeTask = $api.useMutation('post', '/tasks/{id}/complete', {
+  const completeBlock = $api.useMutation('post', '/task-completions', {
     onSuccess: (data) => {
-      // Refetch user data so the profile card reflects updated XP/coins
-      queryClient.invalidateQueries({ queryKey: $api.queryOptions('get', '/users').queryKey });
-      queryClient.invalidateQueries({ queryKey: $api.queryOptions('get', '/users/{id}', { params: { path: { id: userId } } }).queryKey });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/users').queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/users/{id}', {
+          params: { path: { id: userId } },
+        }).queryKey,
+      });
       setSnackbar({
         open: true,
         message: `Task completed! +${data.xpEarned} XP, +${data.coinsEarned} coins`,
@@ -60,42 +71,66 @@ export default function TaskItem({
     },
   });
 
-  // Asks for confirmation, then sends the complete request.
-  const handleClick = () => {
+  const handleBlockClick = (blockId: number) => {
     if (!window.confirm(`Complete "${name}"?`)) return;
-    completeTask.mutate({
-      params: { path: { id } },
-      body: { userId },
+    completeBlock.mutate({
+      body: { blockId },
     });
   };
 
   return (
-    <ListItem disablePadding sx={{ maxWidth: 500 }}>
-      <ListItemButton onClick={handleClick}>
-        <ListItemIcon sx={{ minWidth: 40, fontSize: 24 }}>
-          {icon ?? '📋'}
-        </ListItemIcon>
-        <ListItemText primary={name} secondary={description} />
-        {/* Reward chips */}
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip
-            icon={<MonetizationOnIcon />}
-            label={`${coinReward}`}
-            size="small"
-            color="warning"
-            variant="outlined"
-          />
-          <Chip
-            icon={<StarIcon />}
-            label={`${xpReward} XP`}
-            size="small"
-            color="primary"
-            variant="outlined"
-          />
+    <Box
+      sx={{
+        maxWidth: 500,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        mb: 1,
+        p: 1.5,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ fontSize: 24 }}>{icon ?? '📋'}</Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>
+            {name}
+          </Typography>
+          {desc && (
+            <Typography variant="body2" color="text.secondary">
+              {desc}
+            </Typography>
+          )}
         </Box>
-      </ListItemButton>
+        <IconButton size="small" onClick={() => navigate(`/tasks/${id}/edit`)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </Box>
 
-      {/* Feedback snackbar for task completion */}
+      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+        {blocks.map((block) => (
+          <Button
+            key={block.id}
+            variant="outlined"
+            onClick={() => handleBlockClick(block.id)}
+            sx={{
+              textTransform: 'none',
+              flexDirection: 'column',
+              py: 1,
+              px: 2,
+            }}
+          >
+            <Typography variant="subtitle2">
+              {amountUnit === 'minutes' && block.amount != null
+                ? `${block.amount} min`
+                : '1 count'}
+            </Typography>
+            <Typography variant="caption">
+              ⭐ {block.xpReward} XP &nbsp; 🪙 {block.coinReward}
+            </Typography>
+          </Button>
+        ))}
+      </Stack>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -109,6 +144,6 @@ export default function TaskItem({
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </ListItem>
+    </Box>
   );
 }

@@ -8,10 +8,10 @@
 ## Running tests
 
 ```sh
-pnpm test
+pnpm test:api
 ```
 
-## What happens when you run `pnpm test`
+## What happens when you run `pnpm test:api`
 
 The test database is fully reset before every test run. Here's the implicit workflow:
 
@@ -42,9 +42,9 @@ const { data, error } = await client.GET('/tasks');
 
 ## Key files
 
-| File | Purpose |
-|---|---|
-| `src/test/setup-integration.ts` | Bootstraps a NestJS app, listens on a random port, returns a typed API client |
-| `jest.config.ts` | Jest configuration (ts-jest, test matching) |
-| `package.json` (`pretest`) | Triggers `test-db:reset` before every test run |
-| Root `package.json` (`test-db:reset`) | Docker destroy + recreate + migrate chain |
+| File                                  | Purpose                                                                       |
+| ------------------------------------- | ----------------------------------------------------------------------------- |
+| `src/test/setup-integration.ts`       | Bootstraps a NestJS app, listens on a random port, returns a typed API client |
+| `jest.config.ts`                      | Jest configuration (ts-jest, test matching)                                   |
+| `package.json` (`pretest`)            | Triggers `test-db:reset` before every test run                                |
+| Root `package.json` (`test-db:reset`) | Docker destroy + recreate + migrate chain                                     |

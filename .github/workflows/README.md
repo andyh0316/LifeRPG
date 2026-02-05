@@ -18,7 +18,7 @@ Runs on every push to `main` and on pull requests targeting `main`.
 Triggers automatically after CI passes on `main` (via `workflow_run`). Does **not** run on PRs.
 
 1. SSHs into the Lightsail VM using `appleboy/ssh-action`
-2. Runs `infra/deploy.sh` which pulls code, builds, migrates, and restarts the app
+2. Runs `infra/lightsail/deploy.sh` which pulls code, builds, migrates, and restarts the app
 
 ## Required Secrets for Deployment
 

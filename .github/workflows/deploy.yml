@@ -18,4 +18,4 @@ jobs:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ${{ secrets.LIGHTSAIL_USERNAME }}
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          script: bash /opt/life-rpg/infra/deploy.sh
+          script: bash /opt/life-rpg/infra/lightsail/deploy.sh

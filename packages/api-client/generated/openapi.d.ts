@@ -65,10 +65,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["TaskController_update"];
         trace?: never;
     };
-    "/tasks/{id}/complete": {
+    "/task-completions": {
         parameters: {
             query?: never;
             header?: never;
@@ -110,27 +110,56 @@ export interface components {
             firstName?: string;
             lastName?: string;
         };
+        TaskBlockResponseDto: {
+            id: number;
+            amount?: number | null;
+            xpReward: number;
+            coinReward: number;
+        };
         TaskResponseDto: {
             id: number;
             userId: number;
             name: string;
-            description?: string | null;
-            xpReward: number;
-            coinReward: number;
+            desc?: string | null;
             icon?: string | null;
+            /** @enum {string|null} */
+            amountUnit?: "minutes" | null;
+            blocks: components["schemas"]["TaskBlockResponseDto"][];
+        };
+        CreateTaskBlockDto: {
+            amount?: number | null;
+            /** @default 0 */
+            xpReward: number;
+            /** @default 0 */
+            coinReward: number;
         };
         CreateTaskDto: {
-            userId: number;
             name: string;
-            description?: string | null;
+            desc?: string | null;
+            icon?: string | null;
+            /** @enum {string|null} */
+            amountUnit?: "minutes" | null;
+            blocks?: components["schemas"]["CreateTaskBlockDto"][];
+        };
+        UpdateTaskBlockDto: {
+            amount?: number | null;
             /** @default 0 */
             xpReward: number;
             /** @default 0 */
             coinReward: number;
+            id?: number;
+            delete?: boolean;
+        };
+        UpdateTaskDto: {
+            name?: string;
+            desc?: string | null;
             icon?: string | null;
+            /** @enum {string|null} */
+            amountUnit?: "minutes" | null;
+            blocks?: components["schemas"]["UpdateTaskBlockDto"][];
         };
         CompleteTaskDto: {
-            userId: number;
+            blockId: number;
         };
         TaskCompletionResponseDto: {
             id: number;
@@ -322,13 +351,36 @@ export interface operations {
             };
         };
     };
-    TaskCompletionController_complete: {
+    TaskController_update: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 id: number;
             };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTaskDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponseDto"];
+                };
+            };
+        };
+    };
+    TaskCompletionController_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody: {

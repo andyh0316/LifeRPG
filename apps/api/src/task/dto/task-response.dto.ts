@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TaskBlockResponseDto } from './task-block-response.dto';
 
 export class TaskResponseDto {
   @ApiProperty({ type: Number })
@@ -13,12 +14,12 @@ export class TaskResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true })
   desc!: string | null;
 
-  @ApiProperty()
-  xpReward!: number;
-
-  @ApiProperty()
-  coinReward!: number;
-
   @ApiPropertyOptional({ type: String, nullable: true })
   icon!: string | null;
+
+  @ApiPropertyOptional({ enum: ['minutes'], nullable: true })
+  amountUnit!: string | null;
+
+  @ApiProperty({ type: [TaskBlockResponseDto] })
+  blocks!: TaskBlockResponseDto[];
 }
