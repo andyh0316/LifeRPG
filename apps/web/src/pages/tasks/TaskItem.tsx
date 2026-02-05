@@ -46,10 +46,8 @@ export default function TaskItem({
     severity: 'success' | 'error';
   }>({ open: false, message: '', severity: 'success' });
 
-  // Completes this task for the given user.
-  const completeTask = $api.useMutation('post', '/tasks/{id}/complete', {
+  const completeBlock = $api.useMutation('post', '/task-completions', {
     onSuccess: (data) => {
-      // Refetch user data so the profile card reflects updated XP/coins
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/users').queryKey,
       });
@@ -73,12 +71,10 @@ export default function TaskItem({
     },
   });
 
-  // Asks for confirmation, then sends the complete request.
-  const handleClick = () => {
+  const handleBlockClick = (blockId: number) => {
     if (!window.confirm(`Complete "${name}"?`)) return;
-    completeTask.mutate({
-      params: { path: { id } },
-      body: { userId },
+    completeBlock.mutate({
+      body: { blockId },
     });
   };
 
@@ -115,7 +111,7 @@ export default function TaskItem({
           <Button
             key={block.id}
             variant="outlined"
-            onClick={() => {}}
+            onClick={() => handleBlockClick(block.id)}
             sx={{
               textTransform: 'none',
               flexDirection: 'column',

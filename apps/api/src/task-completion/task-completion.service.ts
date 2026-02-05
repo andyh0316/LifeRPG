@@ -1,5 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { asc, eq, sql } from 'drizzle-orm';
+import {
+  Inject,
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { eq, sql } from 'drizzle-orm';
 import {
   tasks,
   taskCompletions,
@@ -22,44 +27,42 @@ const completionSelect = {
 export class TaskCompletionService {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  // Marks a task as completed for a user. Looks up the task's rewards,
+  // Marks a task block as completed for a user. Looks up the block's rewards,
   // records a completion entry, and credits the user's XP and coins—all
   // within a single transaction so rewards stay consistent.
   async complete(
-    taskId: number,
+    blockId: number,
     userId: number,
   ): Promise<TaskCompletionResponseDto> {
     return this.db.transaction(async (tx) => {
-      // Fetch the task and its first block
-      const [task] = await tx
-        .select({ id: tasks.id })
-        .from(tasks)
-        .where(eq(tasks.id, taskId));
-
-      if (!task) {
-        throw new NotFoundException(`Task ${taskId} not found`);
-      }
-
       const [block] = await tx
         .select({
+          taskId: taskBlocks.taskId,
           amount: taskBlocks.amount,
           xpReward: taskBlocks.xpReward,
           coinReward: taskBlocks.coinReward,
         })
         .from(taskBlocks)
-        .where(eq(taskBlocks.taskId, taskId))
-        .orderBy(asc(taskBlocks.id))
-        .limit(1);
+        .where(eq(taskBlocks.id, blockId));
 
       if (!block) {
-        throw new NotFoundException(`No task block found for task ${taskId}`);
+        throw new NotFoundException(`Task block ${blockId} not found`);
+      }
+
+      const [task] = await tx
+        .select({ userId: tasks.userId })
+        .from(tasks)
+        .where(eq(tasks.id, block.taskId));
+
+      if (task.userId !== userId) {
+        throw new ForbiddenException('Task does not belong to this user');
       }
 
       // Insert a completion record with the earned rewards
       const [completion] = await tx
         .insert(taskCompletions)
         .values({
-          taskId,
+          taskId: block.taskId,
           amount: block.amount,
           userId,
           xpEarned: block.xpReward,
@@ -67,7 +70,7 @@ export class TaskCompletionService {
         })
         .returning(completionSelect);
 
-      // Add the task's rewards to the user's character totals
+      // Add the block's rewards to the user's character totals
       await tx
         .update(userCharacter)
         .set({
