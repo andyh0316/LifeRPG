@@ -7,6 +7,7 @@ import {
   ValidateNested,
   Min,
   MaxLength,
+  ArrayMinSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -53,6 +54,7 @@ export class CreateTaskDto {
   @ApiPropertyOptional({ type: [CreateTaskOptionDto] })
   @IsOptional()
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => CreateTaskOptionDto)
   options?: CreateTaskOptionDto[];

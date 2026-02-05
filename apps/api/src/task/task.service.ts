@@ -68,7 +68,7 @@ export class TaskService {
 
       let options: TaskOptionRow[];
 
-      if (dto.options?.length) {
+      if (dto.options) {
         options = await this.taskOptionRepository.createMany(
           dto.options.map((o, i) => ({
             taskId: task.id,
@@ -95,17 +95,30 @@ export class TaskService {
     });
   }
 
+  // userA: [A B C (new)]
+  // userB: [A B D (new)]
   async update(id: number, dto: UpdateTaskDto): Promise<TaskResponseDto> {
     return this.db.transaction(async (tx) => {
-      const data: Record<string, unknown> = {};
-      if (dto.name !== undefined) data.name = dto.name;
-      if (dto.desc !== undefined) data.description = dto.desc;
-      if (dto.xpReward !== undefined) data.xpReward = dto.xpReward;
-      if (dto.coinReward !== undefined) data.coinReward = dto.coinReward;
-      if (dto.icon !== undefined) data.icon = dto.icon;
-      if (dto.goalUnit !== undefined) data.goalUnit = dto.goalUnit;
+      const taskFields = {
+        name: dto.name,
+        description: dto.desc,
+        xpReward: dto.xpReward,
+        coinReward: dto.coinReward,
+        icon: dto.icon,
+        goalUnit: dto.goalUnit,
+      };
 
-      const task = await this.taskRepository.update(id, data, tx);
+      const hasTaskFields = Object.values(taskFields).some(
+        (v) => v !== undefined,
+      );
+
+      let task: TaskRow | undefined;
+
+      if (hasTaskFields) {
+        task = await this.taskRepository.update(id, taskFields, tx);
+      } else {
+        task = await this.taskRepository.findById(id);
+      }
 
       if (!task) {
         throw new NotFoundException(`Task ${id} not found`);
@@ -114,17 +127,44 @@ export class TaskService {
       let options: TaskOptionRow[];
 
       if (dto.options) {
-        await this.taskOptionRepository.deleteByTaskId(id, tx);
-        options = await this.taskOptionRepository.createMany(
-          dto.options.map((o, i) => ({
-            taskId: id,
-            goal: o.goal,
-            xpReward: o.xpReward,
-            coinReward: o.coinReward,
-            sortOrder: i,
-          })),
+        const toDelete = dto.options.filter((o) => o.id != null && o.delete);
+        const toUpdate = dto.options.filter((o) => o.id != null && !o.delete);
+        const toCreate = dto.options.filter((o) => o.id == null);
+
+        await this.taskOptionRepository.deleteByIds(
+          toDelete.map((o) => o.id!),
           tx,
         );
+
+        await Promise.all(
+          toUpdate.map((o, i) =>
+            this.taskOptionRepository.update(
+              o.id!,
+              {
+                goal: o.goal,
+                xpReward: o.xpReward,
+                coinReward: o.coinReward,
+                sortOrder: i,
+              },
+              tx,
+            ),
+          ),
+        );
+
+        if (toCreate.length) {
+          await this.taskOptionRepository.createMany(
+            toCreate.map((o, i) => ({
+              taskId: id,
+              goal: o.goal,
+              xpReward: o.xpReward,
+              coinReward: o.coinReward,
+              sortOrder: toUpdate.length + i,
+            })),
+            tx,
+          );
+        }
+
+        options = await this.taskOptionRepository.findByTaskId(id, tx);
       } else {
         options = await this.taskOptionRepository.findByTaskId(id, tx);
       }

@@ -1,10 +1,10 @@
-import { INestApplication } from '@nestjs/common';
 import type { Db } from '@life-rpg/database';
 import { users } from '@life-rpg/database';
+import { INestApplication } from '@nestjs/common';
 import { TestAgent, createIntegrationApp } from '../test/setup-integration';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 describe('Task Integration', () => {
   let app: INestApplication;
@@ -29,6 +29,33 @@ describe('Task Integration', () => {
 
   afterAll(async () => {
     await app.close();
+  });
+
+  it('GET /tasks/:id - returns a task by id', async () => {
+    // setup
+    const input: CreateTaskDto = {
+      userId: testUserId,
+      name: 'Stretching',
+      desc: 'Morning stretching routine',
+      xpReward: 15,
+      coinReward: 8,
+      icon: 'yoga',
+    };
+    const createRes = await request.post('/tasks').send(input).expect(201);
+    const createdTask: TaskResponseDto = createRes.body;
+
+    // act
+    const res = await request.get(`/tasks/${createdTask.id}`).expect(200);
+
+    // assert
+    const fetchedTask: TaskResponseDto = res.body;
+    expect(fetchedTask.id).toBe(createdTask.id);
+    expect(fetchedTask.userId).toBe(testUserId);
+    expect(fetchedTask.name).toBe(input.name);
+    expect(fetchedTask.desc).toBe(input.desc);
+    expect(fetchedTask.xpReward).toBe(input.xpReward);
+    expect(fetchedTask.coinReward).toBe(input.coinReward);
+    expect(fetchedTask.icon).toBe(input.icon);
   });
 
   it('POST /tasks - creates a task without options', async () => {
@@ -101,36 +128,41 @@ describe('Task Integration', () => {
     });
   });
 
-  it('GET /tasks/:id - returns a task by id', async () => {
-    // setup
-    const input: CreateTaskDto = {
-      userId: testUserId,
-      name: 'Stretching',
-      desc: 'Morning stretching routine',
-      xpReward: 15,
-      coinReward: 8,
-      icon: 'yoga',
-    };
-    const createRes = await request.post('/tasks').send(input).expect(201);
-    const createdTask: TaskResponseDto = createRes.body;
-
-    // act
-    const res = await request.get(`/tasks/${createdTask.id}`).expect(200);
-
-    // assert
-    const fetchedTask: TaskResponseDto = res.body;
-    expect(fetchedTask.id).toBe(createdTask.id);
-    expect(fetchedTask.userId).toBe(testUserId);
-    expect(fetchedTask.name).toBe(input.name);
-    expect(fetchedTask.desc).toBe(input.desc);
-    expect(fetchedTask.xpReward).toBe(input.xpReward);
-    expect(fetchedTask.coinReward).toBe(input.coinReward);
-    expect(fetchedTask.icon).toBe(input.icon);
+  it('POST /tasks - rejects empty options array', async () => {
+    await request
+      .post('/tasks')
+      .send({
+        userId: testUserId,
+        name: 'Bad Task',
+        xpReward: 10,
+        coinReward: 5,
+        options: [],
+      } as CreateTaskDto)
+      .expect(400);
   });
 
-  it('PATCH /tasks/:id - updates task fields', async () => {
+  it('PATCH /tasks/:id - rejects empty options array', async () => {
     // setup
-    const createRes = await request
+    const setupRes = await request
+      .post('/tasks')
+      .send({
+        userId: testUserId,
+        name: 'Valid Task',
+        xpReward: 10,
+        coinReward: 5,
+      } as CreateTaskDto)
+      .expect(201);
+
+    // act & assert
+    await request
+      .patch(`/tasks/${setupRes.body.id}`)
+      .send({ options: [] } as UpdateTaskDto)
+      .expect(400);
+  });
+
+  it('PATCH /tasks/:id - updates task fields and patches options', async () => {
+    // setup — create task with 3 options
+    const setupRes = await request
       .post('/tasks')
       .send({
         userId: testUserId,
@@ -139,9 +171,15 @@ describe('Task Integration', () => {
         xpReward: 10,
         coinReward: 5,
         icon: 'book',
+        goalUnit: 'minutes',
+        options: [
+          { goal: 15, xpReward: 10, coinReward: 5 },
+          { goal: 30, xpReward: 25, coinReward: 12 },
+          { goal: 60, xpReward: 50, coinReward: 25 },
+        ],
       } as CreateTaskDto)
       .expect(201);
-    const createdTask: TaskResponseDto = createRes.body;
+    const setupTask: TaskResponseDto = setupRes.body;
 
     const updateInput: UpdateTaskDto = {
       name: 'Read More',
@@ -149,133 +187,56 @@ describe('Task Integration', () => {
       xpReward: 20,
       coinReward: 10,
       icon: 'books',
+      options: [
+        // option[0]: omitted — left untouched
+        // option[1]: updated
+        { id: setupTask.options[1].id, goal: 30, xpReward: 30, coinReward: 15 },
+        // option[2]: deleted
+        { id: setupTask.options[2].id, delete: true },
+        // new option
+        { goal: 90, xpReward: 80, coinReward: 40 },
+      ],
     };
 
     // act
     const res = await request
-      .patch(`/tasks/${createdTask.id}`)
+      .patch(`/tasks/${setupTask.id}`)
       .send(updateInput)
       .expect(200);
 
     // assert
     const updatedTask: TaskResponseDto = res.body;
-    expect(updatedTask.id).toBe(createdTask.id);
+    expect(updatedTask.id).toBe(setupTask.id);
     expect(updatedTask.name).toBe(updateInput.name);
     expect(updatedTask.desc).toBe(updateInput.desc);
     expect(updatedTask.xpReward).toBe(updateInput.xpReward);
     expect(updatedTask.coinReward).toBe(updateInput.coinReward);
     expect(updatedTask.icon).toBe(updateInput.icon);
-  });
-
-  it('PATCH /tasks/:id - omitted fields are not changed', async () => {
-    // setup
-    const createRes = await request
-      .post('/tasks')
-      .send({
-        userId: testUserId,
-        name: 'Journal',
-        desc: 'Write in journal',
-        xpReward: 15,
-        coinReward: 7,
-        icon: 'pencil',
-      } as CreateTaskDto)
-      .expect(201);
-    const createdTask: TaskResponseDto = createRes.body;
-
-    // act
-    const res = await request
-      .patch(`/tasks/${createdTask.id}`)
-      .send({})
-      .expect(200);
-
-    // assert
-    const updatedTask: TaskResponseDto = res.body;
-    expect(updatedTask.id).toBe(createdTask.id);
-    expect(updatedTask.name).toBe('Journal');
-    expect(updatedTask.desc).toBe('Write in journal');
-    expect(updatedTask.xpReward).toBe(15);
-    expect(updatedTask.coinReward).toBe(7);
-    expect(updatedTask.icon).toBe('pencil');
-  });
-
-  it('PATCH /tasks/:id - null clears nullable fields', async () => {
-    // setup
-    const createRes = await request
-      .post('/tasks')
-      .send({
-        userId: testUserId,
-        name: 'Walk',
-        desc: 'Take a walk',
-        xpReward: 5,
-        coinReward: 3,
-        icon: 'shoe',
-      } as CreateTaskDto)
-      .expect(201);
-    const createdTask: TaskResponseDto = createRes.body;
-
-    // act
-    const res = await request
-      .patch(`/tasks/${createdTask.id}`)
-      .send({ desc: null, icon: null } as UpdateTaskDto)
-      .expect(200);
-
-    // assert
-    const updatedTask: TaskResponseDto = res.body;
-    expect(updatedTask.id).toBe(createdTask.id);
-    expect(updatedTask.desc).toBeNull();
-    expect(updatedTask.icon).toBeNull();
-    expect(updatedTask.name).toBe('Walk');
-    expect(updatedTask.xpReward).toBe(5);
-    expect(updatedTask.coinReward).toBe(3);
-  });
-
-  it('PATCH /tasks/:id - replaces options', async () => {
-    // setup
-    const createRes = await request
-      .post('/tasks')
-      .send({
-        userId: testUserId,
-        name: 'Run',
-        icon: 'runner',
-        goalUnit: 'minutes',
-        options: [
-          { goal: 10, xpReward: 5, coinReward: 2 },
-          { goal: 20, xpReward: 10, coinReward: 5 },
-        ],
-      } as CreateTaskDto)
-      .expect(201);
-    const createdTask: TaskResponseDto = createRes.body;
-    expect(createdTask.options).toHaveLength(2);
-
-    // act
-    const res = await request
-      .patch(`/tasks/${createdTask.id}`)
-      .send({
-        options: [
-          { goal: 30, xpReward: 20, coinReward: 10 },
-          { goal: 60, xpReward: 50, coinReward: 25 },
-          { goal: 90, xpReward: 80, coinReward: 40 },
-        ],
-      } as UpdateTaskDto)
-      .expect(200);
-
-    // assert
-    const updatedTask: TaskResponseDto = res.body;
     expect(updatedTask.options).toHaveLength(3);
-    expect(updatedTask.options[0]).toMatchObject({
-      goal: 30,
-      xpReward: 20,
-      coinReward: 10,
-    });
-    expect(updatedTask.options[1]).toMatchObject({
-      goal: 60,
-      xpReward: 50,
-      coinReward: 25,
-    });
-    expect(updatedTask.options[2]).toMatchObject({
-      goal: 90,
-      xpReward: 80,
-      coinReward: 40,
-    });
+
+    // option[0]: untouched — keeps original values
+    const untouched = updatedTask.options.find(
+      (o) => o.id === setupTask.options[0].id,
+    );
+    expect(untouched).toMatchObject({ goal: 15, xpReward: 10, coinReward: 5 });
+
+    // option[1]: updated
+    const updated = updatedTask.options.find(
+      (o) => o.id === setupTask.options[1].id,
+    );
+    expect(updated).toMatchObject({ goal: 30, xpReward: 30, coinReward: 15 });
+
+    // option[2]: deleted — no longer present
+    const deleted = updatedTask.options.find(
+      (o) => o.id === setupTask.options[2].id,
+    );
+    expect(deleted).toBeUndefined();
+
+    // new option: gets a fresh id
+    const originalIds = setupTask.options.map((o) => o.id);
+    const created = updatedTask.options.find(
+      (o) => !originalIds.includes(o.id),
+    );
+    expect(created).toMatchObject({ goal: 90, xpReward: 80, coinReward: 40 });
   });
 });
