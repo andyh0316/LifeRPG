@@ -92,7 +92,6 @@ export const taskCompletions = pgTable('task_completions', {
   taskId: integer('task_id')
     .notNull()
     .references(() => tasks.id),
-  taskBlockId: integer('task_block_id').references(() => taskBlocks.id),
   amount: integer('amount'),
   xpEarned: integer('xp_earned').notNull(),
   coinsEarned: integer('coins_earned').notNull(),

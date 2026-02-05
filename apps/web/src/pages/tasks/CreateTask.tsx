@@ -17,10 +17,11 @@ export default function CreateTask() {
   } = useForm<CreateTaskDto>({
     defaultValues: {
       name: '',
-      description: null,
+      desc: null,
       xpReward: 0,
       coinReward: 0,
       icon: null,
+      blocks: [{ amount: null, xpReward: 0, coinReward: 0 }],
     },
   });
 
@@ -29,12 +30,7 @@ export default function CreateTask() {
   });
 
   const onSubmit = (data: CreateTaskDto) => {
-    createTask.mutate({
-      body: {
-        ...data,
-        blocks: [{ xpReward: 0, coinReward: 0 }],
-      },
-    });
+    createTask.mutate({ body: data });
   };
 
   return (
@@ -77,7 +73,7 @@ export default function CreateTask() {
           label="Description"
           multiline
           rows={3}
-          {...register('description')}
+          {...register('desc')}
         />
       </Box>
     </>

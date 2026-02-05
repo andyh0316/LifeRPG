@@ -60,7 +60,7 @@ export class TaskService {
     return this.db.transaction(async (tx) => {
       const task = await this.taskRepository.create(
         {
-          userId: dto.userId,
+          userId: 1,
           name: dto.name,
           description: dto.desc,
           xpReward: dto.xpReward,

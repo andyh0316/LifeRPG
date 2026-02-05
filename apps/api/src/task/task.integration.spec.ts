@@ -1,5 +1,3 @@
-import type { Db } from '@life-rpg/database';
-import { users } from '@life-rpg/database';
 import { INestApplication } from '@nestjs/common';
 import { TestAgent, createIntegrationApp } from '../test/setup-integration';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -8,23 +6,9 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 
 describe('Task Integration', () => {
   let app: INestApplication;
-  let db: Db;
   let request: TestAgent;
-  let testUserId: number;
-
   beforeAll(async () => {
-    ({ app, db, request } = await createIntegrationApp());
-
-    // Create a test user directly in the database
-    const [user] = await db
-      .insert(users)
-      .values({
-        email: 'tasktest@example.com',
-        firstName: 'Task',
-        lastName: 'Tester',
-      })
-      .returning({ id: users.id });
-    testUserId = user.id;
+    ({ app, request } = await createIntegrationApp());
   });
 
   afterAll(async () => {
@@ -34,7 +18,6 @@ describe('Task Integration', () => {
   it('GET /tasks/:id - returns a task by id', async () => {
     // setup
     const input: CreateTaskDto = {
-      userId: testUserId,
       name: 'Stretching',
       desc: 'Morning stretching routine',
       xpReward: 15,
@@ -51,7 +34,7 @@ describe('Task Integration', () => {
     // assert
     const fetchedTask: TaskResponseDto = res.body;
     expect(fetchedTask.id).toBe(createdTask.id);
-    expect(fetchedTask.userId).toBe(testUserId);
+    expect(fetchedTask.userId).toBe(1);
     expect(fetchedTask.name).toBe(input.name);
     expect(fetchedTask.desc).toBe(input.desc);
     expect(fetchedTask.xpReward).toBe(input.xpReward);
@@ -63,7 +46,6 @@ describe('Task Integration', () => {
     await request
       .post('/tasks')
       .send({
-        userId: testUserId,
         name: 'Push-ups',
         desc: 'Do some push-ups',
         xpReward: 10,
@@ -76,7 +58,6 @@ describe('Task Integration', () => {
   it('POST /tasks - creates a task with blocks', async () => {
     // setup
     const input: CreateTaskDto = {
-      userId: testUserId,
       name: 'Meditate',
       desc: 'Daily meditation',
       icon: 'lotus',
@@ -118,7 +99,6 @@ describe('Task Integration', () => {
     await request
       .post('/tasks')
       .send({
-        userId: testUserId,
         name: 'Bad Task',
         xpReward: 10,
         coinReward: 5,
@@ -132,7 +112,6 @@ describe('Task Integration', () => {
     const setupRes = await request
       .post('/tasks')
       .send({
-        userId: testUserId,
         name: 'Valid Task',
         xpReward: 10,
         coinReward: 5,
@@ -152,7 +131,6 @@ describe('Task Integration', () => {
     const setupRes = await request
       .post('/tasks')
       .send({
-        userId: testUserId,
         name: 'Read',
         desc: 'Read a book',
         xpReward: 10,

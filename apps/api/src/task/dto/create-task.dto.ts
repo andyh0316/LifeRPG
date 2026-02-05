@@ -14,10 +14,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreateTaskBlockDto } from './create-task-block.dto';
 
 export class CreateTaskDto {
-  @ApiProperty({ type: Number })
-  @IsInt()
-  userId!: number;
-
   @ApiProperty()
   @IsString()
   @MaxLength(255)

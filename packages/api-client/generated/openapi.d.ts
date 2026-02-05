@@ -65,7 +65,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["TaskController_update"];
         trace?: never;
     };
     "/tasks/{id}/complete": {
@@ -89,7 +89,7 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         UserDetailDto: {
-            id: string;
+            id: number;
             email: string;
             fullName: string;
             level: number;
@@ -104,38 +104,75 @@ export interface components {
             email: string;
             firstName: string;
             lastName?: string;
-            displayName: string;
         };
         UpdateUserDto: {
             email?: string;
             firstName?: string;
             lastName?: string;
-            displayName?: string;
+        };
+        TaskBlockResponseDto: {
+            id: number;
+            amount?: number | null;
+            xpReward: number;
+            coinReward: number;
         };
         TaskResponseDto: {
             id: number;
+            userId: number;
             name: string;
-            description?: string | null;
+            desc?: string | null;
             xpReward: number;
             coinReward: number;
             icon?: string | null;
+            /** @enum {string|null} */
+            amountUnit?: "minutes" | null;
+            blocks: components["schemas"]["TaskBlockResponseDto"][];
+        };
+        CreateTaskBlockDto: {
+            amount?: number | null;
+            /** @default 0 */
+            xpReward: number;
+            /** @default 0 */
+            coinReward: number;
         };
         CreateTaskDto: {
             name: string;
-            description?: string | null;
+            desc?: string | null;
             /** @default 0 */
             xpReward: number;
             /** @default 0 */
             coinReward: number;
             icon?: string | null;
+            /** @enum {string|null} */
+            amountUnit?: "minutes" | null;
+            blocks?: components["schemas"]["CreateTaskBlockDto"][];
+        };
+        UpdateTaskBlockDto: {
+            amount?: number | null;
+            /** @default 0 */
+            xpReward: number;
+            /** @default 0 */
+            coinReward: number;
+            id?: number;
+            delete?: boolean;
+        };
+        UpdateTaskDto: {
+            name?: string;
+            desc?: string | null;
+            xpReward?: number;
+            coinReward?: number;
+            icon?: string | null;
+            /** @enum {string|null} */
+            amountUnit?: "minutes" | null;
+            blocks?: components["schemas"]["UpdateTaskBlockDto"][];
         };
         CompleteTaskDto: {
-            userId: string;
+            userId: number;
         };
         TaskCompletionResponseDto: {
             id: number;
             taskId: number;
-            userId: string;
+            userId: number;
             xpEarned: number;
             coinsEarned: number;
             /** Format: date-time */
@@ -311,6 +348,31 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponseDto"];
+                };
+            };
+        };
+    };
+    TaskController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTaskDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {

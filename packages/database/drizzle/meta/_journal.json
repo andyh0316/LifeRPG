@@ -22,6 +22,13 @@
       "when": 1770274911559,
       "tag": "0002_luxuriant_omega_flight",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770275901032,
+      "tag": "0003_quiet_wolfpack",
+      "breakpoints": true
     }
   ]
 }
