@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CreateTaskOptionDto } from './create-task-option.dto';
+import { CreateTaskBlockDto } from './create-task-block.dto';
 
 export class CreateTaskDto {
   @ApiProperty({ type: Number })
@@ -49,13 +49,13 @@ export class CreateTaskDto {
   @ApiPropertyOptional({ enum: ['minutes'], nullable: true })
   @IsOptional()
   @IsIn(['minutes'])
-  goalUnit?: 'minutes' | null;
+  amountUnit?: 'minutes' | null;
 
-  @ApiPropertyOptional({ type: [CreateTaskOptionDto] })
+  @ApiPropertyOptional({ type: [CreateTaskBlockDto] })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => CreateTaskOptionDto)
-  options?: CreateTaskOptionDto[];
+  @Type(() => CreateTaskBlockDto)
+  blocks?: CreateTaskBlockDto[];
 }

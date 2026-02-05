@@ -89,7 +89,7 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         UserDetailDto: {
-            id: number;
+            id: string;
             email: string;
             fullName: string;
             level: number;
@@ -104,15 +104,16 @@ export interface components {
             email: string;
             firstName: string;
             lastName?: string;
+            displayName: string;
         };
         UpdateUserDto: {
             email?: string;
             firstName?: string;
             lastName?: string;
+            displayName?: string;
         };
         TaskResponseDto: {
             id: number;
-            userId: number;
             name: string;
             description?: string | null;
             xpReward: number;
@@ -120,7 +121,6 @@ export interface components {
             icon?: string | null;
         };
         CreateTaskDto: {
-            userId: number;
             name: string;
             description?: string | null;
             /** @default 0 */
@@ -130,12 +130,12 @@ export interface components {
             icon?: string | null;
         };
         CompleteTaskDto: {
-            userId: number;
+            userId: string;
         };
         TaskCompletionResponseDto: {
             id: number;
             taskId: number;
-            userId: number;
+            userId: string;
             xpEarned: number;
             coinsEarned: number;
             /** Format: date-time */
@@ -197,7 +197,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: number;
+                id: string;
             };
             cookie?: never;
         };
@@ -218,7 +218,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: number;
+                id: string;
             };
             cookie?: never;
         };
@@ -243,7 +243,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: number;
+                id: string;
             };
             cookie?: never;
         };

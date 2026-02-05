@@ -7,7 +7,8 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "pretest": "cd ../.. && pnpm test-db:reset",
+    "generate:spec": "npx tsx scripts/generate-spec.ts",
+    "pretest": "cd ../.. && pnpm --filter @life-rpg/database build && pnpm test-db:reset",
     "test": "jest --forceExit"
   },
   "dependencies": {

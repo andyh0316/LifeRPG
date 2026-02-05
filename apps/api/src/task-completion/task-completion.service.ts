@@ -1,6 +1,11 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { asc, eq, sql } from 'drizzle-orm';
-import { tasks, taskCompletions, taskOptions, userCharacter } from '@life-rpg/database';
+import {
+  tasks,
+  taskCompletions,
+  taskBlocks,
+  userCharacter,
+} from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 
@@ -25,7 +30,7 @@ export class TaskCompletionService {
     userId: number,
   ): Promise<TaskCompletionResponseDto> {
     return this.db.transaction(async (tx) => {
-      // Fetch the task and its first option
+      // Fetch the task and its first block
       const [task] = await tx
         .select({ id: tasks.id })
         .from(tasks)
@@ -35,19 +40,19 @@ export class TaskCompletionService {
         throw new NotFoundException(`Task ${taskId} not found`);
       }
 
-      const [option] = await tx
+      const [block] = await tx
         .select({
-          id: taskOptions.id,
-          xpReward: taskOptions.xpReward,
-          coinReward: taskOptions.coinReward,
+          amount: taskBlocks.amount,
+          xpReward: taskBlocks.xpReward,
+          coinReward: taskBlocks.coinReward,
         })
-        .from(taskOptions)
-        .where(eq(taskOptions.taskId, taskId))
-        .orderBy(asc(taskOptions.id))
+        .from(taskBlocks)
+        .where(eq(taskBlocks.taskId, taskId))
+        .orderBy(asc(taskBlocks.id))
         .limit(1);
 
-      if (!option) {
-        throw new NotFoundException(`No task option found for task ${taskId}`);
+      if (!block) {
+        throw new NotFoundException(`No task block found for task ${taskId}`);
       }
 
       // Insert a completion record with the earned rewards
@@ -55,10 +60,10 @@ export class TaskCompletionService {
         .insert(taskCompletions)
         .values({
           taskId,
-          taskOptionId: option.id,
+          amount: block.amount,
           userId,
-          xpEarned: option.xpReward,
-          coinsEarned: option.coinReward,
+          xpEarned: block.xpReward,
+          coinsEarned: block.coinReward,
         })
         .returning(completionSelect);
 
@@ -66,8 +71,8 @@ export class TaskCompletionService {
       await tx
         .update(userCharacter)
         .set({
-          xp: sql`${userCharacter.xp} + ${option.xpReward}`,
-          coins: sql`${userCharacter.coins} + ${option.coinReward}`,
+          xp: sql`${userCharacter.xp} + ${block.xpReward}`,
+          coins: sql`${userCharacter.coins} + ${block.coinReward}`,
         })
         .where(eq(userCharacter.userId, userId));
 

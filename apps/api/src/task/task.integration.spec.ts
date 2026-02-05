@@ -40,6 +40,7 @@ describe('Task Integration', () => {
       xpReward: 15,
       coinReward: 8,
       icon: 'yoga',
+      blocks: [{ amount: null, xpReward: 15, coinReward: 8 }],
     };
     const createRes = await request.post('/tasks').send(input).expect(201);
     const createdTask: TaskResponseDto = createRes.body;
@@ -58,47 +59,32 @@ describe('Task Integration', () => {
     expect(fetchedTask.icon).toBe(input.icon);
   });
 
-  it('POST /tasks - creates a task without options', async () => {
-    // setup
-    const input: CreateTaskDto = {
-      userId: testUserId,
-      name: 'Push-ups',
-      desc: 'Do some push-ups',
-      xpReward: 10,
-      coinReward: 5,
-      icon: 'muscle',
-    };
-
-    // act
-    const res = await request.post('/tasks').send(input).expect(201);
-
-    // assert
-    const task: TaskResponseDto = res.body;
-    expect(task.id).toBeDefined();
-    expect(task.name).toBe(input.name);
-    expect(task.xpReward).toBe(10);
-    expect(task.coinReward).toBe(5);
-    expect(task.goalUnit).toBeNull();
-    expect(task.options).toHaveLength(1);
-    expect(task.options[0]).toMatchObject({
-      goal: null,
-      xpReward: 10,
-      coinReward: 5,
-    });
+  it('POST /tasks - rejects task without blocks', async () => {
+    await request
+      .post('/tasks')
+      .send({
+        userId: testUserId,
+        name: 'Push-ups',
+        desc: 'Do some push-ups',
+        xpReward: 10,
+        coinReward: 5,
+        icon: 'muscle',
+      } as CreateTaskDto)
+      .expect(400);
   });
 
-  it('POST /tasks - creates a task with options', async () => {
+  it('POST /tasks - creates a task with blocks', async () => {
     // setup
     const input: CreateTaskDto = {
       userId: testUserId,
       name: 'Meditate',
       desc: 'Daily meditation',
       icon: 'lotus',
-      goalUnit: 'minutes',
-      options: [
-        { goal: 15, xpReward: 10, coinReward: 5 },
-        { goal: 30, xpReward: 25, coinReward: 12 },
-        { goal: 60, xpReward: 50, coinReward: 25 },
+      amountUnit: 'minutes',
+      blocks: [
+        { amount: 15, xpReward: 10, coinReward: 5 },
+        { amount: 30, xpReward: 25, coinReward: 12 },
+        { amount: 60, xpReward: 50, coinReward: 25 },
       ],
     };
 
@@ -109,26 +95,26 @@ describe('Task Integration', () => {
     const task: TaskResponseDto = res.body;
     expect(task.id).toBeDefined();
     expect(task.name).toBe(input.name);
-    expect(task.goalUnit).toBe('minutes');
-    expect(task.options).toHaveLength(3);
-    expect(task.options[0]).toMatchObject({
-      goal: 15,
+    expect(task.amountUnit).toBe('minutes');
+    expect(task.blocks).toHaveLength(3);
+    expect(task.blocks[0]).toMatchObject({
+      amount: 15,
       xpReward: 10,
       coinReward: 5,
     });
-    expect(task.options[1]).toMatchObject({
-      goal: 30,
+    expect(task.blocks[1]).toMatchObject({
+      amount: 30,
       xpReward: 25,
       coinReward: 12,
     });
-    expect(task.options[2]).toMatchObject({
-      goal: 60,
+    expect(task.blocks[2]).toMatchObject({
+      amount: 60,
       xpReward: 50,
       coinReward: 25,
     });
   });
 
-  it('POST /tasks - rejects empty options array', async () => {
+  it('POST /tasks - rejects empty blocks array', async () => {
     await request
       .post('/tasks')
       .send({
@@ -136,12 +122,12 @@ describe('Task Integration', () => {
         name: 'Bad Task',
         xpReward: 10,
         coinReward: 5,
-        options: [],
+        blocks: [],
       } as CreateTaskDto)
       .expect(400);
   });
 
-  it('PATCH /tasks/:id - rejects empty options array', async () => {
+  it('PATCH /tasks/:id - rejects empty blocks array', async () => {
     // setup
     const setupRes = await request
       .post('/tasks')
@@ -150,18 +136,19 @@ describe('Task Integration', () => {
         name: 'Valid Task',
         xpReward: 10,
         coinReward: 5,
+        blocks: [{ amount: null, xpReward: 10, coinReward: 5 }],
       } as CreateTaskDto)
       .expect(201);
 
     // act & assert
     await request
       .patch(`/tasks/${setupRes.body.id}`)
-      .send({ options: [] } as UpdateTaskDto)
+      .send({ blocks: [] } as UpdateTaskDto)
       .expect(400);
   });
 
-  it('PATCH /tasks/:id - updates task fields and patches options', async () => {
-    // setup — create task with 3 options
+  it('PATCH /tasks/:id - updates task fields and patches blocks', async () => {
+    // setup — create task with 3 blocks
     const setupRes = await request
       .post('/tasks')
       .send({
@@ -171,11 +158,11 @@ describe('Task Integration', () => {
         xpReward: 10,
         coinReward: 5,
         icon: 'book',
-        goalUnit: 'minutes',
-        options: [
-          { goal: 15, xpReward: 10, coinReward: 5 },
-          { goal: 30, xpReward: 25, coinReward: 12 },
-          { goal: 60, xpReward: 50, coinReward: 25 },
+        amountUnit: 'minutes',
+        blocks: [
+          { amount: 15, xpReward: 10, coinReward: 5 },
+          { amount: 30, xpReward: 25, coinReward: 12 },
+          { amount: 60, xpReward: 50, coinReward: 25 },
         ],
       } as CreateTaskDto)
       .expect(201);
@@ -187,14 +174,19 @@ describe('Task Integration', () => {
       xpReward: 20,
       coinReward: 10,
       icon: 'books',
-      options: [
-        // option[0]: omitted — left untouched
-        // option[1]: updated
-        { id: setupTask.options[1].id, goal: 30, xpReward: 30, coinReward: 15 },
-        // option[2]: deleted
-        { id: setupTask.options[2].id, delete: true },
-        // new option
-        { goal: 90, xpReward: 80, coinReward: 40 },
+      blocks: [
+        // blocks[0]: omitted — left untouched
+        // blocks[1]: updated
+        {
+          id: setupTask.blocks[1].id,
+          amount: 30,
+          xpReward: 30,
+          coinReward: 15,
+        },
+        // blocks[2]: deleted
+        { id: setupTask.blocks[2].id, delete: true },
+        // new block
+        { amount: 90, xpReward: 80, coinReward: 40 },
       ],
     };
 
@@ -212,31 +204,33 @@ describe('Task Integration', () => {
     expect(updatedTask.xpReward).toBe(updateInput.xpReward);
     expect(updatedTask.coinReward).toBe(updateInput.coinReward);
     expect(updatedTask.icon).toBe(updateInput.icon);
-    expect(updatedTask.options).toHaveLength(3);
+    expect(updatedTask.blocks).toHaveLength(3);
 
-    // option[0]: untouched — keeps original values
-    const untouched = updatedTask.options.find(
-      (o) => o.id === setupTask.options[0].id,
+    // blocks[0]: untouched — keeps original values
+    const untouched = updatedTask.blocks.find(
+      (o) => o.id === setupTask.blocks[0].id,
     );
-    expect(untouched).toMatchObject({ goal: 15, xpReward: 10, coinReward: 5 });
+    expect(untouched).toMatchObject({
+      amount: 15,
+      xpReward: 10,
+      coinReward: 5,
+    });
 
-    // option[1]: updated
-    const updated = updatedTask.options.find(
-      (o) => o.id === setupTask.options[1].id,
+    // blocks[1]: updated
+    const updated = updatedTask.blocks.find(
+      (o) => o.id === setupTask.blocks[1].id,
     );
-    expect(updated).toMatchObject({ goal: 30, xpReward: 30, coinReward: 15 });
+    expect(updated).toMatchObject({ amount: 30, xpReward: 30, coinReward: 15 });
 
-    // option[2]: deleted — no longer present
-    const deleted = updatedTask.options.find(
-      (o) => o.id === setupTask.options[2].id,
+    // blocks[2]: deleted — no longer present
+    const deleted = updatedTask.blocks.find(
+      (o) => o.id === setupTask.blocks[2].id,
     );
     expect(deleted).toBeUndefined();
 
-    // new option: gets a fresh id
-    const originalIds = setupTask.options.map((o) => o.id);
-    const created = updatedTask.options.find(
-      (o) => !originalIds.includes(o.id),
-    );
-    expect(created).toMatchObject({ goal: 90, xpReward: 80, coinReward: 40 });
+    // new block: gets a fresh id
+    const originalIds = setupTask.blocks.map((o) => o.id);
+    const created = updatedTask.blocks.find((o) => !originalIds.includes(o.id));
+    expect(created).toMatchObject({ amount: 90, xpReward: 80, coinReward: 40 });
   });
 });

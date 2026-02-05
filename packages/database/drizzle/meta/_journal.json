@@ -15,6 +15,13 @@
       "when": 1770229549647,
       "tag": "0001_solid_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770274911559,
+      "tag": "0002_luxuriant_omega_flight",
+      "breakpoints": true
     }
   ]
 }

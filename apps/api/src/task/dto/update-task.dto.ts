@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { UpdateTaskOptionDto } from './update-task-option.dto';
+import { UpdateTaskBlockDto } from './update-task-block.dto';
 
 export class UpdateTaskDto {
   @ApiPropertyOptional({ type: String })
@@ -46,13 +46,13 @@ export class UpdateTaskDto {
   @ApiPropertyOptional({ enum: ['minutes'], nullable: true })
   @IsOptional()
   @IsIn(['minutes'])
-  goalUnit?: 'minutes' | null;
+  amountUnit?: 'minutes' | null;
 
-  @ApiPropertyOptional({ type: [UpdateTaskOptionDto] })
+  @ApiPropertyOptional({ type: [UpdateTaskBlockDto] })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => UpdateTaskOptionDto)
-  options?: UpdateTaskOptionDto[];
+  @Type(() => UpdateTaskBlockDto)
+  blocks?: UpdateTaskBlockDto[];
 }

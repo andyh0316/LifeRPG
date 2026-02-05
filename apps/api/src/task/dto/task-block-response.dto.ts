@@ -1,11 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class TaskOptionResponseDto {
+export class TaskBlockResponseDto {
   @ApiProperty({ type: Number })
   id!: number;
 
   @ApiPropertyOptional({ type: Number, nullable: true })
-  goal!: number | null;
+  amount!: number | null;
 
   @ApiProperty()
   xpReward!: number;

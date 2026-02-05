@@ -1,8 +1,8 @@
 import { IsOptional, IsInt, IsBoolean } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { CreateTaskOptionDto } from './create-task-option.dto';
+import { CreateTaskBlockDto } from './create-task-block.dto';
 
-export class UpdateTaskOptionDto extends CreateTaskOptionDto {
+export class UpdateTaskBlockDto extends CreateTaskBlockDto {
   @ApiPropertyOptional({ type: Number })
   @IsOptional()
   @IsInt()

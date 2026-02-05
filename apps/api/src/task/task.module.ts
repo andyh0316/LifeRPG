@@ -3,7 +3,7 @@ import { createDb } from '@life-rpg/database';
 import { TaskController } from './task.controller';
 import { TaskService } from './task.service';
 import { TaskRepository } from './task.repository';
-import { TaskOptionRepository } from './task-option.repository';
+import { TaskBlockRepository } from './task-block.repository';
 
 @Module({
   controllers: [TaskController],
@@ -15,7 +15,7 @@ import { TaskOptionRepository } from './task-option.repository';
       },
     },
     TaskRepository,
-    TaskOptionRepository,
+    TaskBlockRepository,
     TaskService,
   ],
 })

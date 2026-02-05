@@ -46,7 +46,7 @@ export const userCharacter = pgTable('user_character', {
   weeklyXpTarget: integer('weekly_xp_target'),
 });
 
-export const goalUnitEnum = pgEnum('goal_unit', ['minutes']);
+export const amountUnitEnum = pgEnum('amount_unit', ['minutes']);
 
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
@@ -59,16 +59,16 @@ export const tasks = pgTable('tasks', {
   xpReward: integer('xp_reward').notNull().default(0),
   coinReward: integer('coin_reward').notNull().default(0),
   icon: varchar('icon', { length: 50 }),
-  goalUnit: goalUnitEnum('goal_unit'),
+  amountUnit: amountUnitEnum('amount_unit'),
 });
 
-export const taskOptions = pgTable('task_options', {
+export const taskBlocks = pgTable('task_blocks', {
   id: serial('id').primaryKey(),
   ...auditColumns,
   taskId: integer('task_id')
     .notNull()
     .references(() => tasks.id),
-  goal: integer('goal'), // e.g. 30, 60, 2
+  amount: integer('amount'), // e.g. 30, 60, 2
   xpReward: integer('xp_reward').notNull().default(0),
   coinReward: integer('coin_reward').notNull().default(0),
   sortOrder: integer('sort_order').notNull().default(0),
@@ -92,7 +92,8 @@ export const taskCompletions = pgTable('task_completions', {
   taskId: integer('task_id')
     .notNull()
     .references(() => tasks.id),
-  taskOptionId: integer('task_option_id').references(() => taskOptions.id),
+  taskBlockId: integer('task_block_id').references(() => taskBlocks.id),
+  amount: integer('amount'),
   xpEarned: integer('xp_earned').notNull(),
   coinsEarned: integer('coins_earned').notNull(),
   completedAt: timestamp('completed_at', { withTimezone: true })

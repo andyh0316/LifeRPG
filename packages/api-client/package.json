@@ -7,9 +7,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "generate:spec": "tsx scripts/generate-spec.ts",
     "generate:types": "openapi-typescript openapi.json -o generated/openapi.d.ts",
-    "generate": "pnpm generate:spec && pnpm generate:types"
+    "generate": "pnpm --filter @life-rpg/api generate:spec && pnpm generate:types"
   },
   "dependencies": {
     "openapi-fetch": "^0.15.0",
