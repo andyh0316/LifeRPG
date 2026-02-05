@@ -19,7 +19,7 @@
     "generate": "drizzle-kit generate",
     "backup": "bash scripts/backup.sh",
     "restore": "bash scripts/restore.sh",
-    "migrate": "pnpm backup && drizzle-kit migrate",
+    "migrate": "[ \"$NODE_ENV\" = development ] && pnpm backup; drizzle-kit migrate",
     "push": "drizzle-kit push",
     "studio": "drizzle-kit studio",
     "test-db:migrate": "drizzle-kit migrate --config drizzle.config.test.ts"
