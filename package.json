@@ -13,7 +13,10 @@
     "db:reset": "docker compose down -v && docker compose up -d && docker compose exec db sh -c 'until pg_isready -U haitianhong; do sleep 0.2; done' && pnpm db:migrate",
     "test-db:migrate": "pnpm --filter @life-rpg/database test-db:migrate",
     "test-db:reset": "docker compose rm -sfv db-test && docker volume rm -f liferpg_pgdata-test && docker compose up -d db-test && docker compose exec db-test sh -c 'until pg_isready -U haitianhong; do sleep 0.2; done' && pnpm test-db:migrate",
+    "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:web\"",
+    "dev:test": "concurrently \"pnpm dev:api:test\" \"pnpm dev:web\"",
     "dev:api": "pnpm generate:api-client && pnpm --filter @life-rpg/api start:dev",
+    "dev:api:test": ". apps/api/.env && DATABASE_URL=$TEST_DATABASE_URL pnpm dev:api",
     "build": "pnpm -r run build",
     "build:api": "pnpm generate:api-client && pnpm --filter @life-rpg/api build",
     "dev:web": "pnpm --filter @life-rpg/web dev",
@@ -21,12 +24,13 @@
     "test": "pnpm --filter @life-rpg/api test",
     "generate:api-client": "pnpm --filter @life-rpg/api-client generate",
     "test:e2e": "playwright test",
-    "test:e2e:slow": "SLOW=3 playwright test",
+    "test:e2e:debug": "HEADED=1 SLOW=3 playwright test",
     "menu": "npx ntl -A"
   },
   "devDependencies": {
     "@life-rpg/api-client": "workspace:*",
     "@playwright/test": "^1.58.1",
+    "concurrently": "^9.2.1",
     "prettier": "^3.8.1"
   }
 }
