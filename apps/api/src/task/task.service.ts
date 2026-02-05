@@ -40,8 +40,8 @@ export class TaskService {
   }
 
   async findAll(): Promise<TaskResponseDto[]> {
-    const rows = await this.taskRepository.findAll();
-    return rows.map((row) => this.toDto(row, []));
+    const rows = await this.taskRepository.findAll({ includeBlocks: true });
+    return rows.map((row) => this.toDto(row, row.blocks));
   }
 
   async findOne(id: number): Promise<TaskResponseDto> {

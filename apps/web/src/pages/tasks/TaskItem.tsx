@@ -1,21 +1,30 @@
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 
+interface Block {
+  id: number;
+  amount?: number | null;
+  xpReward: number;
+  coinReward: number;
+}
+
 export interface TaskItemProps {
   id: number;
   name: string;
-  description?: string | null;
+  desc?: string | null;
   icon?: string | null;
+  amountUnit?: string | null;
+  blocks: Block[];
   userId: number;
 }
 
@@ -23,8 +32,10 @@ export interface TaskItemProps {
 export default function TaskItem({
   id,
   name,
-  description,
+  desc,
   icon,
+  amountUnit,
+  blocks,
   userId,
 }: TaskItemProps) {
   const navigate = useNavigate();
@@ -72,23 +83,58 @@ export default function TaskItem({
   };
 
   return (
-    <ListItem
-      disablePadding
-      sx={{ maxWidth: 500 }}
-      secondaryAction={
-        <IconButton edge="end" onClick={() => navigate(`/tasks/${id}/edit`)}>
+    <Box
+      sx={{
+        maxWidth: 500,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 1,
+        mb: 1,
+        p: 1.5,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Box sx={{ fontSize: 24 }}>{icon ?? '📋'}</Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>
+            {name}
+          </Typography>
+          {desc && (
+            <Typography variant="body2" color="text.secondary">
+              {desc}
+            </Typography>
+          )}
+        </Box>
+        <IconButton size="small" onClick={() => navigate(`/tasks/${id}/edit`)}>
           <EditIcon fontSize="small" />
         </IconButton>
-      }
-    >
-      <ListItemButton onClick={handleClick}>
-        <ListItemIcon sx={{ minWidth: 40, fontSize: 24 }}>
-          {icon ?? '📋'}
-        </ListItemIcon>
-        <ListItemText primary={name} secondary={description} />
-      </ListItemButton>
+      </Box>
 
-      {/* Feedback snackbar for task completion */}
+      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+        {blocks.map((block) => (
+          <Button
+            key={block.id}
+            variant="outlined"
+            onClick={() => {}}
+            sx={{
+              textTransform: 'none',
+              flexDirection: 'column',
+              py: 1,
+              px: 2,
+            }}
+          >
+            <Typography variant="subtitle2">
+              {amountUnit === 'minutes' && block.amount != null
+                ? `${block.amount} min`
+                : '1 count'}
+            </Typography>
+            <Typography variant="caption">
+              ⭐ {block.xpReward} XP &nbsp; 🪙 {block.coinReward}
+            </Typography>
+          </Button>
+        ))}
+      </Stack>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -102,6 +148,6 @@ export default function TaskItem({
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </ListItem>
+    </Box>
   );
 }

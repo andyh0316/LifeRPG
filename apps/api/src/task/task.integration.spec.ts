@@ -15,29 +15,6 @@ describe('Task Integration', () => {
     await app.close();
   });
 
-  it('GET /tasks/:id - returns a task by id', async () => {
-    // setup
-    const input: CreateTaskDto = {
-      name: 'Stretching',
-      desc: 'Morning stretching routine',
-      icon: 'yoga',
-      blocks: [{ amount: null, xpReward: 15, coinReward: 8 }],
-    };
-    const createRes = await request.post('/tasks').send(input).expect(201);
-    const createdTask: TaskResponseDto = createRes.body;
-
-    // act
-    const res = await request.get(`/tasks/${createdTask.id}`).expect(200);
-
-    // assert
-    const fetchedTask: TaskResponseDto = res.body;
-    expect(fetchedTask.id).toBe(createdTask.id);
-    expect(fetchedTask.userId).toBe(1);
-    expect(fetchedTask.name).toBe(input.name);
-    expect(fetchedTask.desc).toBe(input.desc);
-    expect(fetchedTask.icon).toBe(input.icon);
-  });
-
   it('POST /tasks - rejects task without blocks', async () => {
     await request
       .post('/tasks')
@@ -194,5 +171,55 @@ describe('Task Integration', () => {
     const originalIds = setupTask.blocks.map((o) => o.id);
     const created = updatedTask.blocks.find((o) => !originalIds.includes(o.id));
     expect(created).toMatchObject({ amount: 90, xpReward: 80, coinReward: 40 });
+  });
+
+  it('GET /tasks/:id - returns a task by id', async () => {
+    // setup
+    const input: CreateTaskDto = {
+      name: 'Stretching',
+      desc: 'Morning stretching routine',
+      icon: 'yoga',
+      blocks: [{ amount: null, xpReward: 15, coinReward: 8 }],
+    };
+    const createRes = await request.post('/tasks').send(input).expect(201);
+    const createdTask: TaskResponseDto = createRes.body;
+
+    // act
+    const res = await request.get(`/tasks/${createdTask.id}`).expect(200);
+
+    // assert
+    const fetchedTask: TaskResponseDto = res.body;
+    expect(fetchedTask.id).toBe(createdTask.id);
+    expect(fetchedTask.userId).toBe(1);
+    expect(fetchedTask.name).toBe(input.name);
+    expect(fetchedTask.desc).toBe(input.desc);
+    expect(fetchedTask.icon).toBe(input.icon);
+    expect(fetchedTask.blocks).toHaveLength(1);
+  });
+
+  it('GET /tasks - returns all tasks with blocks', async () => {
+    // setup
+    const input: CreateTaskDto = {
+      name: 'Journaling',
+      desc: 'Write in journal',
+      icon: 'pencil',
+      blocks: [
+        { amount: null, xpReward: 10, coinReward: 5 },
+        { amount: null, xpReward: 20, coinReward: 10 },
+      ],
+    };
+    const createRes = await request.post('/tasks').send(input).expect(201);
+    const createdTask: TaskResponseDto = createRes.body;
+
+    // act
+    const res = await request.get('/tasks').expect(200);
+
+    // assert
+    const tasks: TaskResponseDto[] = res.body;
+    expect(tasks.length).toBeGreaterThan(0);
+    const found = tasks.find((t) => t.id === createdTask.id);
+    expect(found).toBeDefined();
+    expect(found!.name).toBe(input.name);
+    expect(found!.blocks).toHaveLength(2);
   });
 });

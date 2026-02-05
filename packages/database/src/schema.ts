@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm';
 import {
   pgTable,
   serial,
@@ -8,6 +9,10 @@ import {
   timestamp,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
+
+// ============================================================================
+// Shared
+// ============================================================================
 
 const auditColumns = {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -23,6 +28,10 @@ const auditColumns = {
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 };
 
+// ============================================================================
+// Users
+// ============================================================================
+
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   ...auditColumns,
@@ -30,6 +39,16 @@ export const users = pgTable('users', {
   firstName: varchar('first_name', { length: 255 }).notNull(),
   lastName: varchar('last_name', { length: 255 }),
 });
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  character: one(userCharacter, {
+    fields: [users.id],
+    references: [userCharacter.userId],
+  }),
+  tasks: many(tasks),
+  taskCompletions: many(taskCompletions),
+  rewardRedemptions: many(rewardRedemptions),
+}));
 
 /** Stores RPG progression state for a user (1:1 with users). */
 export const userCharacter = pgTable('user_character', {
@@ -46,6 +65,17 @@ export const userCharacter = pgTable('user_character', {
   weeklyXpTarget: integer('weekly_xp_target'),
 });
 
+export const userCharacterRelations = relations(userCharacter, ({ one }) => ({
+  user: one(users, {
+    fields: [userCharacter.userId],
+    references: [users.id],
+  }),
+}));
+
+// ============================================================================
+// Tasks
+// ============================================================================
+
 export const amountUnitEnum = pgEnum('amount_unit', ['minutes']);
 
 export const tasks = pgTable('tasks', {
@@ -60,6 +90,15 @@ export const tasks = pgTable('tasks', {
   amountUnit: amountUnitEnum('amount_unit'),
 });
 
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  user: one(users, {
+    fields: [tasks.userId],
+    references: [users.id],
+  }),
+  blocks: many(taskBlocks),
+  completions: many(taskCompletions),
+}));
+
 export const taskBlocks = pgTable('task_blocks', {
   id: serial('id').primaryKey(),
   ...auditColumns,
@@ -72,14 +111,12 @@ export const taskBlocks = pgTable('task_blocks', {
   sortOrder: integer('sort_order').notNull().default(0),
 });
 
-export const rewards = pgTable('rewards', {
-  id: serial('id').primaryKey(),
-  ...auditColumns,
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  coinCost: integer('coin_cost').notNull(),
-  icon: varchar('icon', { length: 50 }),
-});
+export const taskBlocksRelations = relations(taskBlocks, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskBlocks.taskId],
+    references: [tasks.id],
+  }),
+}));
 
 export const taskCompletions = pgTable('task_completions', {
   id: serial('id').primaryKey(),
@@ -98,6 +135,37 @@ export const taskCompletions = pgTable('task_completions', {
     .defaultNow(),
 });
 
+export const taskCompletionsRelations = relations(
+  taskCompletions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [taskCompletions.userId],
+      references: [users.id],
+    }),
+    task: one(tasks, {
+      fields: [taskCompletions.taskId],
+      references: [tasks.id],
+    }),
+  }),
+);
+
+// ============================================================================
+// Rewards
+// ============================================================================
+
+export const rewards = pgTable('rewards', {
+  id: serial('id').primaryKey(),
+  ...auditColumns,
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  coinCost: integer('coin_cost').notNull(),
+  icon: varchar('icon', { length: 50 }),
+});
+
+export const rewardsRelations = relations(rewards, ({ many }) => ({
+  redemptions: many(rewardRedemptions),
+}));
+
 export const rewardRedemptions = pgTable('reward_redemptions', {
   id: serial('id').primaryKey(),
   ...auditColumns,
@@ -112,3 +180,17 @@ export const rewardRedemptions = pgTable('reward_redemptions', {
     .notNull()
     .defaultNow(),
 });
+
+export const rewardRedemptionsRelations = relations(
+  rewardRedemptions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [rewardRedemptions.userId],
+      references: [users.id],
+    }),
+    reward: one(rewards, {
+      fields: [rewardRedemptions.rewardId],
+      references: [rewards.id],
+    }),
+  }),
+);

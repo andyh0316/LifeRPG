@@ -10,8 +10,18 @@ export type TaskInsert = typeof tasks.$inferInsert;
 export class TaskRepository {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  async findAll(): Promise<TaskRow[]> {
-    return this.db.select().from(tasks);
+  async findAll(options?: {
+    includeBlocks?: boolean;
+    includeCompletions?: boolean;
+  }) {
+    const rows = await this.db.query.tasks.findMany({
+      with: {
+        ...(options?.includeBlocks && { blocks: true }),
+        ...(options?.includeCompletions && { completions: true }),
+      },
+    });
+
+    return rows;
   }
 
   async findById(id: number): Promise<TaskRow | undefined> {
