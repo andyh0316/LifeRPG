@@ -3,8 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import MenuItem from '@mui/material/MenuItem';
 import InputAdornment from '@mui/material/InputAdornment';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -72,9 +71,10 @@ export default function EditTask() {
     });
   };
 
-  const handleTimedToggle = (checked: boolean) => {
-    setValue('amountUnit', checked ? 'minutes' : null);
-    if (!checked) {
+  const handleUnitChange = (value: string) => {
+    const unit = value === '' ? null : (value as 'minutes');
+    setValue('amountUnit', unit);
+    if (!unit) {
       const firstBlock = {
         id: getValues('blocks.0.id'),
         amount: null,
@@ -150,18 +150,18 @@ export default function EditTask() {
             <Controller
               name="amountUnit"
               control={control}
-              render={() => (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={isTimed}
-                      onChange={(_, checked) => handleTimedToggle(checked)}
-                      size="small"
-                    />
-                  }
-                  label="Timed"
-                  slotProps={{ typography: { variant: 'body2' } }}
-                />
+              render={({ field }) => (
+                <TextField
+                  select
+                  label="Unit"
+                  size="small"
+                  sx={{ width: 130 }}
+                  value={field.value ?? ''}
+                  onChange={(e) => handleUnitChange(e.target.value)}
+                >
+                  <MenuItem value="">None</MenuItem>
+                  <MenuItem value="minutes">Minutes</MenuItem>
+                </TextField>
               )}
             />
           </Box>
