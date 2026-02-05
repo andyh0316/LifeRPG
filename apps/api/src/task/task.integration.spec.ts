@@ -20,8 +20,6 @@ describe('Task Integration', () => {
     const input: CreateTaskDto = {
       name: 'Stretching',
       desc: 'Morning stretching routine',
-      xpReward: 15,
-      coinReward: 8,
       icon: 'yoga',
       blocks: [{ amount: null, xpReward: 15, coinReward: 8 }],
     };
@@ -37,8 +35,6 @@ describe('Task Integration', () => {
     expect(fetchedTask.userId).toBe(1);
     expect(fetchedTask.name).toBe(input.name);
     expect(fetchedTask.desc).toBe(input.desc);
-    expect(fetchedTask.xpReward).toBe(input.xpReward);
-    expect(fetchedTask.coinReward).toBe(input.coinReward);
     expect(fetchedTask.icon).toBe(input.icon);
   });
 
@@ -48,8 +44,6 @@ describe('Task Integration', () => {
       .send({
         name: 'Push-ups',
         desc: 'Do some push-ups',
-        xpReward: 10,
-        coinReward: 5,
         icon: 'muscle',
       } as CreateTaskDto)
       .expect(400);
@@ -100,8 +94,6 @@ describe('Task Integration', () => {
       .post('/tasks')
       .send({
         name: 'Bad Task',
-        xpReward: 10,
-        coinReward: 5,
         blocks: [],
       } as CreateTaskDto)
       .expect(400);
@@ -113,8 +105,6 @@ describe('Task Integration', () => {
       .post('/tasks')
       .send({
         name: 'Valid Task',
-        xpReward: 10,
-        coinReward: 5,
         blocks: [{ amount: null, xpReward: 10, coinReward: 5 }],
       } as CreateTaskDto)
       .expect(201);
@@ -133,8 +123,6 @@ describe('Task Integration', () => {
       .send({
         name: 'Read',
         desc: 'Read a book',
-        xpReward: 10,
-        coinReward: 5,
         icon: 'book',
         amountUnit: 'minutes',
         blocks: [
@@ -149,8 +137,6 @@ describe('Task Integration', () => {
     const updateInput: UpdateTaskDto = {
       name: 'Read More',
       desc: 'Read two chapters',
-      xpReward: 20,
-      coinReward: 10,
       icon: 'books',
       blocks: [
         // blocks[0]: omitted — left untouched
@@ -179,8 +165,6 @@ describe('Task Integration', () => {
     expect(updatedTask.id).toBe(setupTask.id);
     expect(updatedTask.name).toBe(updateInput.name);
     expect(updatedTask.desc).toBe(updateInput.desc);
-    expect(updatedTask.xpReward).toBe(updateInput.xpReward);
-    expect(updatedTask.coinReward).toBe(updateInput.coinReward);
     expect(updatedTask.icon).toBe(updateInput.icon);
     expect(updatedTask.blocks).toHaveLength(3);
 

@@ -26,8 +26,6 @@ export class TaskService {
       userId: row.userId,
       name: row.name,
       desc: row.description,
-      xpReward: row.xpReward,
-      coinReward: row.coinReward,
       icon: row.icon,
       amountUnit: row.amountUnit,
       blocks: blockRows.map(
@@ -53,7 +51,8 @@ export class TaskService {
       throw new NotFoundException(`Task ${id} not found`);
     }
 
-    return this.toDto(row, []);
+    const blocks = await this.taskBlockRepository.findByTaskId(id);
+    return this.toDto(row, blocks);
   }
 
   async create(dto: CreateTaskDto): Promise<TaskResponseDto> {
@@ -63,8 +62,6 @@ export class TaskService {
           userId: 1,
           name: dto.name,
           description: dto.desc,
-          xpReward: dto.xpReward,
-          coinReward: dto.coinReward,
           icon: dto.icon,
           amountUnit: dto.amountUnit,
         },
@@ -99,8 +96,6 @@ export class TaskService {
         {
           name: dto.name,
           description: dto.desc,
-          xpReward: dto.xpReward,
-          coinReward: dto.coinReward,
           icon: dto.icon,
           amountUnit: dto.amountUnit,
         },

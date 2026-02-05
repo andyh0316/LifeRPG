@@ -1,11 +1,9 @@
 import {
   IsString,
   IsOptional,
-  IsInt,
   IsIn,
   IsArray,
   ValidateNested,
-  Min,
   MaxLength,
   ArrayMinSize,
 } from 'class-validator';
@@ -23,18 +21,6 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   desc?: string | null;
-
-  @ApiPropertyOptional({ type: Number, default: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  xpReward?: number;
-
-  @ApiPropertyOptional({ type: Number, default: 0 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  coinReward?: number;
 
   @ApiPropertyOptional({ type: String, nullable: true })
   @IsOptional()

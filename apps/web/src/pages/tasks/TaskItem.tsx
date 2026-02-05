@@ -2,13 +2,12 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Chip from '@mui/material/Chip';
-import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-import StarIcon from '@mui/icons-material/Star';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import EditIcon from '@mui/icons-material/Edit';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 
@@ -16,8 +15,6 @@ export interface TaskItemProps {
   id: number;
   name: string;
   description?: string | null;
-  xpReward: number;
-  coinReward: number;
   icon?: string | null;
   userId: number;
 }
@@ -27,11 +24,10 @@ export default function TaskItem({
   id,
   name,
   description,
-  xpReward,
-  coinReward,
   icon,
   userId,
 }: TaskItemProps) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -43,8 +39,14 @@ export default function TaskItem({
   const completeTask = $api.useMutation('post', '/tasks/{id}/complete', {
     onSuccess: (data) => {
       // Refetch user data so the profile card reflects updated XP/coins
-      queryClient.invalidateQueries({ queryKey: $api.queryOptions('get', '/users').queryKey });
-      queryClient.invalidateQueries({ queryKey: $api.queryOptions('get', '/users/{id}', { params: { path: { id: userId } } }).queryKey });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/users').queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/users/{id}', {
+          params: { path: { id: userId } },
+        }).queryKey,
+      });
       setSnackbar({
         open: true,
         message: `Task completed! +${data.xpEarned} XP, +${data.coinsEarned} coins`,
@@ -70,29 +72,20 @@ export default function TaskItem({
   };
 
   return (
-    <ListItem disablePadding sx={{ maxWidth: 500 }}>
+    <ListItem
+      disablePadding
+      sx={{ maxWidth: 500 }}
+      secondaryAction={
+        <IconButton edge="end" onClick={() => navigate(`/tasks/${id}/edit`)}>
+          <EditIcon fontSize="small" />
+        </IconButton>
+      }
+    >
       <ListItemButton onClick={handleClick}>
         <ListItemIcon sx={{ minWidth: 40, fontSize: 24 }}>
           {icon ?? '📋'}
         </ListItemIcon>
         <ListItemText primary={name} secondary={description} />
-        {/* Reward chips */}
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip
-            icon={<MonetizationOnIcon />}
-            label={`${coinReward}`}
-            size="small"
-            color="warning"
-            variant="outlined"
-          />
-          <Chip
-            icon={<StarIcon />}
-            label={`${xpReward} XP`}
-            size="small"
-            color="primary"
-            variant="outlined"
-          />
-        </Box>
       </ListItemButton>
 
       {/* Feedback snackbar for task completion */}

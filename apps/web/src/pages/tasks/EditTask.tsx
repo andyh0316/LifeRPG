@@ -11,30 +11,47 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import TimerIcon from '@mui/icons-material/Timer';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray, useWatch, Controller } from 'react-hook-form';
+import { useEffect } from 'react';
 import { $api, type components } from '@life-rpg/api-client';
 
-type CreateTaskDto = components['schemas']['CreateTaskDto'];
+type UpdateTaskDto = components['schemas']['UpdateTaskDto'];
 
-export default function CreateTask() {
+export default function EditTask() {
+  const { id } = useParams<{ id: string }>();
+  const taskId = Number(id);
   const navigate = useNavigate();
+
+  const { data: task, isLoading } = $api.useQuery('get', '/tasks/{id}', {
+    params: { path: { id: taskId } },
+  });
+
   const {
     register,
     handleSubmit,
     control,
     setValue,
     getValues,
+    reset,
     formState: { errors },
-  } = useForm<CreateTaskDto>({
-    defaultValues: {
-      name: '',
-      desc: null,
-      icon: null,
-      amountUnit: null,
-      blocks: [{ amount: null, xpReward: 0, coinReward: 0 }],
-    },
-  });
+  } = useForm<UpdateTaskDto>();
+
+  useEffect(() => {
+    if (!task) return;
+    reset({
+      name: task.name,
+      desc: task.desc,
+      icon: task.icon,
+      amountUnit: task.amountUnit,
+      blocks: task.blocks.map((b) => ({
+        id: b.id,
+        amount: b.amount,
+        xpReward: b.xpReward,
+        coinReward: b.coinReward,
+      })),
+    });
+  }, [task, reset]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -44,19 +61,22 @@ export default function CreateTask() {
   const amountUnit = useWatch({ control, name: 'amountUnit' });
   const isTimed = amountUnit === 'minutes';
 
-  const createTask = $api.useMutation('post', '/tasks', {
+  const updateTask = $api.useMutation('patch', '/tasks/{id}', {
     onSuccess: () => navigate('/tasks'),
   });
 
-  const onSubmit = (data: CreateTaskDto) => {
-    createTask.mutate({ body: data });
+  const onSubmit = (data: UpdateTaskDto) => {
+    updateTask.mutate({
+      params: { path: { id: taskId } },
+      body: data,
+    });
   };
 
   const handleTimedToggle = (checked: boolean) => {
     setValue('amountUnit', checked ? 'minutes' : null);
     if (!checked) {
-      // Reset to a single block without amount
       const firstBlock = {
+        id: getValues('blocks.0.id'),
         amount: null,
         xpReward: getValues('blocks.0.xpReward') ?? 0,
         coinReward: getValues('blocks.0.coinReward') ?? 0,
@@ -64,6 +84,10 @@ export default function CreateTask() {
       setValue('blocks', [firstBlock]);
     }
   };
+
+  if (isLoading) {
+    return <Typography>Loading...</Typography>;
+  }
 
   return (
     <>
@@ -75,7 +99,7 @@ export default function CreateTask() {
           mb: 2,
         }}
       >
-        <Typography variant="h4">Create Task</Typography>
+        <Typography variant="h4">Edit Task</Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button variant="outlined" onClick={() => navigate('/tasks')}>
             Cancel
@@ -83,7 +107,7 @@ export default function CreateTask() {
           <Button
             variant="contained"
             onClick={handleSubmit(onSubmit)}
-            disabled={createTask.isPending}
+            disabled={updateTask.isPending}
           >
             Save
           </Button>
@@ -100,12 +124,14 @@ export default function CreateTask() {
           {...register('name', { required: 'Name is required' })}
           error={!!errors.name}
           helperText={errors.name?.message}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
         <TextField
           label="Description"
           multiline
           rows={3}
           {...register('desc')}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
 
         {/* Blocks / Reward Tiers */}

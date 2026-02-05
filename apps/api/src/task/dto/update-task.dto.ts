@@ -1,11 +1,9 @@
 import {
   IsString,
   IsOptional,
-  IsInt,
   IsIn,
   IsArray,
   ValidateNested,
-  Min,
   MaxLength,
   ArrayMinSize,
 } from 'class-validator';
@@ -24,18 +22,6 @@ export class UpdateTaskDto {
   @IsOptional()
   @IsString()
   desc?: string | null;
-
-  @ApiPropertyOptional({ type: Number })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  xpReward?: number;
-
-  @ApiPropertyOptional({ type: Number })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  coinReward?: number;
 
   @ApiPropertyOptional({ type: String, nullable: true })
   @IsOptional()

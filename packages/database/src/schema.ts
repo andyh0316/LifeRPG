@@ -56,8 +56,6 @@ export const tasks = pgTable('tasks', {
     .references(() => users.id),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
-  xpReward: integer('xp_reward').notNull().default(0),
-  coinReward: integer('coin_reward').notNull().default(0),
   icon: varchar('icon', { length: 50 }),
   amountUnit: amountUnitEnum('amount_unit'),
 });

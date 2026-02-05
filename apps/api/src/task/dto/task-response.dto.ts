@@ -14,12 +14,6 @@ export class TaskResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true })
   desc!: string | null;
 
-  @ApiProperty()
-  xpReward!: number;
-
-  @ApiProperty()
-  coinReward!: number;
-
   @ApiPropertyOptional({ type: String, nullable: true })
   icon!: string | null;
 

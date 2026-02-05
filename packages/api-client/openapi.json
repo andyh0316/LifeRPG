@@ -436,12 +436,6 @@
             "type": "string",
             "nullable": true
           },
-          "xpReward": {
-            "type": "number"
-          },
-          "coinReward": {
-            "type": "number"
-          },
           "icon": {
             "type": "string",
             "nullable": true
@@ -464,8 +458,6 @@
           "id",
           "userId",
           "name",
-          "xpReward",
-          "coinReward",
           "blocks"
         ]
       },
@@ -495,14 +487,6 @@
           "desc": {
             "type": "string",
             "nullable": true
-          },
-          "xpReward": {
-            "type": "number",
-            "default": 0
-          },
-          "coinReward": {
-            "type": "number",
-            "default": 0
           },
           "icon": {
             "type": "string",
@@ -558,12 +542,6 @@
           "desc": {
             "type": "string",
             "nullable": true
-          },
-          "xpReward": {
-            "type": "number"
-          },
-          "coinReward": {
-            "type": "number"
           },
           "icon": {
             "type": "string",

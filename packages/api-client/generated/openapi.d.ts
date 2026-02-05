@@ -121,8 +121,6 @@ export interface components {
             userId: number;
             name: string;
             desc?: string | null;
-            xpReward: number;
-            coinReward: number;
             icon?: string | null;
             /** @enum {string|null} */
             amountUnit?: "minutes" | null;
@@ -138,10 +136,6 @@ export interface components {
         CreateTaskDto: {
             name: string;
             desc?: string | null;
-            /** @default 0 */
-            xpReward: number;
-            /** @default 0 */
-            coinReward: number;
             icon?: string | null;
             /** @enum {string|null} */
             amountUnit?: "minutes" | null;
@@ -159,8 +153,6 @@ export interface components {
         UpdateTaskDto: {
             name?: string;
             desc?: string | null;
-            xpReward?: number;
-            coinReward?: number;
             icon?: string | null;
             /** @enum {string|null} */
             amountUnit?: "minutes" | null;
