@@ -68,7 +68,7 @@ export interface paths {
         patch: operations["TaskController_update"];
         trace?: never;
     };
-    "/tasks/{id}/complete": {
+    "/task-completions": {
         parameters: {
             query?: never;
             header?: never;
@@ -159,7 +159,7 @@ export interface components {
             blocks?: components["schemas"]["UpdateTaskBlockDto"][];
         };
         CompleteTaskDto: {
-            userId: number;
+            blockId: number;
         };
         TaskCompletionResponseDto: {
             id: number;
@@ -226,7 +226,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                id: number;
             };
             cookie?: never;
         };
@@ -247,7 +247,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                id: number;
             };
             cookie?: never;
         };
@@ -272,7 +272,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                id: string;
+                id: number;
             };
             cookie?: never;
         };
@@ -380,9 +380,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                id: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {

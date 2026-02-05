@@ -63,7 +63,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -91,7 +91,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -129,7 +129,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -271,19 +271,10 @@
         ]
       }
     },
-    "/tasks/{id}/complete": {
+    "/task-completions": {
       "post": {
         "operationId": "TaskCompletionController_complete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -565,12 +556,12 @@
       "CompleteTaskDto": {
         "type": "object",
         "properties": {
-          "userId": {
+          "blockId": {
             "type": "number"
           }
         },
         "required": [
-          "userId"
+          "blockId"
         ]
       },
       "TaskCompletionResponseDto": {
