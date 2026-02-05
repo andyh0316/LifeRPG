@@ -20,9 +20,13 @@
     "build:web": "pnpm --filter @life-rpg/web build",
     "test": "pnpm --filter @life-rpg/api test",
     "generate:api-client": "pnpm --filter @life-rpg/api-client generate",
+    "test:e2e": "playwright test",
+    "test:e2e:slow": "SLOW=3 playwright test",
     "menu": "npx ntl -A"
   },
   "devDependencies": {
+    "@life-rpg/api-client": "workspace:*",
+    "@playwright/test": "^1.58.1",
     "prettier": "^3.8.1"
   }
 }
