@@ -3,6 +3,5 @@ buildCommand = "cd /app && pnpm install && pnpm --filter @life-rpg/database buil
 
 [deploy]
 startCommand = "node apps/api/dist/main.js"
-healthcheckPath = "/"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
