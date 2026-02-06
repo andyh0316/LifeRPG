@@ -4,7 +4,9 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { users, type Db } from '@life-rpg/database';
 import cookieParser from 'cookie-parser';
 import supertest from 'supertest';
+import { eq } from 'drizzle-orm';
 import { AppModule } from '../app.module';
+import { SessionService } from '../auth/session.service';
 
 export type TestAgent = supertest.Agent;
 
@@ -44,15 +46,18 @@ export async function createIntegrationApp(): Promise<{
     .values(TEST_USER)
     .onConflictDoNothing({ target: users.email });
 
-  // Create a supertest agent and authenticate it
+  // Look up the test user and create a session directly
+  const [testUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, TEST_USER.email));
+
+  const sessionService = app.get(SessionService);
+  const { raw } = await sessionService.createSession(testUser);
+
+  // Create a supertest agent with the session cookie
   const request = supertest.agent(app.getHttpServer());
-  await request
-    .post('/auth/login')
-    .send({ email: TEST_USER.email })
-    .expect(201);
+  request.set('Cookie', `session_token=${raw}`);
 
-  const meRes = await request.get('/auth/me').expect(200);
-  const currentUserId: number = meRes.body.id;
-
-  return { app, db, request, currentUserId };
+  return { app, db, request, currentUserId: testUser.id };
 }

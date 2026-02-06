@@ -20,7 +20,6 @@ function App() {
     data: user,
     isLoading,
     error,
-    refetch,
   } = $api.useQuery('get', '/auth/me', {}, { retry: false });
 
   if (isLoading) {
@@ -43,11 +42,7 @@ function App() {
     return (
       <>
         <CssBaseline />
-        <Login
-          onLogin={() => {
-            refetch();
-          }}
-        />
+        <Login />
       </>
     );
   }

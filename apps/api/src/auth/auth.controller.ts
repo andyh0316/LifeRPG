@@ -1,12 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Post,
-  Req,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiOkResponse,
   ApiTags,
@@ -18,32 +11,11 @@ import { setSessionCookie, clearSessionCookie } from './cookie.helper';
 import { Public } from './public.decorator';
 import { CurrentUser, type AuthUser } from './current-user.decorator';
 import { AuthUserDto } from './dto/auth-user.dto';
-import { LoginDto } from './dto/login.dto';
-import { LoginResponseDto } from './dto/login-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly sessionService: SessionService) {}
-
-  // TODO: missing password
-  @Public()
-  @Post('login')
-  @ApiOkResponse({ type: LoginResponseDto })
-  async login(
-    @Body() dto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const user = await this.sessionService.findUserByEmail(dto.email);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const { raw, expiresAt } = await this.sessionService.createSession(user);
-    setSessionCookie(res, raw);
-
-    return { tokenExpiresAt: expiresAt };
-  }
 
   @Public()
   @Post('logout')
@@ -61,5 +33,24 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Not authenticated' })
   me(@CurrentUser() user: AuthUser): AuthUserDto {
     return { id: user.id, email: user.email };
+  }
+
+  @Public()
+  @Get('google-login')
+  @UseGuards(AuthGuard('google'))
+  googleLogin() {
+    // Passport redirects to Google — this body never runs.
+  }
+
+  @Public()
+  @Get('google-login/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleLoginCallback(@Req() req: Request, @Res() res: Response) {
+    const user = req.user as { id: number; email: string };
+    const { raw } = await this.sessionService.createSession(user);
+    setSessionCookie(res, raw);
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(frontendUrl);
   }
 }

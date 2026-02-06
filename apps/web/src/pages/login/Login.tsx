@@ -1,50 +1,9 @@
-import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Alert from '@mui/material/Alert';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { api } from '@life-rpg/api-client';
+import GoogleIcon from '@mui/icons-material/Google';
 
-interface LoginForm {
-  email: string;
-}
-
-interface LoginProps {
-  onLogin: () => void;
-}
-
-export default function Login({ onLogin }: LoginProps) {
-  const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm<LoginForm>();
-
-  // POST /auth/login sets httpOnly cookies (access_token, refresh_token)
-  // via Set-Cookie response headers. The browser stores them automatically.
-  const onSubmit = async (data: LoginForm) => {
-    setError(null);
-    const { data: loginData, error: apiError } = await api.POST('/auth/login', {
-      body: { email: data.email },
-    });
-
-    if (apiError) {
-      setError('Login failed. Check your email and try again.');
-      return;
-    }
-
-    if (loginData?.tokenExpiresAt) {
-      localStorage.setItem('tokenExpiresAt', loginData.tokenExpiresAt);
-    }
-    onLogin(); // triggers refetch of /auth/me in App.tsx
-    navigate('/');
-  };
-
+export default function Login() {
   return (
     <Box
       sx={{
@@ -55,8 +14,6 @@ export default function Login({ onLogin }: LoginProps) {
       }}
     >
       <Box
-        component="form"
-        onSubmit={handleSubmit(onSubmit)}
         sx={{
           display: 'flex',
           flexDirection: 'column',
@@ -68,15 +25,12 @@ export default function Login({ onLogin }: LoginProps) {
         <Typography variant="h4" textAlign="center">
           LifeRPG
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        <TextField
-          label="Email"
-          type="email"
-          autoFocus
-          {...register('email', { required: true })}
-        />
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
-          Log in
+        <Button
+          variant="outlined"
+          startIcon={<GoogleIcon />}
+          href="/api/auth/google-login"
+        >
+          Sign in with Google
         </Button>
       </Box>
     </Box>
