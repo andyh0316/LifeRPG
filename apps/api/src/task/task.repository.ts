@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { asc, eq } from 'drizzle-orm';
 import { tasks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
@@ -15,6 +15,7 @@ export class TaskRepository {
     includeCompletions?: boolean;
   }) {
     const rows = await this.db.query.tasks.findMany({
+      orderBy: [asc(tasks.id)],
       with: {
         ...(options?.includeBlocks && { blocks: true }),
         ...(options?.includeCompletions && { completions: true }),

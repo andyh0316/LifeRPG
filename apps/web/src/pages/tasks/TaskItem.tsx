@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
+import TaskIcon from '../../components/icons/TaskIcon';
 
 interface Block {
   id: number;
@@ -90,7 +91,7 @@ export default function TaskItem({
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Box sx={{ fontSize: 24 }}>{icon ?? '📋'}</Box>
+        <TaskIcon name={icon} />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>
             {name}
