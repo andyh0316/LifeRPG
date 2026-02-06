@@ -67,7 +67,7 @@ export default function CreateTask() {
         onSubmit={handleSubmit(onSubmit)}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 500 }}
       >
-        <TaskFormFields register={register} errors={errors} />
+        <TaskFormFields register={register} control={control} errors={errors} />
 
         <RewardTiersSection
           control={control}

@@ -93,7 +93,12 @@ export default function EditTask() {
         onSubmit={handleSubmit(onSubmit)}
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 500 }}
       >
-        <TaskFormFields register={register} errors={errors} shrinkLabels />
+        <TaskFormFields
+          register={register}
+          control={control}
+          errors={errors}
+          shrinkLabels
+        />
 
         <RewardTiersSection
           control={control}
