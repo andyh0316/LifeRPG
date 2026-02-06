@@ -1,14 +1,54 @@
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
+import CircularProgress from '@mui/material/CircularProgress';
 import { Routes, Route } from 'react-router-dom';
+import { $api } from '@life-rpg/api-client';
 import Sidebar from './Sidebar';
 import Home from './pages/home/Home';
 import Tasks from './pages/tasks/Tasks';
 import CreateTask from './pages/tasks/CreateTask';
 import EditTask from './pages/tasks/EditTask';
 import Rewards from './pages/rewards/Rewards';
+import Login from './pages/login/Login';
 
 function App() {
+  // Auth gate: checks if user is authenticated via access_token cookie.
+  // Called on mount, window refocus, and network reconnect.
+  const {
+    data: user,
+    isLoading,
+    refetch,
+  } = $api.useQuery('get', '/auth/me', {}, { retry: false });
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+        }}
+      >
+        <CssBaseline />
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!user) {
+    return (
+      <>
+        <CssBaseline />
+        <Login
+          onLogin={() => {
+            refetch();
+          }}
+        />
+      </>
+    );
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />

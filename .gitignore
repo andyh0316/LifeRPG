@@ -22,3 +22,6 @@ build/
 
 # Database backups
 backups/
+
+# Feature planning
+feature-planning/
