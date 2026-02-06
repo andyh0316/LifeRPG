@@ -19,13 +19,13 @@ export async function createIntegrationApp(): Promise<{
   app: INestApplication;
   db: Db;
   request: TestAgent;
+  currentUserId: number;
 }> {
   // Validate that the test database URL is configured
   if (!process.env.TEST_DATABASE_URL) {
     throw new Error('TEST_DATABASE_URL must be set');
   }
   process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
-  process.env.JWT_SECRET ??= 'test-secret';
 
   // Bootstrap the NestJS application with validation
   const moduleRef = await Test.createTestingModule({
@@ -51,5 +51,8 @@ export async function createIntegrationApp(): Promise<{
     .send({ email: TEST_USER.email })
     .expect(201);
 
-  return { app, db, request };
+  const meRes = await request.get('/auth/me').expect(200);
+  const currentUserId: number = meRes.body.id;
+
+  return { app, db, request, currentUserId };
 }

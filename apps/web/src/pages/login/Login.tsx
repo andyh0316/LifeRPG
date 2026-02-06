@@ -38,17 +38,8 @@ export default function Login({ onLogin }: LoginProps) {
       return;
     }
 
-    if (loginData?.accessTokenExpiresAt) {
-      localStorage.setItem(
-        'accessTokenExpiresAt',
-        loginData.accessTokenExpiresAt,
-      );
-    }
-    if (loginData?.refreshTokenExpiresAt) {
-      localStorage.setItem(
-        'refreshTokenExpiresAt',
-        loginData.refreshTokenExpiresAt,
-      );
+    if (loginData?.tokenExpiresAt) {
+      localStorage.setItem('tokenExpiresAt', loginData.tokenExpiresAt);
     }
     onLogin(); // triggers refetch of /auth/me in App.tsx
     navigate('/');

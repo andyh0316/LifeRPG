@@ -32,23 +32,6 @@
         ]
       }
     },
-    "/auth/refresh": {
-      "post": {
-        "operationId": "AuthController_refresh",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Tokens refreshed"
-          },
-          "401": {
-            "description": "Invalid or expired refresh token"
-          }
-        },
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/auth/logout": {
       "post": {
         "operationId": "AuthController_logout",
@@ -414,18 +397,13 @@
       "LoginResponseDto": {
         "type": "object",
         "properties": {
-          "accessTokenExpiresAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "refreshTokenExpiresAt": {
+          "tokenExpiresAt": {
             "type": "string",
             "format": "date-time"
           }
         },
         "required": [
-          "accessTokenExpiresAt",
-          "refreshTokenExpiresAt"
+          "tokenExpiresAt"
         ]
       },
       "AuthUserDto": {

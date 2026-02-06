@@ -2,6 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { users, type Db } from '@life-rpg/database';
 import supertest from 'supertest';
 import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { AuthUserDto } from './dto/auth-user.dto';
 
 describe('Auth Integration', () => {
   let app: INestApplication;
@@ -15,7 +17,7 @@ describe('Auth Integration', () => {
     await app.close();
   });
 
-  it('POST /auth/login - sets token cookies for an existing user', async () => {
+  it('POST /auth/login - sets session cookie for an existing user', async () => {
     // setup
     await db
       .insert(users)
@@ -30,13 +32,12 @@ describe('Auth Integration', () => {
       .expect(201);
 
     // assert
+    const login: LoginResponseDto = res.body;
     const cookies = res.headers['set-cookie'] as unknown as string[];
-    expect(cookies.some((c: string) => c.startsWith('access_token='))).toBe(
+    expect(cookies.some((c: string) => c.startsWith('session_token='))).toBe(
       true,
     );
-    expect(cookies.some((c: string) => c.startsWith('refresh_token='))).toBe(
-      true,
-    );
+    expect(login.tokenExpiresAt).toBeDefined();
   });
 
   it('POST /auth/login - returns 404 for unknown email', async () => {
@@ -47,11 +48,12 @@ describe('Auth Integration', () => {
   });
 
   it('GET /auth/me - returns the authenticated user', async () => {
-    // act (request agent was authenticated in createIntegrationApp with test@test.com)
+    // act
     const res = await request.get('/auth/me').expect(200);
 
     // assert
-    expect(res.body).toEqual(
+    const me: AuthUserDto = res.body;
+    expect(me).toEqual(
       expect.objectContaining({
         id: expect.any(Number),
         email: 'test@test.com',
@@ -67,33 +69,7 @@ describe('Auth Integration', () => {
     await unauthenticatedRequest.get('/auth/me').expect(401);
   });
 
-  it('POST /auth/refresh - rotates tokens', async () => {
-    // setup
-    await db
-      .insert(users)
-      .values({ email: 'refresh@test.com', firstName: 'Refresh' })
-      .onConflictDoNothing({ target: users.email });
-    const agent = supertest.agent(app.getHttpServer());
-    await agent
-      .post('/auth/login')
-      .send({ email: 'refresh@test.com' })
-      .expect(201);
-
-    // act
-    const res = await agent.post('/auth/refresh').expect(201);
-
-    // assert
-    const cookies = res.headers['set-cookie'] as unknown as string[];
-    expect(cookies.some((c: string) => c.startsWith('access_token='))).toBe(
-      true,
-    );
-    expect(cookies.some((c: string) => c.startsWith('refresh_token='))).toBe(
-      true,
-    );
-    await agent.get('/auth/me').expect(200);
-  });
-
-  it('POST /auth/logout - clears cookies and revokes refresh token', async () => {
+  it('POST /auth/logout - clears cookie and revokes session', async () => {
     // setup
     await db
       .insert(users)
@@ -113,7 +89,7 @@ describe('Auth Integration', () => {
     expect(
       cookies.some(
         (c: string) =>
-          c.startsWith('access_token=;') || c.includes('access_token=;'),
+          c.startsWith('session_token=;') || c.includes('session_token=;'),
       ),
     ).toBe(true);
     await agent.get('/auth/me').expect(401);

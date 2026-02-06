@@ -43,6 +43,13 @@
       "when": 1770358029172,
       "tag": "0005_zippy_millenium_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1770394954666,
+      "tag": "0006_dizzy_lilandra",
+      "breakpoints": true
     }
   ]
 }

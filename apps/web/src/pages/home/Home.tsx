@@ -8,14 +8,13 @@ export default function Home() {
   const { data: users = [] } = $api.useQuery('get', '/users');
 
   const [, tick] = useState(0);
-  const accessTokenExpiresAt = localStorage.getItem('accessTokenExpiresAt');
-  const refreshTokenExpiresAt = localStorage.getItem('refreshTokenExpiresAt');
+  const tokenExpiresAt = localStorage.getItem('tokenExpiresAt');
 
   useEffect(() => {
-    if (!accessTokenExpiresAt && !refreshTokenExpiresAt) return;
+    if (!tokenExpiresAt) return;
     const id = setInterval(() => tick((n) => n + 1), 1000);
     return () => clearInterval(id);
-  }, [accessTokenExpiresAt, refreshTokenExpiresAt]);
+  }, [tokenExpiresAt]);
 
   return (
     <>
@@ -32,10 +31,9 @@ export default function Home() {
         }}
       >
         <Typography variant="subtitle2" gutterBottom>
-          DEBUG: Token Expiry
+          DEBUG: Session Expiry
         </Typography>
-        <div>Access Token: {formatCountdown(accessTokenExpiresAt)}</div>
-        <div>Refresh Token: {formatCountdown(refreshTokenExpiresAt)}</div>
+        <div>Session Token: {formatCountdown(tokenExpiresAt)}</div>
       </Box>
 
       <ul>

@@ -76,7 +76,7 @@ export const userCharacterRelations = relations(userCharacter, ({ one }) => ({
 // Auth
 // ============================================================================
 
-export const refreshTokens = pgTable('refresh_tokens', {
+export const userSessions = pgTable('user_sessions', {
   id: serial('id').primaryKey(),
   userId: integer('user_id')
     .notNull()
@@ -87,9 +87,9 @@ export const refreshTokens = pgTable('refresh_tokens', {
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
 });
 
-export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
+export const userSessionsRelations = relations(userSessions, ({ one }) => ({
   user: one(users, {
-    fields: [refreshTokens.userId],
+    fields: [userSessions.userId],
     references: [users.id],
   }),
 }));

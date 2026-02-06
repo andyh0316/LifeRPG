@@ -25,8 +25,7 @@ interface SidebarProps {
 export default function Sidebar({ onLogout }: SidebarProps) {
   const handleLogout = async () => {
     await api.POST('/auth/logout');
-    localStorage.removeItem('accessTokenExpiresAt');
-    localStorage.removeItem('refreshTokenExpiresAt');
+    localStorage.removeItem('tokenExpiresAt');
     onLogout();
   };
 

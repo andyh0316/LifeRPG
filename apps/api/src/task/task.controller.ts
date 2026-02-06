@@ -12,6 +12,7 @@ import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
+import { CurrentUser, type AuthUser } from '../auth/current-user.decorator';
 
 @Controller('tasks')
 export class TaskController {
@@ -31,8 +32,8 @@ export class TaskController {
 
   @Post()
   @ApiCreatedResponse({ type: TaskResponseDto })
-  create(@Body() body: CreateTaskDto) {
-    return this.taskService.create(body);
+  create(@Body() body: CreateTaskDto, @CurrentUser() user: AuthUser) {
+    return this.taskService.create(body, user.id);
   }
 
   @Patch(':id')

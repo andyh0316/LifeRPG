@@ -7,8 +7,9 @@ import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 describe('Task Completion Integration', () => {
   let app: INestApplication;
   let request: TestAgent;
+  let currentUserId: number;
   beforeAll(async () => {
-    ({ app, request } = await createIntegrationApp());
+    ({ app, request, currentUserId } = await createIntegrationApp());
   });
 
   afterAll(async () => {
@@ -38,7 +39,7 @@ describe('Task Completion Integration', () => {
     const completion: TaskCompletionResponseDto = res.body;
     expect(completion.id).toBeDefined();
     expect(completion.taskId).toBe(task.id);
-    expect(completion.userId).toBe(1);
+    expect(completion.userId).toBe(currentUserId);
     expect(completion.xpEarned).toBe(15);
     expect(completion.coinsEarned).toBe(10);
     expect(completion.completedAt).toBeDefined();
