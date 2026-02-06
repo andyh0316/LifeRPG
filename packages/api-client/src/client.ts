@@ -19,6 +19,6 @@ export function initApiClient(opts: ApiClientOptions) {
     throw new Error('initApiClient() has already been called');
   }
   initialized = true;
-  api = createClient<paths>({ baseUrl: opts.baseUrl });
+  api = createClient<paths>({ baseUrl: opts.baseUrl, credentials: 'include' });
   $api = createQueryClient(api);
 }
