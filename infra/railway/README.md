@@ -7,7 +7,8 @@ Go to [railway.app](https://railway.app) and sign in with your GitHub account.
 ### 1. Create project + database
 
 1. **New Project** → **Provision PostgreSQL**
-2. Click the Postgres service → **Variables** tab → note the `DATABASE_URL`
+2. Click the Postgres service → **Networking** → enable **TCP Proxy** to get a public connection URL
+3. Go to **Variables** tab → copy the public `DATABASE_URL` (the one with `*.proxy.rlwy.net`)
 
 ### 2. Add the GitHub repo
 
@@ -26,7 +27,7 @@ Railway auto-detects the pnpm monorepo and creates a service for each workspace 
 **api** (configure first) — needs a database connection:
 
 - Add **Variables**:
-  - `DATABASE_URL` → `${{Postgres.DATABASE_URL}}` (reference variable, auto-links to the DB)
+  - `DATABASE_URL` → the public Postgres URL from step 1 (the `*.proxy.rlwy.net` one). Must be the public URL because migrations run at build time, which has no access to Railway's private network.
   - `NODE_ENV` → `production`
 - **Networking** → **Generate Domain**
 - Deploy the service — once deployed, copy the generated domain URL for the next step
@@ -39,7 +40,7 @@ Railway auto-detects the pnpm monorepo and creates a service for each workspace 
 
 ### 3. Database migrations
 
-Migrations run automatically before each API deploy via `preDeployCommand` in `apps/api/railway.toml`. No manual step needed.
+Migrations run automatically during the API **build step** (see `buildCommand` in `apps/api/railway.toml`). No manual step needed.
 
 To run migrations manually (e.g. for debugging):
 
@@ -61,6 +62,6 @@ These override dashboard settings on every deploy. See [Railway docs](https://do
 
 ## Notes
 
-- The Postgres `DATABASE_URL` reference variable uses Railway's internal network (`*.railway.internal`) — it only works between Railway services, not from your local machine.
+- `DATABASE_URL` uses the Postgres **public proxy** URL (`*.proxy.rlwy.net`) so it works during both build (migrations) and deploy (API runtime). The private `*.railway.internal` hostname only works at deploy time, not build time.
 - Railway auto-detects pnpm via corepack. If you run into version issues, add `"packageManager": "pnpm@<version>"` to the root `package.json`.
 - By default Railway deploys from `main`. Change in service settings if you want to deploy from another branch.

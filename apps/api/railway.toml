@@ -1,5 +1,5 @@
 [build]
-buildCommand = "cd /app && pnpm install && pnpm --filter @life-rpg/database build && pnpm --filter @life-rpg/api build && echo DB=$DATABASE_URL && pnpm db:migrate"
+buildCommand = "cd /app && pnpm install && pnpm --filter @life-rpg/database build && pnpm --filter @life-rpg/api build && pnpm db:migrate"
 
 [deploy]
 startCommand = "node apps/api/dist/main.js"

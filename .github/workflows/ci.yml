@@ -71,8 +71,7 @@ jobs:
         run: pnpm test:api
 
   # ============================================
-  # DEPLOY (Lightsail — triggered via deploy.yml workflow_run)
+  # DEPLOY (Railway)
   # ============================================
-  # Deployment runs automatically after CI passes on main.
-  # See .github/workflows/deploy.yml for the deploy job.
-  # Required secrets: LIGHTSAIL_HOST, LIGHTSAIL_SSH_KEY, LIGHTSAIL_USERNAME
+  # Railway deploys automatically when CI passes on main (Wait for CI enabled).
+  # See infra/railway/README.md for setup details.
