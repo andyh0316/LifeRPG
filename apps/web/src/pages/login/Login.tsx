@@ -29,7 +29,7 @@ export default function Login({ onLogin }: LoginProps) {
   // via Set-Cookie response headers. The browser stores them automatically.
   const onSubmit = async (data: LoginForm) => {
     setError(null);
-    const { error: apiError } = await api.POST('/auth/login', {
+    const { data: loginData, error: apiError } = await api.POST('/auth/login', {
       body: { email: data.email },
     });
 
@@ -38,6 +38,18 @@ export default function Login({ onLogin }: LoginProps) {
       return;
     }
 
+    if (loginData?.accessTokenExpiresAt) {
+      localStorage.setItem(
+        'accessTokenExpiresAt',
+        loginData.accessTokenExpiresAt,
+      );
+    }
+    if (loginData?.refreshTokenExpiresAt) {
+      localStorage.setItem(
+        'refreshTokenExpiresAt',
+        loginData.refreshTokenExpiresAt,
+      );
+    }
     onLogin(); // triggers refetch of /auth/me in App.tsx
     navigate('/');
   };

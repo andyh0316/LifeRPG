@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Routes, Route } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import Sidebar from './Sidebar';
 import Home from './pages/home/Home';
@@ -14,9 +15,11 @@ import Login from './pages/login/Login';
 function App() {
   // Auth gate: checks if user is authenticated via access_token cookie.
   // Called on mount, window refocus, and network reconnect.
+  const queryClient = useQueryClient();
   const {
     data: user,
     isLoading,
+    error,
     refetch,
   } = $api.useQuery('get', '/auth/me', {}, { retry: false });
 
@@ -36,7 +39,7 @@ function App() {
     );
   }
 
-  if (!user) {
+  if (!user || error) {
     return (
       <>
         <CssBaseline />
@@ -52,7 +55,7 @@ function App() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <Sidebar />
+      <Sidebar onLogout={() => queryClient.resetQueries()} />
       <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
         <Routes>
           <Route path="/" element={<Home />} />

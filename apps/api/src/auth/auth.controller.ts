@@ -20,6 +20,7 @@ import { Public } from './public.decorator';
 import { CurrentUser, type AuthUser } from './current-user.decorator';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -29,7 +30,7 @@ export class AuthController {
   // TODO: missing password
   @Public()
   @Post('login')
-  @ApiOkResponse({ description: 'Logged in' })
+  @ApiOkResponse({ type: LoginResponseDto })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -40,8 +41,14 @@ export class AuthController {
     }
 
     const accessToken = this.tokenService.generateAccessToken(user);
-    const refreshToken = await this.tokenService.generateRefreshToken(user);
+    const { raw: refreshToken, expiresAt: refreshTokenExpiresAt } =
+      await this.tokenService.generateRefreshToken(user);
     setTokenCookies(res, accessToken, refreshToken);
+
+    return {
+      accessTokenExpiresAt: this.tokenService.getAccessTokenExpiry(accessToken),
+      refreshTokenExpiresAt,
+    };
   }
 
   @Public()

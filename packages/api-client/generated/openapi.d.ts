@@ -156,6 +156,12 @@ export interface components {
             /** @example user@example.com */
             email: string;
         };
+        LoginResponseDto: {
+            /** Format: date-time */
+            accessTokenExpiresAt: string;
+            /** Format: date-time */
+            refreshTokenExpiresAt: string;
+        };
         AuthUserDto: {
             id: number;
             email: string;
@@ -264,12 +270,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Logged in */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LoginResponseDto"];
+                };
             };
         };
     };

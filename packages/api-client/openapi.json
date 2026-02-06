@@ -17,7 +17,14 @@
         },
         "responses": {
           "200": {
-            "description": "Logged in"
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -402,6 +409,23 @@
         },
         "required": [
           "email"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "accessTokenExpiresAt",
+          "refreshTokenExpiresAt"
         ]
       },
       "AuthUserDto": {

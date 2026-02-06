@@ -5,7 +5,8 @@ import { and, eq, ilike, isNull } from 'drizzle-orm';
 import { refreshTokens, users } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
-const REFRESH_TOKEN_EXPIRY_DAYS = 30;
+const REFRESH_TOKEN_EXPIRY_DAYS =
+  Number(process.env.REFRESH_TOKEN_EXPIRY_DAYS) || 30;
 
 function hashToken(raw: string): string {
   return createHash('sha256').update(raw).digest('hex');
@@ -22,7 +23,9 @@ export class TokenService {
     return this.jwtService.sign({ sub: user.id, email: user.email });
   }
 
-  async generateRefreshToken(user: { id: number }): Promise<string> {
+  async generateRefreshToken(user: {
+    id: number;
+  }): Promise<{ raw: string; expiresAt: Date }> {
     const raw = randomBytes(32).toString('hex');
     const hashed = hashToken(raw);
     const expiresAt = new Date(
@@ -35,7 +38,15 @@ export class TokenService {
       expiresAt,
     });
 
-    return raw;
+    return { raw, expiresAt };
+  }
+
+  getAccessTokenExpiry(token: string): Date | null {
+    const payload = this.jwtService.decode(token);
+    if (payload && typeof payload === 'object' && payload.exp) {
+      return new Date(payload.exp * 1000);
+    }
+    return null;
   }
 
   async refreshAccessToken(
@@ -71,7 +82,7 @@ export class TokenService {
       .where(eq(refreshTokens.id, row.id));
 
     const accessToken = this.generateAccessToken(user);
-    const refreshToken = await this.generateRefreshToken(user);
+    const { raw: refreshToken } = await this.generateRefreshToken(user);
 
     return { accessToken, refreshToken };
   }
