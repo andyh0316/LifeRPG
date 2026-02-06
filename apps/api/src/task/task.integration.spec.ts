@@ -7,8 +7,9 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 describe('Task Integration', () => {
   let app: INestApplication;
   let request: TestAgent;
+  let currentUserId: number;
   beforeAll(async () => {
-    ({ app, request } = await createIntegrationApp());
+    ({ app, request, currentUserId } = await createIntegrationApp());
   });
 
   afterAll(async () => {
@@ -190,7 +191,7 @@ describe('Task Integration', () => {
     // assert
     const fetchedTask: TaskResponseDto = res.body;
     expect(fetchedTask.id).toBe(createdTask.id);
-    expect(fetchedTask.userId).toBe(1);
+    expect(fetchedTask.userId).toBe(currentUserId);
     expect(fetchedTask.name).toBe(input.name);
     expect(fetchedTask.desc).toBe(input.desc);
     expect(fetchedTask.icon).toBe(input.icon);

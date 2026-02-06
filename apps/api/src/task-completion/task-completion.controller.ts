@@ -3,7 +3,7 @@ import { ApiCreatedResponse } from '@nestjs/swagger';
 import { TaskCompletionService } from './task-completion.service';
 import { CompleteTaskDto } from './dto/complete-task.dto';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
-import { getCurrentUserId } from '../auth/current-user';
+import { CurrentUser, type AuthUser } from '../auth/current-user.decorator';
 
 @Controller('task-completions')
 export class TaskCompletionController {
@@ -11,10 +11,7 @@ export class TaskCompletionController {
 
   @Post()
   @ApiCreatedResponse({ type: TaskCompletionResponseDto })
-  complete(@Body() body: CompleteTaskDto) {
-    return this.taskCompletionService.complete(
-      body.blockId,
-      getCurrentUserId(),
-    );
+  complete(@Body() body: CompleteTaskDto, @CurrentUser() user: AuthUser) {
+    return this.taskCompletionService.complete(body.blockId, user.id);
   }
 }

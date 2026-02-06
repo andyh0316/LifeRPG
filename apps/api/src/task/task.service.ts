@@ -55,11 +55,11 @@ export class TaskService {
     return this.toDto(row, blocks);
   }
 
-  async create(dto: CreateTaskDto): Promise<TaskResponseDto> {
+  async create(dto: CreateTaskDto, userId: number): Promise<TaskResponseDto> {
     return this.db.transaction(async (tx) => {
       const task = await this.taskRepository.create(
         {
-          userId: 1,
+          userId,
           name: dto.name,
           description: dto.desc,
           icon: dto.icon,

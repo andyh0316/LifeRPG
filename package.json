@@ -23,8 +23,9 @@
     "build:web": "pnpm --filter @life-rpg/web build",
     "test:api": "pnpm --filter @life-rpg/api test",
     "generate:api-client": "pnpm --filter @life-rpg/api-client generate",
-    "test:web": "playwright test",
-    "test:web:debug": "HEADED=1 SLOW=3 playwright test",
+    "test:web": "pnpm --filter @life-rpg/web test",
+    "pw-test:web": "playwright test",
+    "pw-test:web:debug": "HEADED=1 SLOW=3 playwright test",
     "menu": "npx ntl -A"
   },
   "devDependencies": {

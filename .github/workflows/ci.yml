@@ -63,12 +63,16 @@ jobs:
           TEST_DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
         run: pnpm db:migrate
 
-      # Run the test suite against the test database
-      - name: Run tests
+      # Run API tests against the test database
+      - name: Run API tests
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
           TEST_DATABASE_URL: postgresql://testuser:testpass@localhost:5432/life_rpg_test
         run: pnpm test:api
+
+      # Run web unit tests (vitest)
+      - name: Run web tests
+        run: pnpm test:web
 
   # ============================================
   # DEPLOY (Railway)
