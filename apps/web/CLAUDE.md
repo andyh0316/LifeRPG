@@ -1,1 +1,2 @@
 - Try to leverage MUI for where applicable.
+- Prefer `Stack` over `Box` when positioning more than one child.

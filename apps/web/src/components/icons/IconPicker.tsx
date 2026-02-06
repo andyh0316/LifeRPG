@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import AddPhotoAlternate from '@mui/icons-material/AddPhotoAlternate';
 import { ICON_REGISTRY, ICON_MAP, ICON_CATEGORIES } from './iconRegistry';
@@ -60,14 +61,14 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
 
   return (
     <>
-      <Button
-        variant="outlined"
-        onClick={() => setOpen(true)}
-        startIcon={SelectedIcon ? <SelectedIcon /> : <AddPhotoAlternate />}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        {value ?? 'Choose Icon'}
-      </Button>
+      <Tooltip title={value ?? ''} enterDelay={500}>
+        <IconButton
+          onClick={() => setOpen(true)}
+          sx={{ alignSelf: 'flex-start' }}
+        >
+          {SelectedIcon ? <SelectedIcon /> : <AddPhotoAlternate />}
+        </IconButton>
+      </Tooltip>
 
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>Choose an Icon</DialogTitle>
