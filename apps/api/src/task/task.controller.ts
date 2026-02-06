@@ -12,6 +12,8 @@ import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
+import { TaskTemplateDto } from './dto/task-template.dto';
+import { TASK_TEMPLATES } from './task-templates.data';
 import { CurrentUser, type AuthUser } from '../auth/current-user.decorator';
 
 @Controller('tasks')
@@ -22,6 +24,12 @@ export class TaskController {
   @ApiOkResponse({ type: [TaskResponseDto] })
   findAll() {
     return this.taskService.findAll();
+  }
+
+  @Get('templates')
+  @ApiOkResponse({ type: [TaskTemplateDto] })
+  getTemplates(): TaskTemplateDto[] {
+    return TASK_TEMPLATES;
   }
 
   @Get(':id')

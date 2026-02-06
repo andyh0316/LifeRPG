@@ -1,8 +1,8 @@
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
+import TextField from '@/components/mui/TextField';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
-import IconPicker from '../icons/IconPicker';
+import IconPicker from '@/components/icons/IconPicker';
 
 interface TaskFormFieldsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,14 +10,12 @@ interface TaskFormFieldsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>;
   errors: FieldErrors<{ name?: string }>;
-  shrinkLabels?: boolean;
 }
 
 export default function TaskFormFields({
   register,
   control,
   errors,
-  shrinkLabels,
 }: TaskFormFieldsProps) {
   return (
     <>
@@ -45,19 +43,10 @@ export default function TaskFormFields({
           {...register('name', { required: 'Name is required' })}
           error={!!errors.name}
           helperText={errors.name?.message}
-          slotProps={
-            shrinkLabels ? { inputLabel: { shrink: true } } : undefined
-          }
           fullWidth
         />
       </Stack>
-      <TextField
-        label="Description"
-        multiline
-        rows={3}
-        {...register('desc')}
-        slotProps={shrinkLabels ? { inputLabel: { shrink: true } } : undefined}
-      />
+      <TextField label="Description" multiline rows={3} {...register('desc')} />
     </>
   );
 }

@@ -4,9 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useEffect } from 'react';
 import { $api, type components } from '@life-rpg/api-client';
-import TaskFormHeader from '../../components/tasks/TaskFormHeader';
-import TaskFormFields from '../../components/tasks/TaskFormFields';
-import RewardTiersSection from '../../components/tasks/RewardTiersSection';
+import TaskFormHeader from './TaskFormHeader';
+import TaskFormFields from './TaskFormFields';
+import RewardTiersSection from './RewardTiersSection';
 
 type UpdateTaskDto = components['schemas']['UpdateTaskDto'];
 
@@ -80,7 +80,7 @@ export default function EditTask() {
   }
 
   return (
-    <>
+    <Box sx={{ maxWidth: 600 }}>
       <TaskFormHeader
         title="Edit Task"
         onCancel={() => navigate('/tasks')}
@@ -91,14 +91,9 @@ export default function EditTask() {
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 500 }}
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
       >
-        <TaskFormFields
-          register={register}
-          control={control}
-          errors={errors}
-          shrinkLabels
-        />
+        <TaskFormFields register={register} control={control} errors={errors} />
 
         <RewardTiersSection
           control={control}
@@ -109,6 +104,6 @@ export default function EditTask() {
           onUnitChange={handleUnitChange}
         />
       </Box>
-    </>
+    </Box>
   );
 }
