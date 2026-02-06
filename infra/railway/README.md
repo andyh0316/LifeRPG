@@ -37,7 +37,11 @@ Railway auto-detects the pnpm monorepo and creates a service for each workspace 
   - `VITE_API_URL` → the API domain from the previous step (e.g. `https://life-rpg-api-production-xxxx.up.railway.app`)
 - **Networking** → **Generate Domain**
 
-### 3. Run database migrations
+### 3. Database migrations
+
+Migrations run automatically before each API deploy via `preDeployCommand` in `apps/api/railway.toml`. No manual step needed.
+
+To run migrations manually (e.g. for debugging):
 
 ```bash
 brew install railway
@@ -45,8 +49,6 @@ railway login
 railway link         # select your project and the api service
 railway run pnpm db:migrate
 ```
-
-Re-run this step whenever you have new migrations to apply.
 
 ## Config as Code
 
