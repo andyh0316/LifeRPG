@@ -35,7 +35,7 @@ Railway auto-detects the pnpm monorepo and creates a service for each workspace 
 **web** — needs the API's public URL so Vite can inline it at build time:
 
 - Add **Variable**:
-  - `VITE_API_URL` → the API domain from the previous step (e.g. `https://life-rpg-api-production-xxxx.up.railway.app`)
+  - `VITE_API_URL` → the API domain from the previous step, with `https://` and `/api` suffix (e.g. `https://life-rpgapi-production.up.railway.app/api`). Must include the protocol — without it, the URL is treated as a relative path.
 - **Networking** → **Generate Domain**
 
 ### 3. Database migrations

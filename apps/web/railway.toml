@@ -1,5 +1,5 @@
 [build]
-buildCommand = "cd /app && pnpm install && echo VITE_API_URL=$VITE_API_URL && pnpm --filter @life-rpg/web build"
+buildCommand = "cd /app && pnpm install && pnpm --filter @life-rpg/web build"
 
 [deploy]
-startCommand = "npx serve apps/web/dist -l 3000"
+startCommand = "npx serve apps/web/dist -s -l 3000"
