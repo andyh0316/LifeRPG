@@ -28,7 +28,7 @@ export default function Login() {
         <Button
           variant="outlined"
           startIcon={<GoogleIcon />}
-          href="/api/auth/google-login"
+          href={`${import.meta.env.VITE_API_URL || '/api'}/auth/google-login`}
         >
           Sign in with Google
         </Button>
