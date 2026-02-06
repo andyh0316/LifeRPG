@@ -3,9 +3,9 @@ name: CI
 # Trigger on pushes to main or pull requests targeting main
 on:
   push:
-    branches: [main]
+    branches: [main, prod]
   pull_request:
-    branches: [main]
+    branches: [main, prod]
 
 jobs:
   # ============================================
@@ -77,5 +77,5 @@ jobs:
   # ============================================
   # DEPLOY (Railway)
   # ============================================
-  # Railway deploys automatically when CI passes on main (Wait for CI enabled).
+  # Railway deploys automatically when CI passes on prod (Wait for CI enabled).
   # See infra/railway/README.md for setup details.
