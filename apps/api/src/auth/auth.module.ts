@@ -16,7 +16,7 @@ import { GoogleStrategy } from './google.strategy';
     },
     SessionService,
     SessionGuard,
-    GoogleStrategy,
+    ...(process.env.GOOGLE_CLIENT_ID ? [GoogleStrategy] : []),
   ],
   exports: [SessionService, SessionGuard],
 })
