@@ -1,5 +1,5 @@
 [build]
-buildCommand = "cd ../.. && pnpm install && pnpm --filter @life-rpg/database build && pnpm --filter @life-rpg/api build"
+buildCommand = "cd /app && pnpm install && pnpm --filter @life-rpg/database build && pnpm --filter @life-rpg/api build"
 
 [deploy]
 startCommand = "node dist/main.js"

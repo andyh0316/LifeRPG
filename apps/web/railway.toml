@@ -1,5 +1,5 @@
 [build]
-buildCommand = "cd ../.. && pnpm install && pnpm --filter @life-rpg/web build"
+buildCommand = "cd /app && pnpm install && pnpm --filter @life-rpg/web build"
 
 [deploy]
 startCommand = "npx serve dist -l 3000"
