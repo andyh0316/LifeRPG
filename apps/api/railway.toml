@@ -1,0 +1,8 @@
+[build]
+buildCommand = "cd ../.. && pnpm install && pnpm --filter @life-rpg/database build && pnpm --filter @life-rpg/api build"
+
+[deploy]
+startCommand = "node dist/main.js"
+healthcheckPath = "/api"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
