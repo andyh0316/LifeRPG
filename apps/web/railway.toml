@@ -2,4 +2,4 @@
 buildCommand = "cd /app && pnpm install && pnpm --filter @life-rpg/web build"
 
 [deploy]
-startCommand = "npx serve dist -l 3000"
+startCommand = "pwd && ls -la && ls -la dist 2>/dev/null; npx serve dist -l 3000"

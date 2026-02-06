@@ -1,5 +1,7 @@
 ## First-Time Setup
 
+Railway needs three services: a **PostgreSQL database**, the **NestJS API**, and the **Vite frontend**. Build and start commands are versioned in `railway.toml` files, so the only manual dashboard work is connecting the repo, setting environment variables, and generating public URLs.
+
 Go to [railway.app](https://railway.app) and sign in with your GitHub account.
 
 ### 1. Create project + database
@@ -7,20 +9,35 @@ Go to [railway.app](https://railway.app) and sign in with your GitHub account.
 1. **New Project** → **Provision PostgreSQL**
 2. Click the Postgres service → **Variables** tab → note the `DATABASE_URL`
 
-### 2. Deploy the API
+### 2. Add the GitHub repo
 
-1. In the same project, click **"+ New"** → **"GitHub Repo"** → select the LifeRpg monorepo
-2. Rename the service to `api`
-3. Set **Root Directory** to `apps/api` (under Settings)
-4. Build/deploy config is handled by `apps/api/railway.toml` — no manual config needed
-5. Add **Variables**:
-   - `DATABASE_URL` → `${{Postgres.DATABASE_URL}}` (reference variable, auto-links to the DB)
-   - `NODE_ENV` → `production`
-6. **Settings** → **Networking** → **Generate Domain**
+Railway auto-detects the pnpm monorepo and creates a service for each workspace package (`api` and `web`). Build/deploy config is handled by the `railway.toml` in each app directory, so you only need to set environment variables and generate public URLs.
+
+1. **"+ New"** → **"GitHub Repo"** → select the LifeRpg monorepo
+2. Railway creates two services automatically — configure each:
+
+**Both services** — in **Settings**:
+
+- Click **"Add Root Directory"** → set to `apps/api` or `apps/web` respectively (so Railway finds the `railway.toml`)
+- Enable **Config-as-Code** (reads `railway.toml` from the repo for build/deploy settings)
+- Enable **Wait for CI** (Railway waits for GitHub Actions to pass before deploying)
+- Enable **Serverless** under Deploy (sleeps the service after 10 min of inactivity to save cost; first request after sleep has a cold start)
+
+**api** (configure first) — needs a database connection:
+
+- Add **Variables**:
+  - `DATABASE_URL` → `${{Postgres.DATABASE_URL}}` (reference variable, auto-links to the DB)
+  - `NODE_ENV` → `production`
+- **Networking** → **Generate Domain**
+- Deploy the service — once deployed, copy the generated domain URL for the next step
+
+**web** — needs the API's public URL so Vite can inline it at build time:
+
+- Add **Variable**:
+  - `VITE_API_URL` → the API domain from the previous step (e.g. `https://life-rpg-api-production-xxxx.up.railway.app`)
+- **Networking** → **Generate Domain**
 
 ### 3. Run database migrations
-
-Install the Railway CLI and run migrations against the Railway database:
 
 ```bash
 brew install railway
@@ -30,16 +47,6 @@ railway run pnpm db:migrate
 ```
 
 Re-run this step whenever you have new migrations to apply.
-
-### 4. Deploy the frontend
-
-1. Click **"+ New"** → **"GitHub Repo"** → select the same repo again
-2. Rename the service to `web`
-3. Set **Root Directory** to `apps/web`
-4. Build/deploy config is handled by `apps/web/railway.toml`
-5. Add **Variable**:
-   - `VITE_API_URL` → the public URL of the `api` service (e.g. `https://api-production-xxxx.up.railway.app`)
-6. **Generate Domain** under Networking
 
 ## Config as Code
 
