@@ -62,12 +62,12 @@ export default function EditTask() {
   };
 
   const handleUnitChange = (value: string) => {
-    const unit = value === '' ? null : (value as 'minutes');
+    const unit = value as 'count' | 'minutes';
     setValue('amountUnit', unit);
-    if (!unit) {
+    if (unit === 'count') {
       const firstBlock = {
         id: getValues('blocks.0.id'),
-        amount: null,
+        amount: 1,
         xpReward: getValues('blocks.0.xpReward') ?? 0,
         coinReward: getValues('blocks.0.coinReward') ?? 0,
       };

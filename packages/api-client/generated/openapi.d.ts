@@ -196,7 +196,7 @@ export interface components {
         };
         TaskBlockResponseDto: {
             id: number;
-            amount?: number | null;
+            amount: number;
             xpReward: number;
             coinReward: number;
         };
@@ -206,37 +206,37 @@ export interface components {
             name: string;
             desc?: string | null;
             icon?: string | null;
-            /** @enum {string|null} */
-            amountUnit?: "minutes" | null;
+            /** @enum {string} */
+            amountUnit: "count" | "minutes";
             blocks: components["schemas"]["TaskBlockResponseDto"][];
         };
         CreateTaskBlockDto: {
-            amount?: number | null;
+            /** @default 1 */
+            amount: number;
             /** @default 0 */
             xpReward: number;
             /** @default 0 */
             coinReward: number;
         };
         TaskTemplateDto: {
-            key: string;
-            label: string;
             name: string;
             desc?: string | null;
             icon?: string | null;
-            /** @enum {string|null} */
-            amountUnit?: "minutes" | null;
+            /** @enum {string} */
+            amountUnit?: "count" | "minutes";
             blocks: components["schemas"]["CreateTaskBlockDto"][];
         };
         CreateTaskDto: {
             name: string;
             desc?: string | null;
             icon?: string | null;
-            /** @enum {string|null} */
-            amountUnit?: "minutes" | null;
+            /** @enum {string} */
+            amountUnit?: "count" | "minutes";
             blocks?: components["schemas"]["CreateTaskBlockDto"][];
         };
         UpdateTaskBlockDto: {
-            amount?: number | null;
+            /** @default 1 */
+            amount: number;
             /** @default 0 */
             xpReward: number;
             /** @default 0 */
@@ -248,8 +248,8 @@ export interface components {
             name?: string;
             desc?: string | null;
             icon?: string | null;
-            /** @enum {string|null} */
-            amountUnit?: "minutes" | null;
+            /** @enum {string} */
+            amountUnit?: "count" | "minutes";
             blocks?: components["schemas"]["UpdateTaskBlockDto"][];
         };
         CompleteTaskDto: {

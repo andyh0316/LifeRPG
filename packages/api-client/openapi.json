@@ -500,8 +500,7 @@
             "type": "number"
           },
           "amount": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           },
           "xpReward": {
             "type": "number"
@@ -512,6 +511,7 @@
         },
         "required": [
           "id",
+          "amount",
           "xpReward",
           "coinReward"
         ]
@@ -539,9 +539,9 @@
           "amountUnit": {
             "type": "string",
             "enum": [
+              "count",
               "minutes"
-            ],
-            "nullable": true
+            ]
           },
           "blocks": {
             "type": "array",
@@ -554,6 +554,7 @@
           "id",
           "userId",
           "name",
+          "amountUnit",
           "blocks"
         ]
       },
@@ -562,7 +563,7 @@
         "properties": {
           "amount": {
             "type": "number",
-            "nullable": true
+            "default": 1
           },
           "xpReward": {
             "type": "number",
@@ -577,12 +578,6 @@
       "TaskTemplateDto": {
         "type": "object",
         "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
           "name": {
             "type": "string"
           },
@@ -597,9 +592,9 @@
           "amountUnit": {
             "type": "string",
             "enum": [
+              "count",
               "minutes"
-            ],
-            "nullable": true
+            ]
           },
           "blocks": {
             "type": "array",
@@ -609,8 +604,6 @@
           }
         },
         "required": [
-          "key",
-          "label",
           "name",
           "blocks"
         ]
@@ -632,9 +625,9 @@
           "amountUnit": {
             "type": "string",
             "enum": [
+              "count",
               "minutes"
-            ],
-            "nullable": true
+            ]
           },
           "blocks": {
             "type": "array",
@@ -652,7 +645,7 @@
         "properties": {
           "amount": {
             "type": "number",
-            "nullable": true
+            "default": 1
           },
           "xpReward": {
             "type": "number",
@@ -687,9 +680,9 @@
           "amountUnit": {
             "type": "string",
             "enum": [
+              "count",
               "minutes"
-            ],
-            "nullable": true
+            ]
           },
           "blocks": {
             "type": "array",

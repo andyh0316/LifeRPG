@@ -19,8 +19,8 @@ const BLANK_DEFAULTS: CreateTaskDto = {
   name: '',
   desc: null,
   icon: null,
-  amountUnit: null,
-  blocks: [{ amount: null, xpReward: 0, coinReward: 0 }],
+  amountUnit: 'count',
+  blocks: [{ amount: 1, xpReward: 0, coinReward: 0 }],
 };
 
 export default function CreateTask() {
@@ -54,11 +54,11 @@ export default function CreateTask() {
   };
 
   const handleUnitChange = (value: string) => {
-    const unit = value === '' ? null : (value as 'minutes');
+    const unit = value as 'count' | 'minutes';
     setValue('amountUnit', unit);
-    if (!unit) {
+    if (unit === 'count') {
       const firstBlock = {
-        amount: null,
+        amount: 1,
         xpReward: getValues('blocks.0.xpReward') ?? 0,
         coinReward: getValues('blocks.0.coinReward') ?? 0,
       };
@@ -68,9 +68,9 @@ export default function CreateTask() {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleTemplateSelect = (key: string) => {
+  const handleTemplateSelect = (name: string) => {
     setAnchorEl(null);
-    const template = templates?.find((t) => t.key === key);
+    const template = templates?.find((t) => t.name === name);
     if (!template) return;
     reset({
       name: template.name,
@@ -113,11 +113,14 @@ export default function CreateTask() {
             onClose={() => setAnchorEl(null)}
           >
             {templates?.map((t) => (
-              <MenuItem key={t.key} onClick={() => handleTemplateSelect(t.key)}>
+              <MenuItem
+                key={t.name}
+                onClick={() => handleTemplateSelect(t.name)}
+              >
                 <ListItemIcon>
                   <TaskIcon name={t.icon} fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>{t.label}</ListItemText>
+                <ListItemText>{t.name}</ListItemText>
               </MenuItem>
             ))}
           </Menu>

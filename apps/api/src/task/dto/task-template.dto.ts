@@ -3,12 +3,6 @@ import { CreateTaskBlockDto } from './create-task-block.dto';
 
 export class TaskTemplateDto {
   @ApiProperty({ type: String })
-  key!: string;
-
-  @ApiProperty({ type: String })
-  label!: string;
-
-  @ApiProperty({ type: String })
   name!: string;
 
   @ApiPropertyOptional({ type: String, nullable: true })
@@ -17,8 +11,8 @@ export class TaskTemplateDto {
   @ApiPropertyOptional({ type: String, nullable: true })
   icon?: string | null;
 
-  @ApiPropertyOptional({ enum: ['minutes'], nullable: true })
-  amountUnit?: 'minutes' | null;
+  @ApiPropertyOptional({ enum: ['count', 'minutes'] })
+  amountUnit?: 'count' | 'minutes';
 
   @ApiProperty({ type: [CreateTaskBlockDto] })
   blocks!: CreateTaskBlockDto[];
