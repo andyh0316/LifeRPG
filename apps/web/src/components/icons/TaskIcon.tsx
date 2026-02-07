@@ -1,5 +1,5 @@
-import Assignment from '@mui/icons-material/Assignment';
-import { ICON_MAP } from './iconRegistry';
+import * as MuiIcons from '@mui/icons-material';
+import type { SvgIconComponent } from '@mui/icons-material';
 
 interface TaskIconProps {
   name: string | null | undefined;
@@ -7,9 +7,8 @@ interface TaskIconProps {
 }
 
 export default function TaskIcon({ name, fontSize = 'medium' }: TaskIconProps) {
-  const IconComponent = name ? ICON_MAP[name] : null;
-  if (IconComponent) {
-    return <IconComponent fontSize={fontSize} />;
-  }
-  return <Assignment fontSize={fontSize} />;
+  if (!name) return null;
+  const IconComponent = (MuiIcons as Record<string, SvgIconComponent>)[name];
+  if (!IconComponent) return null;
+  return <IconComponent fontSize={fontSize} />;
 }
