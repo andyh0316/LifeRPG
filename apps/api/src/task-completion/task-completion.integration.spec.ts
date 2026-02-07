@@ -24,7 +24,7 @@ describe('Task Completion Integration', () => {
         name: 'Push-ups',
         desc: 'Do 20 push-ups',
         icon: 'muscle',
-        blocks: [{ amount: null, xpReward: 15, coinReward: 10 }],
+        blocks: [{ amount: 1, xpReward: 15, coinReward: 10 }],
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;

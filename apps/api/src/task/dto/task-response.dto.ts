@@ -17,8 +17,8 @@ export class TaskResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true })
   icon!: string | null;
 
-  @ApiPropertyOptional({ enum: ['minutes'], nullable: true })
-  amountUnit!: string | null;
+  @ApiProperty({ enum: ['count', 'minutes'] })
+  amountUnit!: string;
 
   @ApiProperty({ type: [TaskBlockResponseDto] })
   blocks!: TaskBlockResponseDto[];

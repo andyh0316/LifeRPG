@@ -29,10 +29,10 @@ export class UpdateTaskDto {
   @MaxLength(50)
   icon?: string | null;
 
-  @ApiPropertyOptional({ enum: ['minutes'], nullable: true })
+  @ApiPropertyOptional({ enum: ['count', 'minutes'] })
   @IsOptional()
-  @IsIn(['minutes'])
-  amountUnit?: 'minutes' | null;
+  @IsIn(['count', 'minutes'])
+  amountUnit?: 'count' | 'minutes';
 
   @ApiPropertyOptional({ type: [UpdateTaskBlockDto] })
   @IsOptional()

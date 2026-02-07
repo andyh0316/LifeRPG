@@ -14,10 +14,15 @@ set -a
 source "$DB_DIR/.env"
 set +a
 
+if [ "$NODE_ENV" != "development" ]; then
+  echo "Skipping backup (NODE_ENV=$NODE_ENV)"
+  exit 0
+fi
+
 mkdir -p "$BACKUP_DIR"
 
 # Create backup
-FILENAME="backup-$(date +%s).dump"
+FILENAME="backup-$(date +%Y_%m_%d__%H_%M_%S).dump"
 pg_dump -Fc "$DATABASE_URL" > "$BACKUP_DIR/$FILENAME"
 echo "Backup saved: $BACKUP_DIR/$FILENAME"
 

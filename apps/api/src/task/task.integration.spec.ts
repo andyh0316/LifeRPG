@@ -83,7 +83,7 @@ describe('Task Integration', () => {
       .post('/tasks')
       .send({
         name: 'Valid Task',
-        blocks: [{ amount: null, xpReward: 10, coinReward: 5 }],
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
       } as CreateTaskDto)
       .expect(201);
 
@@ -180,7 +180,7 @@ describe('Task Integration', () => {
       name: 'Stretching',
       desc: 'Morning stretching routine',
       icon: 'yoga',
-      blocks: [{ amount: null, xpReward: 15, coinReward: 8 }],
+      blocks: [{ amount: 1, xpReward: 15, coinReward: 8 }],
     };
     const createRes = await request.post('/tasks').send(input).expect(201);
     const createdTask: TaskResponseDto = createRes.body;
@@ -205,8 +205,8 @@ describe('Task Integration', () => {
       desc: 'Write in journal',
       icon: 'pencil',
       blocks: [
-        { amount: null, xpReward: 10, coinReward: 5 },
-        { amount: null, xpReward: 20, coinReward: 10 },
+        { amount: 1, xpReward: 10, coinReward: 5 },
+        { amount: 1, xpReward: 20, coinReward: 10 },
       ],
     };
     const createRes = await request.post('/tasks').send(input).expect(201);
