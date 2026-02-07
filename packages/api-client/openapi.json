@@ -269,6 +269,30 @@
         ]
       }
     },
+    "/tasks/templates": {
+      "get": {
+        "operationId": "TaskController_getTemplates",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaskTemplateDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
     "/tasks/{id}": {
       "get": {
         "operationId": "TaskController_findOne",
@@ -476,8 +500,7 @@
             "type": "number"
           },
           "amount": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           },
           "xpReward": {
             "type": "number"
@@ -488,6 +511,7 @@
         },
         "required": [
           "id",
+          "amount",
           "xpReward",
           "coinReward"
         ]
@@ -515,9 +539,9 @@
           "amountUnit": {
             "type": "string",
             "enum": [
+              "count",
               "minutes"
-            ],
-            "nullable": true
+            ]
           },
           "blocks": {
             "type": "array",
@@ -530,6 +554,7 @@
           "id",
           "userId",
           "name",
+          "amountUnit",
           "blocks"
         ]
       },
@@ -538,7 +563,7 @@
         "properties": {
           "amount": {
             "type": "number",
-            "nullable": true
+            "default": 1
           },
           "xpReward": {
             "type": "number",
@@ -549,6 +574,39 @@
             "default": 0
           }
         }
+      },
+      "TaskTemplateDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "count",
+              "minutes"
+            ]
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateTaskBlockDto"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "blocks"
+        ]
       },
       "CreateTaskDto": {
         "type": "object",
@@ -567,9 +625,9 @@
           "amountUnit": {
             "type": "string",
             "enum": [
+              "count",
               "minutes"
-            ],
-            "nullable": true
+            ]
           },
           "blocks": {
             "type": "array",
@@ -587,7 +645,7 @@
         "properties": {
           "amount": {
             "type": "number",
-            "nullable": true
+            "default": 1
           },
           "xpReward": {
             "type": "number",
@@ -622,9 +680,9 @@
           "amountUnit": {
             "type": "string",
             "enum": [
+              "count",
               "minutes"
-            ],
-            "nullable": true
+            ]
           },
           "blocks": {
             "type": "array",

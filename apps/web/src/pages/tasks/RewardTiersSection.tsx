@@ -1,7 +1,7 @@
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import TextField from '@/components/mui/TextField';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -10,6 +10,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import TimerIcon from '@mui/icons-material/Timer';
+import TagIcon from '@mui/icons-material/Tag';
 import { Controller, useWatch, FieldValues } from 'react-hook-form';
 
 interface RewardTiersSectionProps {
@@ -19,7 +20,7 @@ interface RewardTiersSectionProps {
   register: any;
   fields: FieldValues[];
   append: (value: {
-    amount: number | null;
+    amount: number;
     xpReward: number;
     coinReward: number;
   }) => void;
@@ -60,10 +61,10 @@ export default function RewardTiersSection({
               label="Unit"
               size="small"
               sx={{ width: 130 }}
-              value={field.value ?? ''}
+              value={field.value ?? 'count'}
               onChange={(e) => onUnitChange(e.target.value)}
             >
-              <MenuItem value="">None</MenuItem>
+              <MenuItem value="count">Count</MenuItem>
               <MenuItem value="minutes">Minutes</MenuItem>
             </TextField>
           )}
@@ -75,27 +76,29 @@ export default function RewardTiersSection({
           key={field.id}
           sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}
         >
-          {isTimed && (
-            <TextField
-              label="Minutes"
-              type="number"
-              size="small"
-              sx={{ width: 110 }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
+          <TextField
+            label={isTimed ? 'Minutes' : 'Count'}
+            type="number"
+            size="small"
+            sx={{ width: 110 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    {isTimed ? (
                       <TimerIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              {...register(`blocks.${index}.amount`, {
-                valueAsNumber: true,
-                min: 1,
-              })}
-            />
-          )}
+                    ) : (
+                      <TagIcon fontSize="small" />
+                    )}
+                  </InputAdornment>
+                ),
+              },
+            }}
+            {...register(`blocks.${index}.amount`, {
+              valueAsNumber: true,
+              min: 1,
+            })}
+          />
           <TextField
             label="XP"
             type="number"
@@ -137,7 +140,7 @@ export default function RewardTiersSection({
               min: 0,
             })}
           />
-          {isTimed && fields.length > 1 && (
+          {fields.length > 1 && (
             <IconButton size="small" onClick={() => remove(index)}>
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -145,15 +148,13 @@ export default function RewardTiersSection({
         </Box>
       ))}
 
-      {isTimed && (
-        <Button
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => append({ amount: null, xpReward: 0, coinReward: 0 })}
-        >
-          Add tier
-        </Button>
-      )}
+      <Button
+        size="small"
+        startIcon={<AddIcon />}
+        onClick={() => append({ amount: 1, xpReward: 0, coinReward: 0 })}
+      >
+        Add tier
+      </Button>
     </Box>
   );
 }

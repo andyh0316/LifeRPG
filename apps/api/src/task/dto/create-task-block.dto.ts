@@ -2,11 +2,11 @@ import { IsOptional, IsInt, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateTaskBlockDto {
-  @ApiPropertyOptional({ type: Number, nullable: true })
+  @ApiPropertyOptional({ type: Number, default: 1 })
   @IsOptional()
   @IsInt()
-  @Min(0)
-  amount?: number | null;
+  @Min(1)
+  amount?: number;
 
   @ApiPropertyOptional({ type: Number, default: 0 })
   @IsOptional()

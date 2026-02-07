@@ -116,6 +116,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tasks/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TaskController_getTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tasks/{id}": {
         parameters: {
             query?: never;
@@ -180,7 +196,7 @@ export interface components {
         };
         TaskBlockResponseDto: {
             id: number;
-            amount?: number | null;
+            amount: number;
             xpReward: number;
             coinReward: number;
         };
@@ -190,27 +206,37 @@ export interface components {
             name: string;
             desc?: string | null;
             icon?: string | null;
-            /** @enum {string|null} */
-            amountUnit?: "minutes" | null;
+            /** @enum {string} */
+            amountUnit: "count" | "minutes";
             blocks: components["schemas"]["TaskBlockResponseDto"][];
         };
         CreateTaskBlockDto: {
-            amount?: number | null;
+            /** @default 1 */
+            amount: number;
             /** @default 0 */
             xpReward: number;
             /** @default 0 */
             coinReward: number;
         };
+        TaskTemplateDto: {
+            name: string;
+            desc?: string | null;
+            icon?: string | null;
+            /** @enum {string} */
+            amountUnit?: "count" | "minutes";
+            blocks: components["schemas"]["CreateTaskBlockDto"][];
+        };
         CreateTaskDto: {
             name: string;
             desc?: string | null;
             icon?: string | null;
-            /** @enum {string|null} */
-            amountUnit?: "minutes" | null;
+            /** @enum {string} */
+            amountUnit?: "count" | "minutes";
             blocks?: components["schemas"]["CreateTaskBlockDto"][];
         };
         UpdateTaskBlockDto: {
-            amount?: number | null;
+            /** @default 1 */
+            amount: number;
             /** @default 0 */
             xpReward: number;
             /** @default 0 */
@@ -222,8 +248,8 @@ export interface components {
             name?: string;
             desc?: string | null;
             icon?: string | null;
-            /** @enum {string|null} */
-            amountUnit?: "minutes" | null;
+            /** @enum {string} */
+            amountUnit?: "count" | "minutes";
             blocks?: components["schemas"]["UpdateTaskBlockDto"][];
         };
         CompleteTaskDto: {
@@ -472,6 +498,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskResponseDto"];
+                };
+            };
+        };
+    };
+    TaskController_getTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskTemplateDto"][];
                 };
             };
         };

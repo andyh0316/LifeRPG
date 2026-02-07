@@ -10,10 +10,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
+import TaskIcon from '../../components/icons/TaskIcon';
 
 interface Block {
   id: number;
-  amount?: number | null;
+  amount: number;
   xpReward: number;
   coinReward: number;
 }
@@ -23,7 +24,7 @@ export interface TaskItemProps {
   name: string;
   desc?: string | null;
   icon?: string | null;
-  amountUnit?: string | null;
+  amountUnit: string;
   blocks: Block[];
   userId: number;
 }
@@ -90,7 +91,7 @@ export default function TaskItem({
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Box sx={{ fontSize: 24 }}>{icon ?? '📋'}</Box>
+        <TaskIcon name={icon} />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ lineHeight: 1.3 }}>
             {name}
@@ -120,9 +121,9 @@ export default function TaskItem({
             }}
           >
             <Typography variant="subtitle2">
-              {amountUnit === 'minutes' && block.amount != null
+              {amountUnit === 'minutes'
                 ? `${block.amount} min`
-                : '1 count'}
+                : `${block.amount} count`}
             </Typography>
             <Typography variant="caption">
               ⭐ {block.xpReward} XP &nbsp; 🪙 {block.coinReward}
