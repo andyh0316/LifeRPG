@@ -1,5 +1,11 @@
 import { TaskTemplateDto } from './dto/task-template.dto';
 
+// - brainstorming categories:
+//     - physical health: gym, walk, cleaning, chores
+//     - mental health: travel, meditate, journaling
+//     - relationship: spend time with X
+//     - work: work
+//     - learning: study
 export const TASK_TEMPLATES: TaskTemplateDto[] = [
   {
     name: 'Meditate',
@@ -21,16 +27,6 @@ export const TASK_TEMPLATES: TaskTemplateDto[] = [
     ],
   },
   {
-    name: 'Work',
-    icon: 'Computer',
-    amountUnit: 'minutes',
-    blocks: [
-      { amount: 30, xpReward: 60, coinReward: 60 },
-      { amount: 60, xpReward: 150, coinReward: 150 },
-      { amount: 90, xpReward: 250, coinReward: 250 },
-    ],
-  },
-  {
     name: 'Study',
     icon: 'MenuBook',
     amountUnit: 'minutes',
@@ -40,6 +36,17 @@ export const TASK_TEMPLATES: TaskTemplateDto[] = [
       { amount: 90, xpReward: 250, coinReward: 250 },
     ],
   },
+  {
+    name: 'Work',
+    icon: 'Computer',
+    amountUnit: 'minutes',
+    blocks: [
+      { amount: 30, xpReward: 60, coinReward: 60 },
+      { amount: 60, xpReward: 150, coinReward: 150 },
+      { amount: 90, xpReward: 250, coinReward: 250 },
+    ],
+  },
+
   {
     name: 'Chores',
     icon: 'CleaningServices',
