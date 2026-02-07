@@ -140,12 +140,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["TaskController_findOne"];
-        put?: never;
+        put: operations["TaskController_update"];
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch: operations["TaskController_update"];
+        patch?: never;
         trace?: never;
     };
     "/task-completions": {
@@ -196,6 +196,7 @@ export interface components {
         };
         TaskBlockResponseDto: {
             id: number;
+            sortOrder: number;
             amount: number;
             xpReward: number;
             coinReward: number;
@@ -242,15 +243,14 @@ export interface components {
             /** @default 0 */
             coinReward: number;
             id?: number;
-            delete?: boolean;
         };
         UpdateTaskDto: {
-            name?: string;
-            desc?: string | null;
-            icon?: string | null;
+            name: string;
+            desc: string | null;
+            icon: string | null;
             /** @enum {string} */
-            amountUnit?: "count" | "minutes";
-            blocks?: components["schemas"]["UpdateTaskBlockDto"][];
+            amountUnit: "count" | "minutes";
+            blocks: components["schemas"]["UpdateTaskBlockDto"][];
         };
         CompleteTaskDto: {
             blockId: number;

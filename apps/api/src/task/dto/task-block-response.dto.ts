@@ -5,6 +5,9 @@ export class TaskBlockResponseDto {
   id!: number;
 
   @ApiProperty({ type: Number })
+  sortOrder!: number;
+
+  @ApiProperty({ type: Number })
   amount!: number;
 
   @ApiProperty()

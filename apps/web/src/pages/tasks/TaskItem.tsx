@@ -14,6 +14,7 @@ import TaskIcon from '../../components/icons/TaskIcon';
 
 interface Block {
   id: number;
+  sortOrder: number;
   amount: number;
   xpReward: number;
   coinReward: number;

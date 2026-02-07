@@ -322,7 +322,7 @@
           "Task"
         ]
       },
-      "patch": {
+      "put": {
         "operationId": "TaskController_update",
         "parameters": [
           {
@@ -499,6 +499,9 @@
           "id": {
             "type": "number"
           },
+          "sortOrder": {
+            "type": "number"
+          },
           "amount": {
             "type": "number"
           },
@@ -511,6 +514,7 @@
         },
         "required": [
           "id",
+          "sortOrder",
           "amount",
           "xpReward",
           "coinReward"
@@ -657,9 +661,6 @@
           },
           "id": {
             "type": "number"
-          },
-          "delete": {
-            "type": "boolean"
           }
         }
       },
@@ -690,7 +691,14 @@
               "$ref": "#/components/schemas/UpdateTaskBlockDto"
             }
           }
-        }
+        },
+        "required": [
+          "name",
+          "desc",
+          "icon",
+          "amountUnit",
+          "blocks"
+        ]
       },
       "CompleteTaskDto": {
         "type": "object",

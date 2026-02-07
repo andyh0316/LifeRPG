@@ -1,8 +1,8 @@
+import { useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { useEffect } from 'react';
 import { $api, type components } from '@life-rpg/api-client';
 import TaskFormHeader from './TaskFormHeader';
 import TaskFormFields from './TaskFormFields';
@@ -45,13 +45,13 @@ export default function EditTask() {
     });
   }, [task, reset]);
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'blocks',
   });
 
-  const updateTask = $api.useMutation('patch', '/tasks/{id}', {
-    onSuccess: () => navigate('/tasks'),
+  const updateTask = $api.useMutation('put', '/tasks/{id}', {
+    onSuccess: () => navigate('/tasks', { state: { flash: 'Task saved!' } }),
   });
 
   const onSubmit = (data: UpdateTaskDto) => {
@@ -101,6 +101,7 @@ export default function EditTask() {
           fields={fields}
           append={append}
           remove={remove}
+          move={move}
           onUnitChange={handleUnitChange}
         />
       </Box>

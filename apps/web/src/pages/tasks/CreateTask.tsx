@@ -40,13 +40,13 @@ export default function CreateTask() {
     defaultValues: BLANK_DEFAULTS,
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: 'blocks',
   });
 
   const createTask = $api.useMutation('post', '/tasks', {
-    onSuccess: () => navigate('/tasks'),
+    onSuccess: () => navigate('/tasks', { state: { flash: 'Task created!' } }),
   });
 
   const onSubmit = (data: CreateTaskDto) => {
@@ -134,6 +134,7 @@ export default function CreateTask() {
           fields={fields}
           append={append}
           remove={remove}
+          move={move}
           onUnitChange={handleUnitChange}
         />
       </Box>

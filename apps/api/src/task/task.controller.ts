@@ -2,7 +2,7 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
+  Put,
   Param,
   Body,
   ParseIntPipe,
@@ -44,7 +44,7 @@ export class TaskController {
     return this.taskService.create(body, user.id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiOkResponse({ type: TaskResponseDto })
   update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateTaskDto) {
     return this.taskService.update(id, body);
