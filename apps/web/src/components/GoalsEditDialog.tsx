@@ -26,11 +26,11 @@ interface GoalsFormValues {
 }
 
 const FIELDS = [
-  { name: 'dailyXpTarget' as const, label: 'Daily' },
-  { name: 'weeklyXpTarget' as const, label: 'Weekly' },
-  { name: 'monthlyXpTarget' as const, label: 'Monthly' },
-  { name: 'quarterlyXpTarget' as const, label: 'Quarterly' },
-  { name: 'yearlyXpTarget' as const, label: 'Yearly' },
+  { name: 'dailyXpTarget' as const, label: 'Today' },
+  { name: 'weeklyXpTarget' as const, label: 'This Week' },
+  { name: 'monthlyXpTarget' as const, label: 'This Month' },
+  { name: 'quarterlyXpTarget' as const, label: 'This Quarter' },
+  { name: 'yearlyXpTarget' as const, label: 'This Year' },
 ];
 
 function toFormValues(

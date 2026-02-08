@@ -13,11 +13,11 @@ function getBarGreen(pct: number): string {
 }
 
 const PERIODS = [
-  { key: 'daily' as const, label: 'Daily' },
-  { key: 'weekly' as const, label: 'Weekly' },
-  { key: 'monthly' as const, label: 'Monthly' },
-  { key: 'quarterly' as const, label: 'Quarterly' },
-  { key: 'yearly' as const, label: 'Yearly' },
+  { key: 'daily' as const, label: 'Today' },
+  { key: 'weekly' as const, label: 'This Week' },
+  { key: 'monthly' as const, label: 'This Month' },
+  { key: 'quarterly' as const, label: 'This Quarter' },
+  { key: 'yearly' as const, label: 'This Year' },
 ];
 
 function GoalBar({
@@ -70,19 +70,19 @@ function GoalBar({
             fontSize: '0.75rem',
             fontWeight: 700,
             color: GAME_COLORS.textPrimary,
+            fontVariantNumeric: 'tabular-nums',
           }}
         >
-          {label}
+          {animatedCurrent} / {target} XP
         </Typography>
         <Typography
           sx={{
             fontSize: '0.75rem',
             fontWeight: 700,
             color: GAME_COLORS.textPrimary,
-            fontVariantNumeric: 'tabular-nums',
           }}
         >
-          {animatedCurrent} / {target} XP
+          {label}
         </Typography>
       </Box>
     </Box>

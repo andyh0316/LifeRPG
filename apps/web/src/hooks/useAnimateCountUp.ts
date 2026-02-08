@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
-/** Animates a number from 0 to `target` over `duration` ms with ease-out. */
+/** Animates a number from `initialValue` to `target` over `duration` ms with ease-out. */
 export default function useAnimateCountUp(
   target: number,
   duration = 800,
+  initialValue = 0,
 ): number {
-  const [value, setValue] = useState(0);
-  const prev = useRef(0);
+  const [value, setValue] = useState(initialValue);
+  const prev = useRef(initialValue);
 
   useEffect(() => {
     const start = prev.current;

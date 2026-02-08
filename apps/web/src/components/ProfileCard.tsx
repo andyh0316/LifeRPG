@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import StarIcon from '@mui/icons-material/Star';
-import GeneratingTokensIcon from '@mui/icons-material/GeneratingTokens';
+import CoinIcon from './icons/CoinIcon';
 import { $api } from '@life-rpg/api-client';
 import { GAME_COLORS } from '@/theme/gameTheme';
 import useAnimateCountUp from '@/hooks/useAnimateCountUp';
@@ -71,9 +71,7 @@ export default function ProfileCard() {
             border: `1px solid ${GAME_COLORS.coinGold}33`,
           }}
         >
-          <GeneratingTokensIcon
-            sx={{ fontSize: 14, color: GAME_COLORS.coinGold }}
-          />
+          <CoinIcon sx={{ fontSize: 14 }} />
           <Typography
             sx={{
               fontSize: '0.75rem',
