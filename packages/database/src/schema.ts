@@ -140,6 +140,7 @@ export const tasks = pgTable('tasks', {
   description: text('description'),
   icon: varchar('icon', { length: 50 }),
   amountUnit: amountUnitEnum('amount_unit').notNull().default('count'),
+  sortOrder: integer('sort_order').notNull().default(0),
 });
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({

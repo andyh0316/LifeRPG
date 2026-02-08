@@ -266,6 +266,80 @@ describe('Task Integration', () => {
     expect(fetchedTask.blocks).toHaveLength(1);
   });
 
+  it('DELETE /tasks/:id - soft-deletes a task', async () => {
+    // setup
+    const setupRes = await request
+      .post('/tasks')
+      .send({
+        name: 'To Delete',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const created: TaskResponseDto = setupRes.body;
+
+    // act
+    const res = await request.delete(`/tasks/${created.id}`).expect(200);
+
+    // assert
+    const deleted: TaskResponseDto = res.body;
+    expect(deleted.id).toBe(created.id);
+    expect(deleted.name).toBe('To Delete');
+  });
+
+  it('DELETE /tasks/:id - soft-deleted task excluded from GET /tasks', async () => {
+    // setup
+    const setupRes = await request
+      .post('/tasks')
+      .send({
+        name: 'Invisible After Delete',
+        blocks: [{ amount: 1, xpReward: 5, coinReward: 2 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const created: TaskResponseDto = setupRes.body;
+    await request.delete(`/tasks/${created.id}`).expect(200);
+
+    // act
+    const res = await request.get('/tasks').expect(200);
+
+    // assert
+    const tasks: TaskResponseDto[] = res.body;
+    const found = tasks.find((t) => t.id === created.id);
+    expect(found).toBeUndefined();
+  });
+
+  it('PATCH /tasks/reorder - persists new task order', async () => {
+    // setup
+    const taskA = await request
+      .post('/tasks')
+      .send({
+        name: 'Reorder A',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const taskB = await request
+      .post('/tasks')
+      .send({
+        name: 'Reorder B',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const idA: number = taskA.body.id;
+    const idB: number = taskB.body.id;
+
+    // act — reverse order: B before A
+    await request
+      .patch('/tasks/reorder')
+      .send({ ids: [idB, idA] })
+      .expect(204);
+
+    // assert
+    const res = await request.get('/tasks').expect(200);
+    const tasks: TaskResponseDto[] = res.body;
+    const indexA = tasks.findIndex((t) => t.id === idA);
+    const indexB = tasks.findIndex((t) => t.id === idB);
+    expect(indexB).toBeLessThan(indexA);
+  });
+
   it('GET /tasks - returns all tasks with blocks', async () => {
     // setup
     const input: CreateTaskDto = {

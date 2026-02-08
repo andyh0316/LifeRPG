@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tasks/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["TaskController_reorder"];
+        trace?: never;
+    };
     "/tasks/{id}": {
         parameters: {
             query?: never;
@@ -142,7 +158,7 @@ export interface paths {
         get: operations["TaskController_findOne"];
         put: operations["TaskController_update"];
         post?: never;
-        delete?: never;
+        delete: operations["TaskController_remove"];
         options?: never;
         head?: never;
         patch?: never;
@@ -258,6 +274,9 @@ export interface components {
             /** @enum {string} */
             amountUnit?: "count" | "minutes";
             blocks: components["schemas"]["CreateTaskBlockDto"][];
+        };
+        ReorderTasksDto: {
+            ids: number[];
         };
         CreateTaskDto: {
             name: string;
@@ -580,6 +599,27 @@ export interface operations {
             };
         };
     };
+    TaskController_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderTasksDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     TaskController_findOne: {
         parameters: {
             query?: never;
@@ -615,6 +655,27 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateTaskDto"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponseDto"];
+                };
+            };
+        };
+    };
+    TaskController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {

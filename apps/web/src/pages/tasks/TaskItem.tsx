@@ -1,9 +1,15 @@
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import EditIcon from '@mui/icons-material/Edit';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
@@ -47,6 +53,23 @@ export default function TaskItem({
   userId,
   index = 0,
 }: TaskItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging
+      ? 'none'
+      : transition
+        ? `${transition}, box-shadow 0.2s ease`
+        : 'transform 0.2s ease, box-shadow 0.2s ease',
+  };
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -75,21 +98,44 @@ export default function TaskItem({
     },
   });
 
-  const handleBlockClick = (blockId: number) => {
+  const deleteTask = $api.useMutation('delete', '/tasks/{id}', {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/tasks').queryKey,
+      });
+      toast.success('Task deleted');
+    },
+    onError: () => {
+      toast.error('Failed to delete task');
+    },
+  });
+
+  const [confirmBlock, setConfirmBlock] = useState<Block | null>(null);
+
+  const handleBlockClick = (block: Block) => {
     playClickSound();
-    if (!window.confirm(`Complete "${name}"?`)) return;
-    completeBlock.mutate({
-      body: { blockId },
-    });
+    setConfirmBlock(block);
+  };
+
+  const handleConfirm = () => {
+    if (!confirmBlock) return;
+    completeBlock.mutate({ body: { blockId: confirmBlock.id } });
+    setConfirmBlock(null);
+  };
+
+  const handleDelete = () => {
+    if (!window.confirm(`Delete "${name}"?`)) return;
+    deleteTask.mutate({ params: { path: { id } } });
   };
 
   return (
     <Box
+      ref={setNodeRef}
+      style={style}
       sx={{
         ...sxCard,
         mb: 1.5,
         p: 2,
-        transition: 'box-shadow 0.2s ease, transform 0.2s ease',
         animation: 'slideUpFadeIn 0.3s ease forwards',
         animationDelay: `${index * 0.04}s`,
         opacity: 0,
@@ -149,6 +195,35 @@ export default function TaskItem({
         >
           <EditIcon fontSize="small" />
         </IconButton>
+        <IconButton
+          className="quest-edit-btn"
+          size="small"
+          onClick={handleDelete}
+          sx={{
+            opacity: 0,
+            transition: 'opacity 0.15s ease',
+            color: GAME_COLORS.textMuted,
+            '&:hover': { color: '#e53935' },
+          }}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+        <Box
+          {...attributes}
+          {...listeners}
+          className="quest-edit-btn"
+          sx={{
+            cursor: 'grab',
+            display: 'flex',
+            alignItems: 'center',
+            color: GAME_COLORS.textMuted,
+            opacity: 0,
+            transition: 'opacity 0.15s ease',
+            flexShrink: 0,
+          }}
+        >
+          <DragIndicatorIcon fontSize="small" />
+        </Box>
       </Box>
 
       <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap' }}>
@@ -156,7 +231,7 @@ export default function TaskItem({
           <Button
             key={block.id}
             variant="text"
-            onClick={() => handleBlockClick(block.id)}
+            onClick={() => handleBlockClick(block)}
             sx={{
               textTransform: 'none',
               flexDirection: 'column',
@@ -215,24 +290,94 @@ export default function TaskItem({
                 sx={{
                   fontWeight: 700,
                   fontSize: '0.65rem',
-                  color: GAME_COLORS.xpGreen,
-                }}
-              >
-                {block.xpReward} XP
-              </Typography>
-              <Typography
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '0.65rem',
                   color: GAME_COLORS.coinGold,
                 }}
               >
                 {block.coinReward} G
               </Typography>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.65rem',
+                  color: GAME_COLORS.xpGreen,
+                }}
+              >
+                {block.xpReward} XP
+              </Typography>
             </Box>
           </Button>
         ))}
       </Stack>
+
+      <Dialog
+        open={!!confirmBlock}
+        onClose={() => setConfirmBlock(null)}
+        PaperProps={{
+          sx: {
+            ...sxCard,
+            p: 4,
+            textAlign: 'center',
+            minWidth: 320,
+          },
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            color: GAME_COLORS.textPrimary,
+            mb: 1,
+          }}
+        >
+          {name}
+        </Typography>
+
+        {confirmBlock && (
+          <Typography
+            sx={{
+              fontSize: '0.85rem',
+              color: GAME_COLORS.textSecondary,
+              mb: 3,
+            }}
+          >
+            {confirmBlock.amount} {amountUnit === 'minutes' ? 'min' : 'count'}{' '}
+            &middot;{' '}
+            <span style={{ color: GAME_COLORS.coinGold }}>
+              {confirmBlock.coinReward} G
+            </span>{' '}
+            &middot;{' '}
+            <span style={{ color: GAME_COLORS.xpGreen }}>
+              {confirmBlock.xpReward} XP
+            </span>
+          </Typography>
+        )}
+
+        <Button
+          variant="contained"
+          onClick={handleConfirm}
+          sx={{
+            fontWeight: 800,
+            fontSize: '1.1rem',
+            py: 2,
+            px: 6,
+            borderRadius: GAME_RADII.card,
+            bgcolor: GAME_COLORS.accent,
+            color: '#fff',
+            boxShadow: `0 4px 16px ${GAME_COLORS.accent}40`,
+            '&:hover': {
+              bgcolor: GAME_COLORS.accent,
+              boxShadow: `0 6px 24px ${GAME_COLORS.accent}60`,
+              transform: 'translateY(-1px)',
+            },
+            '&:active': {
+              transform: 'translateY(1px)',
+              boxShadow: `0 2px 8px ${GAME_COLORS.accent}30`,
+            },
+          }}
+        >
+          Complete
+        </Button>
+      </Dialog>
     </Box>
   );
 }

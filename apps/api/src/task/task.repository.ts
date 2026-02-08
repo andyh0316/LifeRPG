@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, isNull } from 'drizzle-orm';
 import { tasks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
@@ -15,7 +15,8 @@ export class TaskRepository {
     includeCompletions?: boolean;
   }) {
     const rows = await this.db.query.tasks.findMany({
-      orderBy: [asc(tasks.id)],
+      where: isNull(tasks.deletedAt),
+      orderBy: [asc(tasks.sortOrder), asc(tasks.id)],
       with: {
         ...(options?.includeBlocks && { blocks: true }),
         ...(options?.includeCompletions && { completions: true }),
@@ -26,7 +27,10 @@ export class TaskRepository {
   }
 
   async findById(id: number): Promise<TaskRow | undefined> {
-    const [row] = await this.db.select().from(tasks).where(eq(tasks.id, id));
+    const [row] = await this.db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.id, id), isNull(tasks.deletedAt)));
     return row;
   }
 
@@ -44,6 +48,28 @@ export class TaskRepository {
       .update(tasks)
       .set(data)
       .where(eq(tasks.id, id))
+      .returning();
+    return row;
+  }
+
+  async updateSortOrders(updates: { id: number; sortOrder: number }[]) {
+    await this.db.transaction(async (tx) => {
+      await Promise.all(
+        updates.map((u) =>
+          tx
+            .update(tasks)
+            .set({ sortOrder: u.sortOrder })
+            .where(eq(tasks.id, u.id)),
+        ),
+      );
+    });
+  }
+
+  async softDelete(id: number): Promise<TaskRow | undefined> {
+    const [row] = await this.db
+      .update(tasks)
+      .set({ deletedAt: new Date() })
+      .where(and(eq(tasks.id, id), isNull(tasks.deletedAt)))
       .returning();
     return row;
   }

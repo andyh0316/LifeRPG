@@ -91,6 +91,20 @@ export class TaskService {
     });
   }
 
+  async reorder(ids: number[]): Promise<void> {
+    const updates = ids.map((id, i) => ({ id, sortOrder: i }));
+    await this.taskRepository.updateSortOrders(updates);
+  }
+
+  async remove(id: number): Promise<TaskResponseDto> {
+    const row = await this.taskRepository.softDelete(id);
+    if (!row) {
+      throw new NotFoundException(`Task ${id} not found`);
+    }
+    const blocks = await this.taskBlockRepository.findByTaskId(id);
+    return this.toDto(row, blocks);
+  }
+
   async update(id: number, dto: UpdateTaskDto): Promise<TaskResponseDto> {
     return this.db.transaction(async (tx) => {
       const task = await this.taskRepository.update(
