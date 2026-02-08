@@ -69,7 +69,7 @@ export default function TaskItem({
       setCompleted(true);
       setEarnedCoins(data.coinsEarned);
       toast.success(
-        `Task completed! +${data.xpEarned} XP, +${data.coinsEarned} gold`,
+        `Task completed! +${data.xpEarned.toLocaleString()} XP, +${data.coinsEarned.toLocaleString()} gold`,
       );
     },
     onError: () => {

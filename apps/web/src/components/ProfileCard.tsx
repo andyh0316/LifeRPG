@@ -79,7 +79,7 @@ export default function ProfileCard() {
               color: GAME_COLORS.coinGold,
             }}
           >
-            {animatedCoins}
+            {animatedCoins.toLocaleString()}
           </Typography>
         </Box>
         <Box
@@ -102,7 +102,7 @@ export default function ProfileCard() {
               color: GAME_COLORS.xpGreen,
             }}
           >
-            {animatedXp} XP
+            {animatedXp.toLocaleString()} XP
           </Typography>
         </Box>
       </Box>

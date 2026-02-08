@@ -41,7 +41,7 @@ function CompletionRewards({
             color: GAME_COLORS.coinGold,
           }}
         >
-          +{animatedCoins} G
+          +{animatedCoins.toLocaleString()} G
         </Typography>
       </Box>
 
@@ -158,7 +158,7 @@ export default function CompletionDialog({
                   color: GAME_COLORS.coinGold,
                 }}
               >
-                {confirmBlock.coinReward} G
+                {confirmBlock.coinReward.toLocaleString()} G
               </Typography>
             </Box>
             <Box
@@ -183,7 +183,7 @@ export default function CompletionDialog({
                   color: GAME_COLORS.xpGreen,
                 }}
               >
-                {confirmBlock.xpReward} XP
+                {confirmBlock.xpReward.toLocaleString()} XP
               </Typography>
             </Box>
           </Box>

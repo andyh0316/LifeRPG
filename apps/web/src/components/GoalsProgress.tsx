@@ -51,7 +51,6 @@ function GoalBar({
           width: `${pct}%`,
           borderRadius: GAME_RADII.progressBar,
           bgcolor: barColor,
-          transition: 'width 0.6s ease',
           animation: isComplete ? 'subtlePulse 2s ease infinite' : undefined,
         }}
       />
@@ -73,7 +72,7 @@ function GoalBar({
             fontVariantNumeric: 'tabular-nums',
           }}
         >
-          {animatedCurrent} / {target} XP
+          {animatedCurrent.toLocaleString()} / {target.toLocaleString()} XP
         </Typography>
         <Typography
           sx={{

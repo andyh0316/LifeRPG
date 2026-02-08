@@ -43,7 +43,6 @@ export default function CompletionProgressBar({
             width: `${pct}%`,
             borderRadius: GAME_RADII.progressBar,
             bgcolor: barColor,
-            transition: 'width 0.05s linear',
           }}
         />
         <Box
@@ -64,7 +63,7 @@ export default function CompletionProgressBar({
               fontVariantNumeric: 'tabular-nums',
             }}
           >
-            {animated} / {target} XP
+            {animated.toLocaleString()} / {target.toLocaleString()} XP
           </Typography>
           <Typography
             sx={{
