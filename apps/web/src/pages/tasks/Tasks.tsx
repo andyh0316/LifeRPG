@@ -2,32 +2,33 @@ import { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import List from '@mui/material/List';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { $api } from '@life-rpg/api-client';
+import GoalsDialog from '@/components/GoalsDialog';
+import { useToast } from '@/components/toast';
 import TaskItem from './TaskItem';
 
 /** Displays the full list of available tasks with their rewards. */
 export default function Tasks() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   const { data: tasks = [], isLoading } = $api.useQuery('get', '/tasks');
   const { data: users = [] } = $api.useQuery('get', '/users');
   const userId = users[0]?.id;
 
-  const [flash, setFlash] = useState<string | null>(null);
+  const [goalsOpen, setGoalsOpen] = useState(false);
 
   useEffect(() => {
     const state = location.state as { flash?: string } | null;
     if (state?.flash) {
-      setFlash(state.flash);
-      // Clear the state so it doesn't re-show on refresh
+      toast.success(state.flash);
       window.history.replaceState({}, '');
     }
-  }, [location.state]);
+  }, [location.state, toast]);
 
   if (isLoading) {
     return <Typography>Loading…</Typography>;
@@ -45,6 +46,14 @@ export default function Tasks() {
         >
           Create
         </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<TrackChangesIcon />}
+          onClick={() => setGoalsOpen(true)}
+        >
+          Goals
+        </Button>
       </Box>
       <List>
         {userId &&
@@ -53,16 +62,7 @@ export default function Tasks() {
           ))}
       </List>
 
-      <Snackbar
-        open={flash != null}
-        autoHideDuration={3000}
-        onClose={() => setFlash(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert severity="success" onClose={() => setFlash(null)}>
-          {flash}
-        </Alert>
-      </Snackbar>
+      <GoalsDialog open={goalsOpen} onClose={() => setGoalsOpen(false)} />
     </>
   );
 }

@@ -391,6 +391,56 @@
           "TaskCompletion"
         ]
       }
+    },
+    "/user-character/goals": {
+      "get": {
+        "operationId": "UserCharacterController_getGoals",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      },
+      "patch": {
+        "operationId": "UserCharacterController_updateGoals",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGoalsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      }
     }
   },
   "info": {
@@ -742,6 +792,71 @@
           "coinsEarned",
           "completedAt"
         ]
+      },
+      "GoalsResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "dailyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "weeklyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "quarterlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "yearlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "dailyXpTarget",
+          "weeklyXpTarget",
+          "monthlyXpTarget",
+          "quarterlyXpTarget",
+          "yearlyXpTarget"
+        ]
+      },
+      "UpdateGoalsDto": {
+        "type": "object",
+        "properties": {
+          "dailyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "weeklyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "quarterlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "yearlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          }
+        }
       }
     }
   }

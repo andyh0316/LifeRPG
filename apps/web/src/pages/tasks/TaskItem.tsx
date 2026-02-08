@@ -1,16 +1,14 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import EditIcon from '@mui/icons-material/Edit';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import TaskIcon from '../../components/icons/TaskIcon';
+import { useToast } from '../../components/toast';
 
 interface Block {
   id: number;
@@ -42,11 +40,7 @@ export default function TaskItem({
 }: TaskItemProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({ open: false, message: '', severity: 'success' });
+  const toast = useToast();
 
   const completeBlock = $api.useMutation('post', '/task-completions', {
     onSuccess: (data) => {
@@ -58,18 +52,12 @@ export default function TaskItem({
           params: { path: { id: userId } },
         }).queryKey,
       });
-      setSnackbar({
-        open: true,
-        message: `Task completed! +${data.xpEarned} XP, +${data.coinsEarned} coins`,
-        severity: 'success',
-      });
+      toast.success(
+        `Task completed! +${data.xpEarned} XP, +${data.coinsEarned} coins`,
+      );
     },
     onError: () => {
-      setSnackbar({
-        open: true,
-        message: 'Failed to complete task',
-        severity: 'error',
-      });
+      toast.error('Failed to complete task');
     },
   });
 
@@ -132,20 +120,6 @@ export default function TaskItem({
           </Button>
         ))}
       </Stack>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity={snackbar.severity}
-          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }

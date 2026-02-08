@@ -3,11 +3,18 @@ import { APP_GUARD } from '@nestjs/core';
 import { UserModule } from './user/user.module';
 import { TaskModule } from './task/task.module';
 import { TaskCompletionModule } from './task-completion/task-completion.module';
+import { UserCharacterModule } from './user-character/user-character.module';
 import { AuthModule } from './auth/auth.module';
 import { SessionGuard } from './auth/session.guard';
 
 @Module({
-  imports: [AuthModule, UserModule, TaskModule, TaskCompletionModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    TaskModule,
+    TaskCompletionModule,
+    UserCharacterModule,
+  ],
   providers: [
     {
       provide: APP_GUARD,

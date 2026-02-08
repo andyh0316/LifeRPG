@@ -45,6 +45,10 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [userCharacter.userId],
   }),
+  characterSettings: one(userCharacterSettings, {
+    fields: [users.id],
+    references: [userCharacterSettings.userId],
+  }),
   tasks: many(tasks),
   taskCompletions: many(taskCompletions),
   rewardRedemptions: many(rewardRedemptions),
@@ -61,8 +65,6 @@ export const userCharacter = pgTable('user_character', {
   level: integer('level').notNull().default(1),
   xp: integer('xp').notNull().default(0),
   coins: integer('coins').notNull().default(0),
-  dailyXpTarget: integer('daily_xp_target'),
-  weeklyXpTarget: integer('weekly_xp_target'),
 });
 
 export const userCharacterRelations = relations(userCharacter, ({ one }) => ({
@@ -71,6 +73,34 @@ export const userCharacterRelations = relations(userCharacter, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// ============================================================================
+// User Character Settings
+// ============================================================================
+
+export const userCharacterSettings = pgTable('user_character_settings', {
+  id: serial('id').primaryKey(),
+  ...auditColumns,
+  userId: integer('user_id')
+    .notNull()
+    .unique()
+    .references(() => users.id),
+  dailyXpTarget: integer('daily_xp_target'),
+  weeklyXpTarget: integer('weekly_xp_target'),
+  monthlyXpTarget: integer('monthly_xp_target'),
+  quarterlyXpTarget: integer('quarterly_xp_target'),
+  yearlyXpTarget: integer('yearly_xp_target'),
+});
+
+export const userCharacterSettingsRelations = relations(
+  userCharacterSettings,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userCharacterSettings.userId],
+      references: [users.id],
+    }),
+  }),
+);
 
 // ============================================================================
 // Auth

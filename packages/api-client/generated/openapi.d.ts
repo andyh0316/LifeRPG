@@ -164,6 +164,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user-character/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserCharacterController_getGoals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["UserCharacterController_updateGoals"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -263,6 +279,22 @@ export interface components {
             coinsEarned: number;
             /** Format: date-time */
             completedAt: string;
+        };
+        GoalsResponseDto: {
+            id: number;
+            userId: number;
+            dailyXpTarget: number | null;
+            weeklyXpTarget: number | null;
+            monthlyXpTarget: number | null;
+            quarterlyXpTarget: number | null;
+            yearlyXpTarget: number | null;
+        };
+        UpdateGoalsDto: {
+            dailyXpTarget?: number | null;
+            weeklyXpTarget?: number | null;
+            monthlyXpTarget?: number | null;
+            quarterlyXpTarget?: number | null;
+            yearlyXpTarget?: number | null;
         };
     };
     responses: never;
@@ -586,6 +618,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskCompletionResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_getGoals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalsResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_updateGoals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGoalsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalsResponseDto"];
                 };
             };
         };

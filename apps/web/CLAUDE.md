@@ -1,2 +1,3 @@
 - Try to leverage MUI for where applicable.
 - Prefer `Stack` over `Box` when positioning more than one child.
+- Always show a toast (MUI `Snackbar` + `Alert`) for "save" actions to confirm success or report errors.
