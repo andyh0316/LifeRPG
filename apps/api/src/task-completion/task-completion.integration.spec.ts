@@ -8,8 +8,20 @@ describe('Task Completion Integration', () => {
   let app: INestApplication;
   let request: TestAgent;
   let currentUserId: number;
+  let startTransaction: () => Promise<void>;
+  let rollbackTransaction: () => Promise<void>;
+
   beforeAll(async () => {
-    ({ app, request, currentUserId } = await createIntegrationApp());
+    ({ app, request, currentUserId, startTransaction, rollbackTransaction } =
+      await createIntegrationApp());
+  });
+
+  beforeEach(async () => {
+    await startTransaction();
+  });
+
+  afterEach(async () => {
+    await rollbackTransaction();
   });
 
   afterAll(async () => {
@@ -78,5 +90,37 @@ describe('Task Completion Integration', () => {
     const c2: TaskCompletionResponseDto = res2.body;
     expect(c2.xpEarned).toBe(25);
     expect(c2.coinsEarned).toBe(12);
+  });
+
+  it('GET /task-completions - returns completions for the current user', async () => {
+    // setup
+    const createRes = await request
+      .post('/tasks')
+      .send({
+        name: 'Read',
+        blocks: [
+          { amount: 1, xpReward: 10, coinReward: 5 },
+          { amount: 2, xpReward: 20, coinReward: 10 },
+        ],
+      } as CreateTaskDto)
+      .expect(201);
+    const task: TaskResponseDto = createRes.body;
+    await request
+      .post('/task-completions')
+      .send({ blockId: task.blocks[0].id })
+      .expect(201);
+    await request
+      .post('/task-completions')
+      .send({ blockId: task.blocks[1].id })
+      .expect(201);
+
+    // act
+    const res = await request.get('/task-completions').expect(200);
+
+    // assert
+    const completions: TaskCompletionResponseDto[] = res.body;
+    expect(completions).toHaveLength(2);
+    expect(completions[0].userId).toBe(currentUserId);
+    expect(completions[1].userId).toBe(currentUserId);
   });
 });

@@ -1,5 +1,4 @@
 import { INestApplication } from '@nestjs/common';
-import { sql } from 'drizzle-orm';
 import { taskCompletions, type Db } from '@life-rpg/database';
 import { TestAgent, createIntegrationApp } from '../test/setup-integration';
 import { GoalsResponseDto } from './dto/goals-response.dto';
@@ -12,9 +11,26 @@ describe('User Character Integration', () => {
   let db: Db;
   let request: TestAgent;
   let currentUserId: number;
+  let startTransaction: () => Promise<void>;
+  let rollbackTransaction: () => Promise<void>;
 
   beforeAll(async () => {
-    ({ app, db, request, currentUserId } = await createIntegrationApp());
+    ({
+      app,
+      db,
+      request,
+      currentUserId,
+      startTransaction,
+      rollbackTransaction,
+    } = await createIntegrationApp());
+  });
+
+  beforeEach(async () => {
+    await startTransaction();
+  });
+
+  afterEach(async () => {
+    await rollbackTransaction();
   });
 
   afterAll(async () => {
@@ -48,6 +64,12 @@ describe('User Character Integration', () => {
   });
 
   it('GET /user-character/goals - returns current goals after PATCH', async () => {
+    // setup
+    await request
+      .patch('/user-character/goals')
+      .send({ dailyXpTarget: 100 })
+      .expect(200);
+
     // act
     const res = await request.get('/user-character/goals').expect(200);
 
@@ -58,6 +80,12 @@ describe('User Character Integration', () => {
   });
 
   it('PATCH /user-character/goals - updates only sent fields, preserves others', async () => {
+    // setup
+    await request
+      .patch('/user-character/goals')
+      .send({ dailyXpTarget: 100 })
+      .expect(200);
+
     // act
     const res = await request
       .patch('/user-character/goals')
@@ -71,6 +99,12 @@ describe('User Character Integration', () => {
   });
 
   it('PATCH /user-character/goals - can set a target to null to clear it', async () => {
+    // setup
+    await request
+      .patch('/user-character/goals')
+      .send({ dailyXpTarget: 100, weeklyXpTarget: 500 })
+      .expect(200);
+
     // act
     const res = await request
       .patch('/user-character/goals')
@@ -113,10 +147,6 @@ describe('User Character Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = taskRes.body;
-
-    await db
-      .delete(taskCompletions)
-      .where(sql`${taskCompletions.userId} = ${currentUserId}`);
 
     await db.insert(taskCompletions).values([
       {

@@ -8,8 +8,20 @@ describe('Task Integration', () => {
   let app: INestApplication;
   let request: TestAgent;
   let currentUserId: number;
+  let startTransaction: () => Promise<void>;
+  let rollbackTransaction: () => Promise<void>;
+
   beforeAll(async () => {
-    ({ app, request, currentUserId } = await createIntegrationApp());
+    ({ app, request, currentUserId, startTransaction, rollbackTransaction } =
+      await createIntegrationApp());
+  });
+
+  beforeEach(async () => {
+    await startTransaction();
+  });
+
+  afterEach(async () => {
+    await rollbackTransaction();
   });
 
   afterAll(async () => {
@@ -359,10 +371,9 @@ describe('Task Integration', () => {
 
     // assert
     const tasks: TaskResponseDto[] = res.body;
-    expect(tasks.length).toBeGreaterThan(0);
-    const found = tasks.find((t) => t.id === createdTask.id);
-    expect(found).toBeDefined();
-    expect(found!.name).toBe(input.name);
-    expect(found!.blocks).toHaveLength(2);
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0].id).toBe(createdTask.id);
+    expect(tasks[0].name).toBe(input.name);
+    expect(tasks[0].blocks).toHaveLength(2);
   });
 });
