@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import { tasks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
@@ -38,6 +38,14 @@ export class TaskRepository {
       .from(tasks)
       .where(and(eq(tasks.id, id), isNull(tasks.deletedAt)));
     return row;
+  }
+
+  async getNextSortOrder(userId: number, tx?: Db): Promise<number> {
+    const [row] = await (tx ?? this.db)
+      .select({ value: sql<number>`coalesce(max(${tasks.sortOrder}), -1) + 1` })
+      .from(tasks)
+      .where(and(eq(tasks.userId, userId), isNull(tasks.deletedAt)));
+    return row.value;
   }
 
   async create(data: TaskInsert, tx?: Db): Promise<TaskRow> {

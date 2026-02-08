@@ -28,6 +28,7 @@ export class TaskService {
       name: row.name,
       desc: row.description,
       icon: row.icon,
+      sortOrder: row.sortOrder,
       amountUnit: row.amountUnit,
       blocks: blockRows.map(
         (o): TaskBlockResponseDto => ({
@@ -62,6 +63,7 @@ export class TaskService {
 
   async create(dto: CreateTaskDto, userId: number): Promise<TaskResponseDto> {
     return this.db.transaction(async (tx) => {
+      const sortOrder = await this.taskRepository.getNextSortOrder(userId, tx);
       const task = await this.taskRepository.create(
         {
           userId,
@@ -69,6 +71,7 @@ export class TaskService {
           description: dto.desc,
           icon: dto.icon,
           amountUnit: dto.amountUnit,
+          sortOrder,
         },
         tx,
       );

@@ -376,4 +376,28 @@ describe('Task Integration', () => {
     expect(tasks[0].name).toBe(input.name);
     expect(tasks[0].blocks).toHaveLength(2);
   });
+
+  it('POST /tasks - auto-assigns sequential sortOrder per user', async () => {
+    // act
+    const res1 = await request
+      .post('/tasks')
+      .send({
+        name: 'First Task',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const res2 = await request
+      .post('/tasks')
+      .send({
+        name: 'Second Task',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+
+    // assert
+    const task1: TaskResponseDto = res1.body;
+    const task2: TaskResponseDto = res2.body;
+    expect(task1.sortOrder).toBe(0);
+    expect(task2.sortOrder).toBe(1);
+  });
 });
