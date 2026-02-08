@@ -7,7 +7,8 @@ import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import List from '@mui/material/List';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { $api } from '@life-rpg/api-client';
-import GoalsDialog from '@/components/GoalsDialog';
+import GoalsEditDialog from '@/components/GoalsEditDialog';
+import GoalsProgress from '@/components/GoalsProgress';
 import { useToast } from '@/components/toast';
 import TaskItem from './TaskItem';
 
@@ -35,7 +36,7 @@ export default function Tasks() {
   }
 
   return (
-    <>
+    <Box sx={{ maxWidth: 600 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
         <Typography variant="h4">Tasks</Typography>
         <Button
@@ -55,6 +56,7 @@ export default function Tasks() {
           Goals
         </Button>
       </Box>
+      <GoalsProgress />
       <List>
         {userId &&
           tasks.map((task) => (
@@ -62,7 +64,7 @@ export default function Tasks() {
           ))}
       </List>
 
-      <GoalsDialog open={goalsOpen} onClose={() => setGoalsOpen(false)} />
-    </>
+      <GoalsEditDialog open={goalsOpen} onClose={() => setGoalsOpen(false)} />
+    </Box>
   );
 }

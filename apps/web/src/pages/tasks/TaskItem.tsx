@@ -9,6 +9,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import TaskIcon from '../../components/icons/TaskIcon';
 import { useToast } from '../../components/toast';
+import playClickSound from '../../utils/playClickSound';
+import playSuccessSound from '../../utils/playSuccessSound';
 
 interface Block {
   id: number;
@@ -52,6 +54,11 @@ export default function TaskItem({
           params: { path: { id: userId } },
         }).queryKey,
       });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/user-character/goals/progress')
+          .queryKey,
+      });
+      playSuccessSound();
       toast.success(
         `Task completed! +${data.xpEarned} XP, +${data.coinsEarned} coins`,
       );
@@ -62,6 +69,7 @@ export default function TaskItem({
   });
 
   const handleBlockClick = (blockId: number) => {
+    playClickSound();
     if (!window.confirm(`Complete "${name}"?`)) return;
     completeBlock.mutate({
       body: { blockId },

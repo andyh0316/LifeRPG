@@ -441,6 +441,27 @@
           "UserCharacter"
         ]
       }
+    },
+    "/user-character/goals/progress": {
+      "get": {
+        "operationId": "UserCharacterController_getGoalsProgress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsProgressResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      }
     }
   },
   "info": {
@@ -857,6 +878,49 @@
             "nullable": true
           }
         }
+      },
+      "PeriodProgressDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "number",
+            "nullable": true
+          },
+          "current": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "target",
+          "current"
+        ]
+      },
+      "GoalsProgressResponseDto": {
+        "type": "object",
+        "properties": {
+          "daily": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "weekly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "monthly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "quarterly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "yearly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          }
+        },
+        "required": [
+          "daily",
+          "weekly",
+          "monthly",
+          "quarterly",
+          "yearly"
+        ]
       }
     }
   }

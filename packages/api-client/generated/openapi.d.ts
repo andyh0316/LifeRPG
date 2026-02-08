@@ -180,6 +180,22 @@ export interface paths {
         patch: operations["UserCharacterController_updateGoals"];
         trace?: never;
     };
+    "/user-character/goals/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserCharacterController_getGoalsProgress"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -295,6 +311,17 @@ export interface components {
             monthlyXpTarget?: number | null;
             quarterlyXpTarget?: number | null;
             yearlyXpTarget?: number | null;
+        };
+        PeriodProgressDto: {
+            target: number | null;
+            current: number;
+        };
+        GoalsProgressResponseDto: {
+            daily: components["schemas"]["PeriodProgressDto"];
+            weekly: components["schemas"]["PeriodProgressDto"];
+            monthly: components["schemas"]["PeriodProgressDto"];
+            quarterly: components["schemas"]["PeriodProgressDto"];
+            yearly: components["schemas"]["PeriodProgressDto"];
         };
     };
     responses: never;
@@ -660,6 +687,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GoalsResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_getGoalsProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalsProgressResponseDto"];
                 };
             };
         };

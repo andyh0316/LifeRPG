@@ -44,7 +44,7 @@ function toFormValues(
   };
 }
 
-export default function GoalsDialog({ open, onClose }: GoalsDialogProps) {
+export default function GoalsEditDialog({ open, onClose }: GoalsDialogProps) {
   const toast = useToast();
   const queryClient = useQueryClient();
   const { data: goals } = $api.useQuery('get', '/user-character/goals');
@@ -62,6 +62,10 @@ export default function GoalsDialog({ open, onClose }: GoalsDialogProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/user-character/goals').queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/user-character/goals/progress')
+          .queryKey,
       });
       toast.success('Goals saved!');
       onClose();
