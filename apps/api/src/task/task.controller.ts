@@ -27,8 +27,8 @@ export class TaskController {
 
   @Get()
   @ApiOkResponse({ type: [TaskResponseDto] })
-  findAll() {
-    return this.taskService.findAll();
+  findAll(@CurrentUser() user: AuthUser) {
+    return this.taskService.findAll(user.id);
   }
 
   @Get('templates')

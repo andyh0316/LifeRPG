@@ -56,4 +56,16 @@ export const TASK_TEMPLATES: TaskTemplateDto[] = [
       { amount: 90, xpReward: 90, coinReward: 90 },
     ],
   },
+  {
+    name: 'Review & Plan',
+    icon: 'EditNote',
+    amountUnit: 'count',
+    blocks: [{ amount: 1, xpReward: 30, coinReward: 30 }],
+  },
+  {
+    name: 'Vitamins',
+    icon: 'Medication',
+    amountUnit: 'count',
+    blocks: [{ amount: 1, xpReward: 10, coinReward: 10 }],
+  },
 ];

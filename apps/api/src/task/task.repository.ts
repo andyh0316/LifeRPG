@@ -11,11 +11,17 @@ export class TaskRepository {
   constructor(@Inject('DATABASE') private db: Db) {}
 
   async findAll(options?: {
+    userId?: number;
     includeBlocks?: boolean;
     includeCompletions?: boolean;
   }) {
+    const conditions = [isNull(tasks.deletedAt)];
+    if (options?.userId != null) {
+      conditions.push(eq(tasks.userId, options.userId));
+    }
+
     const rows = await this.db.query.tasks.findMany({
-      where: isNull(tasks.deletedAt),
+      where: and(...conditions),
       orderBy: [asc(tasks.sortOrder), asc(tasks.id)],
       with: {
         ...(options?.includeBlocks && { blocks: true }),
