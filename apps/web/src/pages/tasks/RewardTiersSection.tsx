@@ -4,6 +4,7 @@ import Button from '@mui/material/Button';
 import TextField from '@/components/mui/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import AddIcon from '@mui/icons-material/Add';
+import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
 import { Controller, useWatch, FieldValues } from 'react-hook-form';
 import {
   DndContext,
@@ -75,7 +76,13 @@ export default function RewardTiersSection({
           mb: 1,
         }}
       >
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            color: GAME_COLORS.textPrimary,
+          }}
+        >
           Reward Tiers
         </Typography>
         <Controller
@@ -124,6 +131,12 @@ export default function RewardTiersSection({
         size="small"
         startIcon={<AddIcon />}
         onClick={() => append({ amount: 1, xpReward: 0, coinReward: 0 })}
+        sx={{
+          textTransform: 'none',
+          fontWeight: 600,
+          borderRadius: GAME_RADII.button,
+          color: GAME_COLORS.accent,
+        }}
       >
         Add tier
       </Button>

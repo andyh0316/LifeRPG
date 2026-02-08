@@ -10,6 +10,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@/components/mui/TextField';
 import { $api } from '@life-rpg/api-client';
 import { useToast } from './toast';
+import { GAME_COLORS, GAME_RADII, sxAccentButton } from '@/theme/gameTheme';
 
 interface GoalsDialogProps {
   open: boolean;
@@ -85,9 +86,27 @@ export default function GoalsEditDialog({ open, onClose }: GoalsDialogProps) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: { borderRadius: GAME_RADII.dialog },
+        },
+      }}
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
-        <DialogTitle>XP Goals</DialogTitle>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            color: GAME_COLORS.textPrimary,
+          }}
+        >
+          XP Goals
+        </DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             {FIELDS.map((field) => (
@@ -103,12 +122,23 @@ export default function GoalsEditDialog({ open, onClose }: GoalsDialogProps) {
             ))}
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={onClose}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              borderRadius: GAME_RADII.button,
+              color: GAME_COLORS.textSecondary,
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             type="submit"
             variant="contained"
             disabled={updateGoals.isPending}
+            sx={sxAccentButton}
           >
             Save
           </Button>

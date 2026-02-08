@@ -7,6 +7,7 @@ import { $api, type components } from '@life-rpg/api-client';
 import TaskFormHeader from './TaskFormHeader';
 import TaskFormFields from './TaskFormFields';
 import RewardTiersSection from './RewardTiersSection';
+import { sxCard } from '@/theme/gameTheme';
 
 type UpdateTaskDto = components['schemas']['UpdateTaskDto'];
 
@@ -91,7 +92,13 @@ export default function EditTask() {
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        sx={{
+          ...sxCard,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          p: 2.5,
+        }}
       >
         <TaskFormFields register={register} control={control} errors={errors} />
 

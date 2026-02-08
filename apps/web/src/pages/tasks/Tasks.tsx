@@ -10,6 +10,12 @@ import { $api } from '@life-rpg/api-client';
 import GoalsEditDialog from '@/components/GoalsEditDialog';
 import GoalsProgress from '@/components/GoalsProgress';
 import { useToast } from '@/components/toast';
+import {
+  GAME_SHADOWS,
+  sxPageTitle,
+  sxAccentButton,
+  sxOutlinedButton,
+} from '@/theme/gameTheme';
 import TaskItem from './TaskItem';
 
 /** Displays the full list of available tasks with their rewards. */
@@ -37,30 +43,36 @@ export default function Tasks() {
 
   return (
     <Box sx={{ maxWidth: 600 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-        <Typography variant="h4">Tasks</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Typography sx={{ ...sxPageTitle, flex: 1 }}>Quests</Typography>
+
         <Button
           variant="contained"
           size="small"
           startIcon={<AddIcon />}
           onClick={() => navigate('/tasks/create')}
+          sx={{ ...sxAccentButton, boxShadow: GAME_SHADOWS.button }}
         >
-          Create
+          New Quest
         </Button>
+
         <Button
           variant="outlined"
           size="small"
           startIcon={<TrackChangesIcon />}
           onClick={() => setGoalsOpen(true)}
+          sx={sxOutlinedButton}
         >
           Goals
         </Button>
       </Box>
+
       <GoalsProgress />
-      <List>
+
+      <List disablePadding>
         {userId &&
-          tasks.map((task) => (
-            <TaskItem key={task.id} {...task} userId={userId} />
+          tasks.map((task, index) => (
+            <TaskItem key={task.id} {...task} userId={userId} index={index} />
           ))}
       </List>
 

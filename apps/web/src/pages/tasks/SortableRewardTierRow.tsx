@@ -93,7 +93,7 @@ export default function SortableRewardTierRow({
         })}
       />
       <TextField
-        label="Coins"
+        label="Gold"
         type="number"
         size="small"
         sx={{ flex: 1 }}

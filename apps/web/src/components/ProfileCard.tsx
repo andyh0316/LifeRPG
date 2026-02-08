@@ -1,73 +1,113 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-// import LinearProgress from '@mui/material/LinearProgress';
 import Avatar from '@mui/material/Avatar';
-import Chip from '@mui/material/Chip';
 import StarIcon from '@mui/icons-material/Star';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import GeneratingTokensIcon from '@mui/icons-material/GeneratingTokens';
 import { $api } from '@life-rpg/api-client';
+import { GAME_COLORS } from '@/theme/gameTheme';
+import useAnimateCountUp from '@/hooks/useAnimateCountUp';
 
-// const XP_TO_NEXT_LEVEL = 500;
-
-/** Displays the current user's profile summary with level and XP progress. */
 export default function ProfileCard() {
-  // Fetch the user list to get the first user's ID.
   const { data: users = [] } = $api.useQuery('get', '/users');
   const userId = users[0]?.id;
 
-  // Fetch the full profile for the first user.
-  const { data: profile } = $api.useQuery('get', '/users/{id}', {
-    params: { path: { id: userId! } },
-  }, { enabled: !!userId });
+  const { data: profile } = $api.useQuery(
+    'get',
+    '/users/{id}',
+    { params: { path: { id: userId! } } },
+    { enabled: !!userId },
+  );
+
+  const animatedCoins = useAnimateCountUp(profile?.coins ?? 0);
+  const animatedXp = useAnimateCountUp(profile?.xp ?? 0);
 
   if (!profile) return null;
 
-  // const progress = (profile.xp / XP_TO_NEXT_LEVEL) * 100;
-
   return (
-    <Box sx={{ p: 2, textAlign: 'center' }}>
-      <Avatar sx={{ width: 56, height: 56, mx: 'auto', mb: 1 }}>
-        {profile.fullName.charAt(0).toUpperCase()}
-      </Avatar>
-      <Typography variant="subtitle1" fontWeight="bold">
-        {profile.fullName}
-      </Typography>
-      {/* <Typography variant="body2" color="text.secondary">
-        Level {profile.level}
-      </Typography> */}
-
-      {/* Coin balance and total XP */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1 }}>
-        <Chip
-          icon={<MonetizationOnIcon />}
-          label={profile.coins}
-          size="small"
-          color="warning"
-          variant="outlined"
-        />
-        <Chip
-          icon={<StarIcon />}
-          label={`${profile.xp} XP`}
-          size="small"
-          color="primary"
-          variant="outlined"
-        />
+    <Box
+      sx={{
+        mx: 1.5,
+        p: 1.5,
+        borderRadius: '10px',
+        bgcolor: GAME_COLORS.sidebarSurface,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+        <Avatar
+          sx={{
+            width: 36,
+            height: 36,
+            bgcolor: GAME_COLORS.avatarBg,
+            fontSize: '0.9rem',
+            fontWeight: 700,
+          }}
+        >
+          {profile.fullName.charAt(0).toUpperCase()}
+        </Avatar>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.85rem',
+            color: GAME_COLORS.sidebarText,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {profile.fullName}
+        </Typography>
       </Box>
 
-      {/* XP progress bar */}
-      {/* <Box sx={{ mt: 1.5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="caption">XP</Typography>
-          <Typography variant="caption">
-            {profile.xp} / {XP_TO_NEXT_LEVEL}
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            px: 1,
+            py: 0.25,
+            borderRadius: '6px',
+            bgcolor: GAME_COLORS.coinGoldSubtle,
+            border: `1px solid ${GAME_COLORS.coinGold}33`,
+          }}
+        >
+          <GeneratingTokensIcon
+            sx={{ fontSize: 14, color: GAME_COLORS.coinGold }}
+          />
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: GAME_COLORS.coinGold,
+            }}
+          >
+            {animatedCoins}
           </Typography>
         </Box>
-        <LinearProgress
-          variant="determinate"
-          value={progress}
-          sx={{ height: 8, borderRadius: 4 }}
-        />
-      </Box> */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            px: 1,
+            py: 0.25,
+            borderRadius: '6px',
+            bgcolor: GAME_COLORS.xpGreenSubtle,
+            border: `1px solid ${GAME_COLORS.xpGreen}33`,
+          }}
+        >
+          <StarIcon sx={{ fontSize: 14, color: GAME_COLORS.xpGreen }} />
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: GAME_COLORS.xpGreen,
+            }}
+          >
+            {animatedXp} XP
+          </Typography>
+        </Box>
+      </Box>
     </Box>
   );
 }

@@ -12,6 +12,7 @@ import TaskFormHeader from './TaskFormHeader';
 import TaskFormFields from './TaskFormFields';
 import RewardTiersSection from './RewardTiersSection';
 import TaskIcon from '@/components/icons/TaskIcon';
+import { sxCard, sxOutlinedButton } from '@/theme/gameTheme';
 
 type CreateTaskDto = components['schemas']['CreateTaskDto'];
 
@@ -97,13 +98,20 @@ export default function CreateTask() {
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        sx={{
+          ...sxCard,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          p: 2.5,
+        }}
       >
         <Box>
           <Button
             variant="outlined"
             size="small"
             onClick={(e) => setAnchorEl(e.currentTarget)}
+            sx={sxOutlinedButton}
           >
             Use Template
           </Button>
