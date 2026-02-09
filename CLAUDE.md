@@ -10,6 +10,10 @@ Never apply database migrations (e.g. `drizzle-kit migrate`) unless explicitly a
 
 - When asked to do any design-related task in plan mode, rephrase the user's prompt clearly in your own words before writing code. This ensures alignment and catches misunderstandings early.
 
+## Environment Variables
+
+- When adding a new variable to `apps/api/.env`, always add it to `apps/api/.env.example` as well.
+
 ## Code Style
 
 ## Automated Test
