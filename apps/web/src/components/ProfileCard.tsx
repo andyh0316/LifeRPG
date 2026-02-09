@@ -3,42 +3,40 @@ import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import StarIcon from '@mui/icons-material/Star';
 import CoinIcon from './icons/CoinIcon';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
-import { GAME_COLORS } from '@/theme/gameTheme';
+import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
 import useAnimateCountUp from '@/hooks/useAnimateCountUp';
 
-interface CharacterSummary {
-  id: number;
-  name: string;
-  level: number;
-  xp: number;
-  coins: number;
-}
-
-interface ProfileCardProps {
-  characters: CharacterSummary[];
-  activeCharacterId: number;
-}
-
-export default function ProfileCard({
-  characters,
-  activeCharacterId,
-}: ProfileCardProps) {
+export default function ProfileCard() {
   const queryClient = useQueryClient();
+
+  const { data: summary } = $api.useQuery('get', '/user-character/summary');
+  const characters = summary?.characters ?? [];
+  const activeCharacterId = summary?.activeCharacterId;
   const active =
     characters.find((c) => c.id === activeCharacterId) ?? characters[0];
 
-  const selectCharacter = $api.useMutation('patch', '/auth/select-character', {
+  const selectCharacter = $api.useMutation('patch', '/user-character/select', {
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
+      });
     },
   });
 
-  const animatedCoins = useAnimateCountUp(active.coins);
-  const animatedXp = useAnimateCountUp(active.xp);
+  const animatedCoins = useAnimateCountUp(active?.coins ?? 0);
+
+  const { data: xpLevels } = $api.useQuery('get', '/user-character/xp-levels');
+  const entry = xpLevels?.find((e) => e.level === active?.level);
+  const xpInLevel = entry && active ? active.xp - entry.cumulativeXp : 0;
+  const xpToNext = entry?.xpToNext ?? 0;
+  const isMaxLevel = xpToNext === 0;
+  const pct = isMaxLevel ? 100 : Math.min((xpInLevel / xpToNext) * 100, 100);
+  const animatedXpInLevel = useAnimateCountUp(xpInLevel);
+
+  if (!active) return null;
 
   return (
     <Box
@@ -104,6 +102,60 @@ export default function ProfileCard({
         )}
       </Box>
 
+      {/* Level bar */}
+      <Box sx={{ mb: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            mb: 0.5,
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              color: GAME_COLORS.xpGreen,
+            }}
+          >
+            Lv. {active.level}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: '0.65rem',
+              fontWeight: 600,
+              color: GAME_COLORS.sidebarTextMuted,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {isMaxLevel
+              ? 'MAX'
+              : `${animatedXpInLevel.toLocaleString()} / ${xpToNext.toLocaleString()} XP`}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            position: 'relative',
+            height: 6,
+            borderRadius: GAME_RADII.progressBar,
+            bgcolor: 'rgba(255,255,255,0.1)',
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              width: `${pct}%`,
+              borderRadius: GAME_RADII.progressBar,
+              bgcolor: GAME_COLORS.xpGreen,
+              transition: 'width 0.6s ease',
+            }}
+          />
+        </Box>
+      </Box>
+
       <Box sx={{ display: 'flex', gap: 1 }}>
         <Box
           sx={{
@@ -126,29 +178,6 @@ export default function ProfileCard({
             }}
           >
             {animatedCoins.toLocaleString()}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1,
-            py: 0.25,
-            borderRadius: '6px',
-            bgcolor: GAME_COLORS.xpGreenSubtle,
-            border: `1px solid ${GAME_COLORS.xpGreen}33`,
-          }}
-        >
-          <StarIcon sx={{ fontSize: 14, color: GAME_COLORS.xpGreen }} />
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              color: GAME_COLORS.xpGreen,
-            }}
-          >
-            {animatedXp.toLocaleString()} XP
           </Typography>
         </Box>
       </Box>

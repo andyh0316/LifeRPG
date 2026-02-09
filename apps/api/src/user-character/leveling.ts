@@ -101,3 +101,13 @@ export const XP_TABLE = [
   { level: 99, xpToNext: 4925, cumulativeXp: 192534 },
   { level: 100, xpToNext: null, cumulativeXp: 197459 },
 ] as const;
+
+/** Returns the level for a given cumulative XP total. */
+export function levelFromXp(xp: number): number {
+  for (let i = XP_TABLE.length - 1; i >= 0; i--) {
+    if (xp >= XP_TABLE[i].cumulativeXp) {
+      return XP_TABLE[i].level;
+    }
+  }
+  return 1;
+}

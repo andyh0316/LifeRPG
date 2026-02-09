@@ -36,22 +36,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/select-character": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: operations["AuthController_selectCharacter"];
-        trace?: never;
-    };
     "/auth/google-login": {
         parameters: {
             query?: never;
@@ -196,6 +180,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user-character/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserCharacterController_getSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user-character/select": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["UserCharacterController_selectCharacter"];
+        trace?: never;
+    };
     "/user-character/goals": {
         parameters: {
             query?: never;
@@ -248,21 +264,9 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        CharacterSummaryDto: {
-            id: number;
-            name: string;
-            level: number;
-            xp: number;
-            coins: number;
-        };
         AuthUserDto: {
             id: number;
             email: string;
-            userCharacterId: number;
-            characters: components["schemas"]["CharacterSummaryDto"][];
-        };
-        SelectCharacterDto: {
-            characterId: number;
         };
         UserDetailDto: {
             id: number;
@@ -360,6 +364,20 @@ export interface components {
         CompleteTaskDto: {
             blockId: number;
         };
+        CharacterSummaryItemDto: {
+            id: number;
+            name: string;
+            level: number;
+            xp: number;
+            coins: number;
+        };
+        CharacterSummaryResponseDto: {
+            activeCharacterId: number;
+            characters: components["schemas"]["CharacterSummaryItemDto"][];
+        };
+        SelectCharacterDto: {
+            characterId: number;
+        };
         GoalsResponseDto: {
             id: number;
             userCharacterId: number;
@@ -442,29 +460,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    AuthController_selectCharacter: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SelectCharacterDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthUserDto"];
-                };
             };
         };
     };
@@ -798,6 +793,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskCompletionResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_getSummary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterSummaryResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_selectCharacter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectCharacterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CharacterSummaryResponseDto"];
                 };
             };
         };

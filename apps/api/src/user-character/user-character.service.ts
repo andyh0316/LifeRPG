@@ -1,10 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, sql } from 'drizzle-orm';
-import { userCharacterSettings, taskCompletions } from '@life-rpg/database';
+import { asc, eq, sql } from 'drizzle-orm';
+import {
+  userCharacter,
+  userCharacterSettings,
+  taskCompletions,
+} from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import { UpdateGoalsDto } from './dto/update-goals.dto';
 import { GoalsResponseDto } from './dto/goals-response.dto';
 import { GoalsProgressResponseDto } from './dto/goals-progress-response.dto';
+import { levelFromXp } from './leveling';
 
 const goalsSelect = {
   id: userCharacterSettings.id,
@@ -19,6 +24,47 @@ const goalsSelect = {
 @Injectable()
 export class UserCharacterService {
   constructor(@Inject('DATABASE') private db: Db) {}
+
+  async getCharacters(
+    userId: number,
+  ): Promise<
+    { id: number; name: string; level: number; xp: number; coins: number }[]
+  > {
+    return this.db
+      .select({
+        id: userCharacter.id,
+        name: userCharacter.name,
+        level: userCharacter.level,
+        xp: userCharacter.xp,
+        coins: userCharacter.coins,
+      })
+      .from(userCharacter)
+      .where(eq(userCharacter.userId, userId))
+      .orderBy(asc(userCharacter.id));
+  }
+
+  async addXp(
+    userCharacterId: number,
+    xpDelta: number,
+    coinsDelta: number,
+    tx: Db = this.db,
+  ): Promise<void> {
+    const [row] = await tx
+      .select({ xp: userCharacter.xp })
+      .from(userCharacter)
+      .where(eq(userCharacter.id, userCharacterId));
+
+    const newXp = row.xp + xpDelta;
+
+    await tx
+      .update(userCharacter)
+      .set({
+        xp: newXp,
+        level: levelFromXp(newXp),
+        coins: sql`${userCharacter.coins} + ${coinsDelta}`,
+      })
+      .where(eq(userCharacter.id, userCharacterId));
+  }
 
   async getGoals(userCharacterId: number): Promise<GoalsResponseDto | null> {
     const [row] = await this.db

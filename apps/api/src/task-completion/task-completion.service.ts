@@ -4,14 +4,10 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { desc, eq, sql } from 'drizzle-orm';
-import {
-  tasks,
-  taskCompletions,
-  taskBlocks,
-  userCharacter,
-} from '@life-rpg/database';
+import { desc, eq } from 'drizzle-orm';
+import { tasks, taskCompletions, taskBlocks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
+import { UserCharacterService } from '../user-character/user-character.service';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 
 const completionSelect = {
@@ -25,7 +21,10 @@ const completionSelect = {
 
 @Injectable()
 export class TaskCompletionService {
-  constructor(@Inject('DATABASE') private db: Db) {}
+  constructor(
+    @Inject('DATABASE') private db: Db,
+    private userCharacterService: UserCharacterService,
+  ) {}
 
   async findAll(userCharacterId: number): Promise<TaskCompletionResponseDto[]> {
     return this.db
@@ -79,13 +78,12 @@ export class TaskCompletionService {
         .returning(completionSelect);
 
       // Add the block's rewards to the user's character totals
-      await tx
-        .update(userCharacter)
-        .set({
-          xp: sql`${userCharacter.xp} + ${block.xpReward}`,
-          coins: sql`${userCharacter.coins} + ${block.coinReward}`,
-        })
-        .where(eq(userCharacter.id, userCharacterId));
+      await this.userCharacterService.addXp(
+        userCharacterId,
+        block.xpReward,
+        block.coinReward,
+        tx,
+      );
 
       return completion;
     });

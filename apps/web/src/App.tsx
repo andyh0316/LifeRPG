@@ -51,11 +51,7 @@ function App() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <Sidebar
-        onLogout={() => queryClient.resetQueries()}
-        characters={user.characters}
-        activeCharacterId={user.userCharacterId}
-      />
+      <Sidebar onLogout={() => queryClient.resetQueries()} />
       <Box
         component="main"
         sx={{

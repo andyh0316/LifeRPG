@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Patch,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiOkResponse,
@@ -20,7 +11,6 @@ import { setSessionCookie, clearSessionCookie } from './cookie.helper';
 import { Public } from './public.decorator';
 import { CurrentUser, type AuthUser } from './current-user.decorator';
 import { AuthUserDto } from './dto/auth-user.dto';
-import { SelectCharacterDto } from './dto/select-character.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -42,35 +32,9 @@ export class AuthController {
   @ApiOkResponse({ type: AuthUserDto })
   @ApiUnauthorizedResponse({ description: 'Not authenticated' })
   async me(@CurrentUser() user: AuthUser): Promise<AuthUserDto> {
-    const characters = await this.sessionService.getUserCharacters(user.id);
     return {
       id: user.id,
       email: user.email,
-      userCharacterId: user.userCharacterId,
-      characters,
-    };
-  }
-
-  @Patch('select-character')
-  @ApiOkResponse({ type: AuthUserDto })
-  async selectCharacter(
-    @Req() req: Request,
-    @Body() dto: SelectCharacterDto,
-    @CurrentUser() user: AuthUser,
-  ): Promise<AuthUserDto> {
-    const rawToken = req.cookies?.['session_token'];
-    await this.sessionService.selectCharacter(
-      rawToken,
-      dto.characterId,
-      user.id,
-    );
-
-    const characters = await this.sessionService.getUserCharacters(user.id);
-    return {
-      id: user.id,
-      email: user.email,
-      userCharacterId: dto.characterId,
-      characters,
     };
   }
 

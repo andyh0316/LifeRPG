@@ -54,7 +54,7 @@ export default function TaskItem({
   const completeBlock = $api.useMutation('post', '/task-completions', {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/users').queryKey,
+        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
       });
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/user-character/goals/progress')

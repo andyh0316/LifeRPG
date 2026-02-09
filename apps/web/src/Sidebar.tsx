@@ -18,18 +18,8 @@ const DRAWER_WIDTH = 240;
 
 export { DRAWER_WIDTH };
 
-interface CharacterSummary {
-  id: number;
-  name: string;
-  level: number;
-  xp: number;
-  coins: number;
-}
-
 interface SidebarProps {
   onLogout: () => void;
-  characters: CharacterSummary[];
-  activeCharacterId: number;
 }
 
 const NAV_ITEMS = [
@@ -38,11 +28,7 @@ const NAV_ITEMS = [
   { label: 'Rewards', icon: <EmojiEventsIcon />, to: '/rewards' },
 ];
 
-export default function Sidebar({
-  onLogout,
-  characters,
-  activeCharacterId,
-}: SidebarProps) {
+export default function Sidebar({ onLogout }: SidebarProps) {
   const location = useLocation();
 
   const handleLogout = async () => {
@@ -86,10 +72,7 @@ export default function Sidebar({
         </Typography>
       </Box>
 
-      <ProfileCard
-        characters={characters}
-        activeCharacterId={activeCharacterId}
-      />
+      <ProfileCard />
 
       <List sx={{ px: 1, mt: 1 }}>
         {NAV_ITEMS.map((item) => {

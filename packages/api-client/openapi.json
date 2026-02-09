@@ -39,37 +39,6 @@
         ]
       }
     },
-    "/auth/select-character": {
-      "patch": {
-        "operationId": "AuthController_selectCharacter",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SelectCharacterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthUserDto"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/auth/google-login": {
       "get": {
         "operationId": "AuthController_googleLogin",
@@ -497,6 +466,58 @@
         ]
       }
     },
+    "/user-character/summary": {
+      "get": {
+        "operationId": "UserCharacterController_getSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterSummaryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      }
+    },
+    "/user-character/select": {
+      "patch": {
+        "operationId": "UserCharacterController_selectCharacter",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectCharacterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterSummaryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      }
+    },
     "/user-character/goals": {
       "get": {
         "operationId": "UserCharacterController_getGoals",
@@ -603,33 +624,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CharacterSummaryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string"
-          },
-          "level": {
-            "type": "number"
-          },
-          "xp": {
-            "type": "number"
-          },
-          "coins": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "level",
-          "xp",
-          "coins"
-        ]
-      },
       "AuthUserDto": {
         "type": "object",
         "properties": {
@@ -638,33 +632,11 @@
           },
           "email": {
             "type": "string"
-          },
-          "userCharacterId": {
-            "type": "number"
-          },
-          "characters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CharacterSummaryDto"
-            }
           }
         },
         "required": [
           "id",
-          "email",
-          "userCharacterId",
-          "characters"
-        ]
-      },
-      "SelectCharacterDto": {
-        "type": "object",
-        "properties": {
-          "characterId": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "characterId"
+          "email"
         ]
       },
       "UserDetailDto": {
@@ -1008,6 +980,62 @@
         },
         "required": [
           "blockId"
+        ]
+      },
+      "CharacterSummaryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "number"
+          },
+          "xp": {
+            "type": "number"
+          },
+          "coins": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "level",
+          "xp",
+          "coins"
+        ]
+      },
+      "CharacterSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "activeCharacterId": {
+            "type": "number"
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CharacterSummaryItemDto"
+            }
+          }
+        },
+        "required": [
+          "activeCharacterId",
+          "characters"
+        ]
+      },
+      "SelectCharacterDto": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "characterId"
         ]
       },
       "GoalsResponseDto": {
