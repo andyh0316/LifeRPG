@@ -92,35 +92,28 @@ export default function ProfileCard() {
         )}
       </Box>
 
-      <Box sx={{ mb: 1 }}>
-        <LevelBar />
-      </Box>
-
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Box
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.75,
+          pt: 0.75,
+          pb: 1.5,
+        }}
+      >
+        <CoinIcon sx={{ fontSize: 21 }} />
+        <Typography
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1,
-            py: 0.25,
-            borderRadius: '6px',
-            bgcolor: GAME_COLORS.coinGoldSubtle,
-            border: `1px solid ${GAME_COLORS.coinGold}33`,
+            fontSize: '1.125rem',
+            fontWeight: 700,
+            color: GAME_COLORS.coinGold,
           }}
         >
-          <CoinIcon sx={{ fontSize: 14 }} />
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              color: GAME_COLORS.coinGold,
-            }}
-          >
-            {animatedCoins.toLocaleString()}
-          </Typography>
-        </Box>
+          {animatedCoins.toLocaleString()} G
+        </Typography>
       </Box>
+
+      <LevelBar />
     </Box>
   );
 }

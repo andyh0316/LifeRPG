@@ -116,10 +116,7 @@ export default function TaskItem({
     deleteTask.mutate({ params: { path: { id } } });
   };
 
-  const dailyProgress =
-    progress?.daily.target != null
-      ? { current: progress.daily.current, target: progress.daily.target }
-      : undefined;
+  const dailyProgress = progress?.daily;
 
   return (
     <Box

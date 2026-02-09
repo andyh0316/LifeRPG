@@ -1,5 +1,4 @@
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
 import useAnimateCountUp from '@/hooks/useAnimateCountUp';
@@ -13,81 +12,66 @@ export default function CompletionProgressBar({
   current,
   target,
   initialCurrent,
-  onClose,
 }: {
   current: number;
-  target: number;
+  target: number | null;
   initialCurrent: number;
-  onClose: () => void;
 }) {
   const animated = useAnimateCountUp(current, 800, initialCurrent);
-  const pct = Math.min((animated / target) * 100, 100);
+  const pct = target ? Math.min((animated / target) * 100, 100) : 0;
   const barColor = getBarGreen(pct);
 
   return (
-    <Box sx={{ width: '100%', mt: 1 }}>
+    <Box
+      sx={{
+        position: 'relative',
+        height: 32,
+        borderRadius: GAME_RADII.progressBar,
+        bgcolor: GAME_COLORS.progressTrack,
+        overflow: 'hidden',
+      }}
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          width: `${pct}%`,
+          borderRadius: GAME_RADII.progressBar,
+          bgcolor: barColor,
+        }}
+      />
       <Box
         sx={{
           position: 'relative',
-          height: 32,
-          borderRadius: GAME_RADII.progressBar,
-          bgcolor: GAME_COLORS.progressTrack,
-          overflow: 'hidden',
-          mb: 3,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: '100%',
+          px: 1.5,
         }}
       >
-        <Box
+        <Typography
           sx={{
-            position: 'absolute',
-            inset: 0,
-            width: `${pct}%`,
-            borderRadius: GAME_RADII.progressBar,
-            bgcolor: barColor,
-          }}
-        />
-        <Box
-          sx={{
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            height: '100%',
-            px: 1.5,
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            color: GAME_COLORS.textPrimary,
+            fontVariantNumeric: 'tabular-nums',
           }}
         >
-          <Typography
-            sx={{
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              color: GAME_COLORS.textPrimary,
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {animated.toLocaleString()} / {target.toLocaleString()} XP
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              color: GAME_COLORS.textPrimary,
-            }}
-          >
-            Today
-          </Typography>
-        </Box>
+          {target
+            ? `${animated.toLocaleString()} / ${target.toLocaleString()} XP`
+            : `${animated.toLocaleString()} XP`}
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            color: GAME_COLORS.textPrimary,
+          }}
+        >
+          Today
+        </Typography>
       </Box>
-
-      <Button
-        variant="text"
-        onClick={onClose}
-        sx={{
-          fontWeight: 700,
-          color: GAME_COLORS.textMuted,
-          fontSize: '0.9rem',
-        }}
-      >
-        Done
-      </Button>
     </Box>
   );
 }
