@@ -1,25 +1,30 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { $api } from '@life-rpg/api-client';
 import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
-import useAnimateCountUp from '@/hooks/useAnimateCountUp';
+import useActiveCharacter from '@/hooks/useActiveCharacter';
+import useLevelBarAnimation from '@/hooks/useLevelBarAnimation';
 
 function getBarGreen(pct: number): string {
   const l = 78 - (pct / 100) * 36;
   return `hsl(142, 60%, ${l}%)`;
 }
 
-export default function CompletionProgressBar({
-  current,
-  target,
-  initialCurrent,
-}: {
-  current: number;
-  target: number | null;
-  initialCurrent: number;
-}) {
-  const animated = useAnimateCountUp(current, 800, initialCurrent);
-  const pct = target ? Math.min((animated / target) * 100, 100) : 0;
-  const barColor = getBarGreen(pct);
+export default function LevelBar() {
+  const { active } = useActiveCharacter();
+  const level = active?.level ?? 0;
+  const xp = active?.xp ?? 0;
+
+  const { data: xpLevels } = $api.useQuery('get', '/user-character/xp-levels');
+
+  const {
+    pct,
+    displayLevel,
+    displayXp,
+    displayXpToNext,
+    isMaxLevel,
+    isAnimating,
+  } = useLevelBarAnimation(level, xp, xpLevels);
 
   return (
     <Box
@@ -31,22 +36,29 @@ export default function CompletionProgressBar({
         overflow: 'hidden',
       }}
     >
+      {/* Fill */}
       <Box
         sx={{
           position: 'absolute',
           inset: 0,
           width: `${pct}%`,
           borderRadius: GAME_RADII.progressBar,
-          bgcolor: barColor,
+          bgcolor: getBarGreen(pct),
+          ...(isAnimating &&
+            pct > 95 && {
+              boxShadow: `0 0 8px ${getBarGreen(pct)}`,
+            }),
         }}
       />
+
+      {/* Labels inside the bar */}
       <Box
         sx={{
-          position: 'relative',
+          position: 'absolute',
+          inset: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          height: '100%',
           px: 1.5,
         }}
       >
@@ -55,21 +67,23 @@ export default function CompletionProgressBar({
             fontSize: '0.8rem',
             fontWeight: 700,
             color: GAME_COLORS.textPrimary,
-            fontVariantNumeric: 'tabular-nums',
+            lineHeight: 1,
           }}
         >
-          {target
-            ? `${animated.toLocaleString()} / ${target.toLocaleString()} XP`
-            : `${animated.toLocaleString()} XP`}
+          Lv. {displayLevel}
         </Typography>
         <Typography
           sx={{
             fontSize: '0.8rem',
             fontWeight: 700,
             color: GAME_COLORS.textPrimary,
+            lineHeight: 1,
+            fontVariantNumeric: 'tabular-nums',
           }}
         >
-          Today
+          {isMaxLevel
+            ? 'MAX'
+            : `${displayXp.toLocaleString()} / ${displayXpToNext.toLocaleString()} XP`}
         </Typography>
       </Box>
     </Box>

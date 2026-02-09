@@ -27,7 +27,7 @@ export default function TaskItem({
   icon,
   amountUnit,
   blocks,
-  userId,
+  userCharacterId,
   index = 0,
 }: TaskItemProps) {
   const {
@@ -54,12 +54,7 @@ export default function TaskItem({
   const completeBlock = $api.useMutation('post', '/task-completions', {
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/users').queryKey,
-      });
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/users/{id}', {
-          params: { path: { id: userId } },
-        }).queryKey,
+        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
       });
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/user-character/goals/progress')
@@ -121,10 +116,7 @@ export default function TaskItem({
     deleteTask.mutate({ params: { path: { id } } });
   };
 
-  const dailyProgress =
-    progress?.daily.target != null
-      ? { current: progress.daily.current, target: progress.daily.target }
-      : undefined;
+  const dailyProgress = progress?.daily;
 
   return (
     <Box

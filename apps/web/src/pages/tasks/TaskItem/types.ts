@@ -13,6 +13,6 @@ export interface TaskItemProps {
   icon?: string | null;
   amountUnit: string;
   blocks: Block[];
-  userId: number;
+  userCharacterId: number;
   index?: number;
 }

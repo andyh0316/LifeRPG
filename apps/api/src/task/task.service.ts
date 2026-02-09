@@ -24,7 +24,7 @@ export class TaskService {
   private toDto(row: TaskRow, blockRows: TaskBlockRow[]): TaskResponseDto {
     return {
       id: row.id,
-      userId: row.userId,
+      userCharacterId: row.userCharacterId,
       name: row.name,
       desc: row.description,
       icon: row.icon,
@@ -42,9 +42,9 @@ export class TaskService {
     };
   }
 
-  async findAll(userId: number): Promise<TaskResponseDto[]> {
+  async findAll(userCharacterId: number): Promise<TaskResponseDto[]> {
     const rows = await this.taskRepository.findAll({
-      userId,
+      userCharacterId,
       includeBlocks: true,
     });
     return rows.map((row) => this.toDto(row, row.blocks));
@@ -61,12 +61,18 @@ export class TaskService {
     return this.toDto(row, blocks);
   }
 
-  async create(dto: CreateTaskDto, userId: number): Promise<TaskResponseDto> {
+  async create(
+    dto: CreateTaskDto,
+    userCharacterId: number,
+  ): Promise<TaskResponseDto> {
     return this.db.transaction(async (tx) => {
-      const sortOrder = await this.taskRepository.getNextSortOrder(userId, tx);
+      const sortOrder = await this.taskRepository.getNextSortOrder(
+        userCharacterId,
+        tx,
+      );
       const task = await this.taskRepository.create(
         {
-          userId,
+          userCharacterId,
           name: dto.name,
           description: dto.desc,
           icon: dto.icon,

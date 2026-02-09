@@ -40,8 +40,6 @@ export default function TaskList() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const { data: tasks = [] } = $api.useQuery('get', '/tasks');
-  const { data: users = [] } = $api.useQuery('get', '/users');
-  const userId = users[0]?.id;
 
   const [goalsOpen, setGoalsOpen] = useState(false);
 
@@ -129,15 +127,9 @@ export default function TaskList() {
           strategy={verticalListSortingStrategy}
         >
           <List disablePadding>
-            {userId &&
-              tasks.map((task, index) => (
-                <TaskItem
-                  key={task.id}
-                  {...task}
-                  userId={userId}
-                  index={index}
-                />
-              ))}
+            {tasks.map((task, index) => (
+              <TaskItem key={task.id} {...task} index={index} />
+            ))}
           </List>
         </SortableContext>
       </DndContext>

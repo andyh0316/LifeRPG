@@ -5,7 +5,7 @@ export class GoalsResponseDto {
   id!: number;
 
   @ApiProperty({ type: Number })
-  userId!: number;
+  userCharacterId!: number;
 
   @ApiProperty({ type: Number, nullable: true })
   dailyXpTarget!: number | null;

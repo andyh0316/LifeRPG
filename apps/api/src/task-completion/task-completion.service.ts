@@ -4,20 +4,16 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { desc, eq, sql } from 'drizzle-orm';
-import {
-  tasks,
-  taskCompletions,
-  taskBlocks,
-  userCharacter,
-} from '@life-rpg/database';
+import { desc, eq } from 'drizzle-orm';
+import { tasks, taskCompletions, taskBlocks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
+import { UserCharacterService } from '../user-character/user-character.service';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 
 const completionSelect = {
   id: taskCompletions.id,
   taskId: taskCompletions.taskId,
-  userId: taskCompletions.userId,
+  userCharacterId: taskCompletions.userCharacterId,
   xpEarned: taskCompletions.xpEarned,
   coinsEarned: taskCompletions.coinsEarned,
   completedAt: taskCompletions.completedAt,
@@ -25,13 +21,16 @@ const completionSelect = {
 
 @Injectable()
 export class TaskCompletionService {
-  constructor(@Inject('DATABASE') private db: Db) {}
+  constructor(
+    @Inject('DATABASE') private db: Db,
+    private userCharacterService: UserCharacterService,
+  ) {}
 
-  async findAll(userId: number): Promise<TaskCompletionResponseDto[]> {
+  async findAll(userCharacterId: number): Promise<TaskCompletionResponseDto[]> {
     return this.db
       .select(completionSelect)
       .from(taskCompletions)
-      .where(eq(taskCompletions.userId, userId))
+      .where(eq(taskCompletions.userCharacterId, userCharacterId))
       .orderBy(desc(taskCompletions.completedAt));
   }
 
@@ -40,7 +39,7 @@ export class TaskCompletionService {
   // within a single transaction so rewards stay consistent.
   async complete(
     blockId: number,
-    userId: number,
+    userCharacterId: number,
   ): Promise<TaskCompletionResponseDto> {
     return this.db.transaction(async (tx) => {
       const [block] = await tx
@@ -58,11 +57,11 @@ export class TaskCompletionService {
       }
 
       const [task] = await tx
-        .select({ userId: tasks.userId })
+        .select({ userCharacterId: tasks.userCharacterId })
         .from(tasks)
         .where(eq(tasks.id, block.taskId));
 
-      if (task.userId !== userId) {
+      if (task.userCharacterId !== userCharacterId) {
         throw new ForbiddenException('Task does not belong to this user');
       }
 
@@ -72,20 +71,19 @@ export class TaskCompletionService {
         .values({
           taskId: block.taskId,
           amount: block.amount,
-          userId,
+          userCharacterId,
           xpEarned: block.xpReward,
           coinsEarned: block.coinReward,
         })
         .returning(completionSelect);
 
       // Add the block's rewards to the user's character totals
-      await tx
-        .update(userCharacter)
-        .set({
-          xp: sql`${userCharacter.xp} + ${block.xpReward}`,
-          coins: sql`${userCharacter.coins} + ${block.coinReward}`,
-        })
-        .where(eq(userCharacter.userId, userId));
+      await this.userCharacterService.addXp(
+        userCharacterId,
+        block.xpReward,
+        block.coinReward,
+        tx,
+      );
 
       return completion;
     });

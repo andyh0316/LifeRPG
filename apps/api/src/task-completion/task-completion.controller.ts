@@ -12,12 +12,15 @@ export class TaskCompletionController {
   @Get()
   @ApiOkResponse({ type: [TaskCompletionResponseDto] })
   findAll(@CurrentUser() user: AuthUser) {
-    return this.taskCompletionService.findAll(user.id);
+    return this.taskCompletionService.findAll(user.userCharacterId);
   }
 
   @Post()
   @ApiCreatedResponse({ type: TaskCompletionResponseDto })
   complete(@Body() body: CompleteTaskDto, @CurrentUser() user: AuthUser) {
-    return this.taskCompletionService.complete(body.blockId, user.id);
+    return this.taskCompletionService.complete(
+      body.blockId,
+      user.userCharacterId,
+    );
   }
 }

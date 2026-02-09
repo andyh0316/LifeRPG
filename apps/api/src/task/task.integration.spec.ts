@@ -7,13 +7,18 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 describe('Task Integration', () => {
   let app: INestApplication;
   let request: TestAgent;
-  let currentUserId: number;
+  let currentUserCharacterId: number;
   let startTransaction: () => Promise<void>;
   let rollbackTransaction: () => Promise<void>;
 
   beforeAll(async () => {
-    ({ app, request, currentUserId, startTransaction, rollbackTransaction } =
-      await createIntegrationApp());
+    ({
+      app,
+      request,
+      currentUserCharacterId,
+      startTransaction,
+      rollbackTransaction,
+    } = await createIntegrationApp());
   });
 
   beforeEach(async () => {
@@ -271,7 +276,7 @@ describe('Task Integration', () => {
     // assert
     const fetchedTask: TaskResponseDto = res.body;
     expect(fetchedTask.id).toBe(createdTask.id);
-    expect(fetchedTask.userId).toBe(currentUserId);
+    expect(fetchedTask.userCharacterId).toBe(currentUserCharacterId);
     expect(fetchedTask.name).toBe(input.name);
     expect(fetchedTask.desc).toBe(input.desc);
     expect(fetchedTask.icon).toBe(input.icon);

@@ -28,7 +28,7 @@ export class TaskController {
   @Get()
   @ApiOkResponse({ type: [TaskResponseDto] })
   findAll(@CurrentUser() user: AuthUser) {
-    return this.taskService.findAll(user.id);
+    return this.taskService.findAll(user.userCharacterId);
   }
 
   @Get('templates')
@@ -52,7 +52,7 @@ export class TaskController {
   @Post()
   @ApiCreatedResponse({ type: TaskResponseDto })
   create(@Body() body: CreateTaskDto, @CurrentUser() user: AuthUser) {
-    return this.taskService.create(body, user.id);
+    return this.taskService.create(body, user.userCharacterId);
   }
 
   @Put(':id')
