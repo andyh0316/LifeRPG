@@ -293,6 +293,30 @@
         ]
       }
     },
+    "/tasks/reorder": {
+      "patch": {
+        "operationId": "TaskController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderTasksDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      }
+    },
     "/tasks/{id}": {
       "get": {
         "operationId": "TaskController_findOne",
@@ -322,7 +346,7 @@
           "Task"
         ]
       },
-      "patch": {
+      "put": {
         "operationId": "TaskController_update",
         "parameters": [
           {
@@ -344,6 +368,34 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Task"
+        ]
+      },
+      "delete": {
+        "operationId": "TaskController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -389,6 +441,77 @@
         },
         "tags": [
           "TaskCompletion"
+        ]
+      }
+    },
+    "/user-character/goals": {
+      "get": {
+        "operationId": "UserCharacterController_getGoals",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      },
+      "patch": {
+        "operationId": "UserCharacterController_updateGoals",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGoalsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      }
+    },
+    "/user-character/goals/progress": {
+      "get": {
+        "operationId": "UserCharacterController_getGoalsProgress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsProgressResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
         ]
       }
     }
@@ -499,6 +622,9 @@
           "id": {
             "type": "number"
           },
+          "sortOrder": {
+            "type": "number"
+          },
           "amount": {
             "type": "number"
           },
@@ -511,6 +637,7 @@
         },
         "required": [
           "id",
+          "sortOrder",
           "amount",
           "xpReward",
           "coinReward"
@@ -608,6 +735,20 @@
           "blocks"
         ]
       },
+      "ReorderTasksDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
       "CreateTaskDto": {
         "type": "object",
         "properties": {
@@ -657,9 +798,6 @@
           },
           "id": {
             "type": "number"
-          },
-          "delete": {
-            "type": "boolean"
           }
         }
       },
@@ -690,7 +828,14 @@
               "$ref": "#/components/schemas/UpdateTaskBlockDto"
             }
           }
-        }
+        },
+        "required": [
+          "name",
+          "desc",
+          "icon",
+          "amountUnit",
+          "blocks"
+        ]
       },
       "CompleteTaskDto": {
         "type": "object",
@@ -733,6 +878,114 @@
           "xpEarned",
           "coinsEarned",
           "completedAt"
+        ]
+      },
+      "GoalsResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "number"
+          },
+          "dailyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "weeklyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "quarterlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "yearlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "dailyXpTarget",
+          "weeklyXpTarget",
+          "monthlyXpTarget",
+          "quarterlyXpTarget",
+          "yearlyXpTarget"
+        ]
+      },
+      "UpdateGoalsDto": {
+        "type": "object",
+        "properties": {
+          "dailyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "weeklyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "monthlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "quarterlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "yearlyXpTarget": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "PeriodProgressDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "number",
+            "nullable": true
+          },
+          "current": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "target",
+          "current"
+        ]
+      },
+      "GoalsProgressResponseDto": {
+        "type": "object",
+        "properties": {
+          "daily": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "weekly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "monthly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "quarterly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          },
+          "yearly": {
+            "$ref": "#/components/schemas/PeriodProgressDto"
+          }
+        },
+        "required": [
+          "daily",
+          "weekly",
+          "monthly",
+          "quarterly",
+          "yearly"
         ]
       }
     }

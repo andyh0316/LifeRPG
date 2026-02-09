@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tasks/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["TaskController_reorder"];
+        trace?: never;
+    };
     "/tasks/{id}": {
         parameters: {
             query?: never;
@@ -140,12 +156,12 @@ export interface paths {
             cookie?: never;
         };
         get: operations["TaskController_findOne"];
-        put?: never;
+        put: operations["TaskController_update"];
         post?: never;
-        delete?: never;
+        delete: operations["TaskController_remove"];
         options?: never;
         head?: never;
-        patch: operations["TaskController_update"];
+        patch?: never;
         trace?: never;
     };
     "/task-completions": {
@@ -158,6 +174,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["TaskCompletionController_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user-character/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserCharacterController_getGoals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["UserCharacterController_updateGoals"];
+        trace?: never;
+    };
+    "/user-character/goals/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserCharacterController_getGoalsProgress"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -196,6 +244,7 @@ export interface components {
         };
         TaskBlockResponseDto: {
             id: number;
+            sortOrder: number;
             amount: number;
             xpReward: number;
             coinReward: number;
@@ -226,6 +275,9 @@ export interface components {
             amountUnit?: "count" | "minutes";
             blocks: components["schemas"]["CreateTaskBlockDto"][];
         };
+        ReorderTasksDto: {
+            ids: number[];
+        };
         CreateTaskDto: {
             name: string;
             desc?: string | null;
@@ -242,15 +294,14 @@ export interface components {
             /** @default 0 */
             coinReward: number;
             id?: number;
-            delete?: boolean;
         };
         UpdateTaskDto: {
-            name?: string;
-            desc?: string | null;
-            icon?: string | null;
+            name: string;
+            desc: string | null;
+            icon: string | null;
             /** @enum {string} */
-            amountUnit?: "count" | "minutes";
-            blocks?: components["schemas"]["UpdateTaskBlockDto"][];
+            amountUnit: "count" | "minutes";
+            blocks: components["schemas"]["UpdateTaskBlockDto"][];
         };
         CompleteTaskDto: {
             blockId: number;
@@ -263,6 +314,33 @@ export interface components {
             coinsEarned: number;
             /** Format: date-time */
             completedAt: string;
+        };
+        GoalsResponseDto: {
+            id: number;
+            userId: number;
+            dailyXpTarget: number | null;
+            weeklyXpTarget: number | null;
+            monthlyXpTarget: number | null;
+            quarterlyXpTarget: number | null;
+            yearlyXpTarget: number | null;
+        };
+        UpdateGoalsDto: {
+            dailyXpTarget?: number | null;
+            weeklyXpTarget?: number | null;
+            monthlyXpTarget?: number | null;
+            quarterlyXpTarget?: number | null;
+            yearlyXpTarget?: number | null;
+        };
+        PeriodProgressDto: {
+            target: number | null;
+            current: number;
+        };
+        GoalsProgressResponseDto: {
+            daily: components["schemas"]["PeriodProgressDto"];
+            weekly: components["schemas"]["PeriodProgressDto"];
+            monthly: components["schemas"]["PeriodProgressDto"];
+            quarterly: components["schemas"]["PeriodProgressDto"];
+            yearly: components["schemas"]["PeriodProgressDto"];
         };
     };
     responses: never;
@@ -521,6 +599,27 @@ export interface operations {
             };
         };
     };
+    TaskController_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderTasksDto"];
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     TaskController_findOne: {
         parameters: {
             query?: never;
@@ -567,6 +666,27 @@ export interface operations {
             };
         };
     };
+    TaskController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskResponseDto"];
+                };
+            };
+        };
+    };
     TaskCompletionController_complete: {
         parameters: {
             query?: never;
@@ -586,6 +706,67 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskCompletionResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_getGoals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalsResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_updateGoals: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGoalsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalsResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_getGoalsProgress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GoalsProgressResponseDto"];
                 };
             };
         };

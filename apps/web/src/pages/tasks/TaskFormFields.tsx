@@ -3,6 +3,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@/components/mui/TextField';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 import IconPicker from '@/components/icons/IconPicker';
+import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
 
 interface TaskFormFieldsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,9 +23,8 @@ export default function TaskFormFields({
       <Stack direction="row" alignItems="center" spacing={1}>
         <Box
           sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 1,
+            border: `1px solid ${GAME_COLORS.cardBorder}`,
+            borderRadius: GAME_RADII.button,
           }}
         >
           <Controller

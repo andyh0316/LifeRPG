@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { $api } from '@life-rpg/api-client';
 import { formatCountdown } from '../../utils/formatCountdown';
+import { GAME_COLORS, sxPageTitle, sxCard } from '@/theme/gameTheme';
 
 export default function Home() {
   const { data: users = [] } = $api.useQuery('get', '/users');
@@ -17,32 +18,43 @@ export default function Home() {
   }, [tokenExpiresAt]);
 
   return (
-    <>
-      <Typography variant="h4">Home</Typography>
+    <Box sx={{ maxWidth: 600 }}>
+      <Typography sx={{ ...sxPageTitle, mb: 2 }}>Home</Typography>
 
-      <Box
-        sx={{
-          my: 2,
-          p: 2,
-          bgcolor: 'grey.100',
-          borderRadius: 1,
-          fontFamily: 'monospace',
-          fontSize: 14,
-        }}
-      >
-        <Typography variant="subtitle2" gutterBottom>
-          DEBUG: Session Expiry
+      <Box sx={{ ...sxCard, p: 2, fontFamily: 'monospace', fontSize: 14 }}>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.8rem',
+            color: GAME_COLORS.textSecondary,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            mb: 1,
+          }}
+        >
+          Debug: Session Expiry
         </Typography>
-        <div>Session Token: {formatCountdown(tokenExpiresAt)}</div>
+        <Box sx={{ color: GAME_COLORS.textPrimary }}>
+          Session Token: {formatCountdown(tokenExpiresAt)}
+        </Box>
       </Box>
 
-      <ul>
-        {users.map((user) => (
-          <li key={user.id}>
-            {user.fullName} — {user.email}
-          </li>
-        ))}
-      </ul>
-    </>
+      {users.length > 0 && (
+        <Box sx={{ ...sxCard, mt: 2, p: 2 }}>
+          {users.map((user) => (
+            <Typography
+              key={user.id}
+              sx={{
+                fontSize: '0.85rem',
+                color: GAME_COLORS.textSecondary,
+                py: 0.25,
+              }}
+            >
+              {user.fullName} — {user.email}
+            </Typography>
+          ))}
+        </Box>
+      )}
+    </Box>
   );
 }

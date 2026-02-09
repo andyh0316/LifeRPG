@@ -11,6 +11,7 @@ import CreateTask from './pages/tasks/CreateTask';
 import EditTask from './pages/tasks/EditTask';
 import Rewards from './pages/rewards/Rewards';
 import Login from './pages/login/Login';
+import { GAME_COLORS } from '@/theme/gameTheme';
 
 function App() {
   // Auth gate: checks if user is authenticated via access_token cookie.
@@ -51,7 +52,15 @@ function App() {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <Sidebar onLogout={() => queryClient.resetQueries()} />
-      <Box component="main" sx={{ flexGrow: 1, p: 2 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          bgcolor: GAME_COLORS.pageBg,
+          minHeight: '100vh',
+        }}
+      >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tasks" element={<Tasks />} />

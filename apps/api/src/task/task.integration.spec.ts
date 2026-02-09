@@ -8,8 +8,20 @@ describe('Task Integration', () => {
   let app: INestApplication;
   let request: TestAgent;
   let currentUserId: number;
+  let startTransaction: () => Promise<void>;
+  let rollbackTransaction: () => Promise<void>;
+
   beforeAll(async () => {
-    ({ app, request, currentUserId } = await createIntegrationApp());
+    ({ app, request, currentUserId, startTransaction, rollbackTransaction } =
+      await createIntegrationApp());
+  });
+
+  beforeEach(async () => {
+    await startTransaction();
+  });
+
+  afterEach(async () => {
+    await rollbackTransaction();
   });
 
   afterAll(async () => {
@@ -77,7 +89,7 @@ describe('Task Integration', () => {
       .expect(400);
   });
 
-  it('PATCH /tasks/:id - rejects empty blocks array', async () => {
+  it('PUT /tasks/:id - rejects empty blocks array', async () => {
     // setup
     const setupRes = await request
       .post('/tasks')
@@ -89,12 +101,18 @@ describe('Task Integration', () => {
 
     // act & assert
     await request
-      .patch(`/tasks/${setupRes.body.id}`)
-      .send({ blocks: [] } as UpdateTaskDto)
+      .put(`/tasks/${setupRes.body.id}`)
+      .send({
+        name: 'Valid Task',
+        desc: null,
+        icon: null,
+        amountUnit: 'count',
+        blocks: [],
+      } as unknown as UpdateTaskDto)
       .expect(400);
   });
 
-  it('PATCH /tasks/:id - updates task fields and patches blocks', async () => {
+  it('PUT /tasks/:id - replaces task fields and blocks', async () => {
     // setup — create task with 3 blocks
     const setupRes = await request
       .post('/tasks')
@@ -116,17 +134,23 @@ describe('Task Integration', () => {
       name: 'Read More',
       desc: 'Read two chapters',
       icon: 'books',
+      amountUnit: 'minutes',
       blocks: [
-        // blocks[0]: omitted — left untouched
-        // blocks[1]: updated
+        // blocks[0]: included with id — kept and updated
+        {
+          id: setupTask.blocks[0].id,
+          amount: 15,
+          xpReward: 10,
+          coinReward: 5,
+        },
+        // blocks[1]: included with id — updated
         {
           id: setupTask.blocks[1].id,
           amount: 30,
           xpReward: 30,
           coinReward: 15,
         },
-        // blocks[2]: deleted
-        { id: setupTask.blocks[2].id, delete: true },
+        // blocks[2]: omitted — deleted
         // new block
         { amount: 90, xpReward: 80, coinReward: 40 },
       ],
@@ -134,7 +158,7 @@ describe('Task Integration', () => {
 
     // act
     const res = await request
-      .patch(`/tasks/${setupTask.id}`)
+      .put(`/tasks/${setupTask.id}`)
       .send(updateInput)
       .expect(200);
 
@@ -146,11 +170,11 @@ describe('Task Integration', () => {
     expect(updatedTask.icon).toBe(updateInput.icon);
     expect(updatedTask.blocks).toHaveLength(3);
 
-    // blocks[0]: untouched — keeps original values
-    const untouched = updatedTask.blocks.find(
+    // blocks[0]: kept with original values
+    const kept = updatedTask.blocks.find(
       (o) => o.id === setupTask.blocks[0].id,
     );
-    expect(untouched).toMatchObject({
+    expect(kept).toMatchObject({
       amount: 15,
       xpReward: 10,
       coinReward: 5,
@@ -162,7 +186,7 @@ describe('Task Integration', () => {
     );
     expect(updated).toMatchObject({ amount: 30, xpReward: 30, coinReward: 15 });
 
-    // blocks[2]: deleted — no longer present
+    // blocks[2]: omitted — deleted
     const deleted = updatedTask.blocks.find(
       (o) => o.id === setupTask.blocks[2].id,
     );
@@ -172,6 +196,62 @@ describe('Task Integration', () => {
     const originalIds = setupTask.blocks.map((o) => o.id);
     const created = updatedTask.blocks.find((o) => !originalIds.includes(o.id));
     expect(created).toMatchObject({ amount: 90, xpReward: 80, coinReward: 40 });
+  });
+
+  it('PUT /tasks/:id - preserves natural input order for blocks', async () => {
+    // setup — create task with 1 block
+    const setupRes = await request
+      .post('/tasks')
+      .send({
+        name: 'Reorder Test',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const setupTask: TaskResponseDto = setupRes.body;
+
+    // act — send [new, existing, new]
+    const res = await request
+      .put(`/tasks/${setupTask.id}`)
+      .send({
+        name: 'Reorder Test',
+        desc: null,
+        icon: null,
+        amountUnit: 'count',
+        blocks: [
+          { amount: 10, xpReward: 100, coinReward: 50 },
+          {
+            id: setupTask.blocks[0].id,
+            amount: 1,
+            xpReward: 10,
+            coinReward: 5,
+          },
+          { amount: 20, xpReward: 200, coinReward: 100 },
+        ],
+      } as UpdateTaskDto)
+      .expect(200);
+
+    // assert — blocks returned in input order
+    const updatedTask: TaskResponseDto = res.body;
+    expect(updatedTask.blocks).toHaveLength(3);
+    expect(updatedTask.blocks[0]).toMatchObject({
+      sortOrder: 0,
+      amount: 10,
+      xpReward: 100,
+      coinReward: 50,
+    });
+    expect(updatedTask.blocks[1].id).toBe(setupTask.blocks[0].id);
+    expect(updatedTask.blocks[1]).toMatchObject({
+      sortOrder: 1,
+      amount: 1,
+      xpReward: 10,
+      coinReward: 5,
+    });
+    expect(updatedTask.blocks[2]).toMatchObject({
+      sortOrder: 2,
+      amount: 20,
+      xpReward: 200,
+      coinReward: 100,
+    });
   });
 
   it('GET /tasks/:id - returns a task by id', async () => {
@@ -198,6 +278,80 @@ describe('Task Integration', () => {
     expect(fetchedTask.blocks).toHaveLength(1);
   });
 
+  it('DELETE /tasks/:id - soft-deletes a task', async () => {
+    // setup
+    const setupRes = await request
+      .post('/tasks')
+      .send({
+        name: 'To Delete',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const created: TaskResponseDto = setupRes.body;
+
+    // act
+    const res = await request.delete(`/tasks/${created.id}`).expect(200);
+
+    // assert
+    const deleted: TaskResponseDto = res.body;
+    expect(deleted.id).toBe(created.id);
+    expect(deleted.name).toBe('To Delete');
+  });
+
+  it('DELETE /tasks/:id - soft-deleted task excluded from GET /tasks', async () => {
+    // setup
+    const setupRes = await request
+      .post('/tasks')
+      .send({
+        name: 'Invisible After Delete',
+        blocks: [{ amount: 1, xpReward: 5, coinReward: 2 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const created: TaskResponseDto = setupRes.body;
+    await request.delete(`/tasks/${created.id}`).expect(200);
+
+    // act
+    const res = await request.get('/tasks').expect(200);
+
+    // assert
+    const tasks: TaskResponseDto[] = res.body;
+    const found = tasks.find((t) => t.id === created.id);
+    expect(found).toBeUndefined();
+  });
+
+  it('PATCH /tasks/reorder - persists new task order', async () => {
+    // setup
+    const taskA = await request
+      .post('/tasks')
+      .send({
+        name: 'Reorder A',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const taskB = await request
+      .post('/tasks')
+      .send({
+        name: 'Reorder B',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const idA: number = taskA.body.id;
+    const idB: number = taskB.body.id;
+
+    // act — reverse order: B before A
+    await request
+      .patch('/tasks/reorder')
+      .send({ ids: [idB, idA] })
+      .expect(204);
+
+    // assert
+    const res = await request.get('/tasks').expect(200);
+    const tasks: TaskResponseDto[] = res.body;
+    const indexA = tasks.findIndex((t) => t.id === idA);
+    const indexB = tasks.findIndex((t) => t.id === idB);
+    expect(indexB).toBeLessThan(indexA);
+  });
+
   it('GET /tasks - returns all tasks with blocks', async () => {
     // setup
     const input: CreateTaskDto = {
@@ -217,10 +371,33 @@ describe('Task Integration', () => {
 
     // assert
     const tasks: TaskResponseDto[] = res.body;
-    expect(tasks.length).toBeGreaterThan(0);
-    const found = tasks.find((t) => t.id === createdTask.id);
-    expect(found).toBeDefined();
-    expect(found!.name).toBe(input.name);
-    expect(found!.blocks).toHaveLength(2);
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0].id).toBe(createdTask.id);
+    expect(tasks[0].name).toBe(input.name);
+    expect(tasks[0].blocks).toHaveLength(2);
+  });
+
+  it('POST /tasks - auto-assigns sequential sortOrder per user', async () => {
+    // act
+    const res1 = await request
+      .post('/tasks')
+      .send({
+        name: 'First Task',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const res2 = await request
+      .post('/tasks')
+      .send({
+        name: 'Second Task',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+
+    // assert
+    const task1: TaskResponseDto = res1.body;
+    const task2: TaskResponseDto = res2.body;
+    expect(task1.sortOrder).toBe(0);
+    expect(task2.sortOrder).toBe(1);
   });
 });

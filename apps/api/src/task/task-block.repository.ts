@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq, and, notInArray, inArray } from 'drizzle-orm';
+import { eq, and, notInArray, inArray, asc } from 'drizzle-orm';
 import { taskBlocks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
@@ -14,7 +14,8 @@ export class TaskBlockRepository {
     return (tx ?? this.db)
       .select()
       .from(taskBlocks)
-      .where(eq(taskBlocks.taskId, taskId));
+      .where(eq(taskBlocks.taskId, taskId))
+      .orderBy(asc(taskBlocks.sortOrder));
   }
 
   async create(data: TaskBlockInsert, tx?: Db): Promise<TaskBlockRow> {
