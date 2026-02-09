@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CharacterSummaryDto } from './character-summary.dto';
 
 export class AuthUserDto {
   @ApiProperty({ type: Number })
@@ -6,4 +7,10 @@ export class AuthUserDto {
 
   @ApiProperty()
   email!: string;
+
+  @ApiProperty({ type: Number })
+  userCharacterId!: number;
+
+  @ApiProperty({ type: [CharacterSummaryDto] })
+  characters!: CharacterSummaryDto[];
 }

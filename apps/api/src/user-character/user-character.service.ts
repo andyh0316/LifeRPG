@@ -8,7 +8,7 @@ import { GoalsProgressResponseDto } from './dto/goals-progress-response.dto';
 
 const goalsSelect = {
   id: userCharacterSettings.id,
-  userId: userCharacterSettings.userId,
+  userCharacterId: userCharacterSettings.userCharacterId,
   dailyXpTarget: userCharacterSettings.dailyXpTarget,
   weeklyXpTarget: userCharacterSettings.weeklyXpTarget,
   monthlyXpTarget: userCharacterSettings.monthlyXpTarget,
@@ -20,24 +20,24 @@ const goalsSelect = {
 export class UserCharacterService {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  async getGoals(userId: number): Promise<GoalsResponseDto | null> {
+  async getGoals(userCharacterId: number): Promise<GoalsResponseDto | null> {
     const [row] = await this.db
       .select(goalsSelect)
       .from(userCharacterSettings)
-      .where(eq(userCharacterSettings.userId, userId));
+      .where(eq(userCharacterSettings.userCharacterId, userCharacterId));
 
     return row ?? null;
   }
 
   async updateGoals(
-    userId: number,
+    userCharacterId: number,
     dto: UpdateGoalsDto,
   ): Promise<GoalsResponseDto> {
     const [row] = await this.db
       .insert(userCharacterSettings)
-      .values({ userId, ...dto })
+      .values({ userCharacterId, ...dto })
       .onConflictDoUpdate({
-        target: userCharacterSettings.userId,
+        target: userCharacterSettings.userCharacterId,
         set: dto,
       })
       .returning(goalsSelect);
@@ -49,10 +49,10 @@ export class UserCharacterService {
   // time period (daily, weekly, monthly, quarterly, yearly) by summing
   // task completions that fall within each period's window.
   async getGoalsProgress(
-    userId: number,
+    userCharacterId: number,
     referenceTime: Date = new Date(),
   ): Promise<GoalsProgressResponseDto> {
-    const goals = await this.getGoals(userId);
+    const goals = await this.getGoals(userCharacterId);
     const ref = sql`${referenceTime.toISOString()}::timestamptz`;
 
     const [xpRow] = await this.db
@@ -65,7 +65,7 @@ export class UserCharacterService {
       })
       .from(taskCompletions)
       .where(
-        sql`${taskCompletions.userId} = ${userId} and ${taskCompletions.completedAt} >= date_trunc('year', ${ref})`,
+        sql`${taskCompletions.userCharacterId} = ${userCharacterId} and ${taskCompletions.completedAt} >= date_trunc('year', ${ref})`,
       );
 
     return {

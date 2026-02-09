@@ -32,9 +32,9 @@ const FIELDS = [
   {
     name: 'quarterlyXpTarget' as const,
     label: 'Quarterly',
-    placeholder: '60000',
+    placeholder: '45000',
   },
-  { name: 'yearlyXpTarget' as const, label: 'Yearly', placeholder: '240000' },
+  { name: 'yearlyXpTarget' as const, label: 'Yearly', placeholder: '180000' },
 ];
 
 function toFormValues(

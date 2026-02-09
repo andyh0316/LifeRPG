@@ -17,7 +17,7 @@ import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 const completionSelect = {
   id: taskCompletions.id,
   taskId: taskCompletions.taskId,
-  userId: taskCompletions.userId,
+  userCharacterId: taskCompletions.userCharacterId,
   xpEarned: taskCompletions.xpEarned,
   coinsEarned: taskCompletions.coinsEarned,
   completedAt: taskCompletions.completedAt,
@@ -27,11 +27,11 @@ const completionSelect = {
 export class TaskCompletionService {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  async findAll(userId: number): Promise<TaskCompletionResponseDto[]> {
+  async findAll(userCharacterId: number): Promise<TaskCompletionResponseDto[]> {
     return this.db
       .select(completionSelect)
       .from(taskCompletions)
-      .where(eq(taskCompletions.userId, userId))
+      .where(eq(taskCompletions.userCharacterId, userCharacterId))
       .orderBy(desc(taskCompletions.completedAt));
   }
 
@@ -40,7 +40,7 @@ export class TaskCompletionService {
   // within a single transaction so rewards stay consistent.
   async complete(
     blockId: number,
-    userId: number,
+    userCharacterId: number,
   ): Promise<TaskCompletionResponseDto> {
     return this.db.transaction(async (tx) => {
       const [block] = await tx
@@ -58,11 +58,11 @@ export class TaskCompletionService {
       }
 
       const [task] = await tx
-        .select({ userId: tasks.userId })
+        .select({ userCharacterId: tasks.userCharacterId })
         .from(tasks)
         .where(eq(tasks.id, block.taskId));
 
-      if (task.userId !== userId) {
+      if (task.userCharacterId !== userCharacterId) {
         throw new ForbiddenException('Task does not belong to this user');
       }
 
@@ -72,7 +72,7 @@ export class TaskCompletionService {
         .values({
           taskId: block.taskId,
           amount: block.amount,
-          userId,
+          userCharacterId,
           xpEarned: block.xpReward,
           coinsEarned: block.coinReward,
         })
@@ -85,7 +85,7 @@ export class TaskCompletionService {
           xp: sql`${userCharacter.xp} + ${block.xpReward}`,
           coins: sql`${userCharacter.coins} + ${block.coinReward}`,
         })
-        .where(eq(userCharacter.userId, userId));
+        .where(eq(userCharacter.id, userCharacterId));
 
       return completion;
     });

@@ -36,6 +36,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/select-character": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AuthController_selectCharacter"];
+        trace?: never;
+    };
     "/auth/google-login": {
         parameters: {
             query?: never;
@@ -171,7 +187,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["TaskCompletionController_findAll"];
         put?: never;
         post: operations["TaskCompletionController_complete"];
         delete?: never;
@@ -212,13 +228,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user-character/xp-levels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserCharacterController_getXpLevels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CharacterSummaryDto: {
+            id: number;
+            name: string;
+            level: number;
+            xp: number;
+            coins: number;
+        };
         AuthUserDto: {
             id: number;
             email: string;
+            userCharacterId: number;
+            characters: components["schemas"]["CharacterSummaryDto"][];
+        };
+        SelectCharacterDto: {
+            characterId: number;
         };
         UserDetailDto: {
             id: number;
@@ -251,10 +295,11 @@ export interface components {
         };
         TaskResponseDto: {
             id: number;
-            userId: number;
+            userCharacterId: number;
             name: string;
             desc?: string | null;
             icon?: string | null;
+            sortOrder: number;
             /** @enum {string} */
             amountUnit: "count" | "minutes";
             blocks: components["schemas"]["TaskBlockResponseDto"][];
@@ -303,21 +348,21 @@ export interface components {
             amountUnit: "count" | "minutes";
             blocks: components["schemas"]["UpdateTaskBlockDto"][];
         };
-        CompleteTaskDto: {
-            blockId: number;
-        };
         TaskCompletionResponseDto: {
             id: number;
             taskId: number;
-            userId: number;
+            userCharacterId: number;
             xpEarned: number;
             coinsEarned: number;
             /** Format: date-time */
             completedAt: string;
         };
+        CompleteTaskDto: {
+            blockId: number;
+        };
         GoalsResponseDto: {
             id: number;
-            userId: number;
+            userCharacterId: number;
             dailyXpTarget: number | null;
             weeklyXpTarget: number | null;
             monthlyXpTarget: number | null;
@@ -341,6 +386,11 @@ export interface components {
             monthly: components["schemas"]["PeriodProgressDto"];
             quarterly: components["schemas"]["PeriodProgressDto"];
             yearly: components["schemas"]["PeriodProgressDto"];
+        };
+        XpLevelDto: {
+            level: number;
+            xpToNext: number | null;
+            cumulativeXp: number;
         };
     };
     responses: never;
@@ -392,6 +442,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    AuthController_selectCharacter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectCharacterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthUserDto"];
+                };
             };
         };
     };
@@ -687,6 +760,25 @@ export interface operations {
             };
         };
     };
+    TaskCompletionController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskCompletionResponseDto"][];
+                };
+            };
+        };
+    };
     TaskCompletionController_complete: {
         parameters: {
             query?: never;
@@ -767,6 +859,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GoalsProgressResponseDto"];
+                };
+            };
+        };
+    };
+    UserCharacterController_getXpLevels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["XpLevelDto"][];
                 };
             };
         };

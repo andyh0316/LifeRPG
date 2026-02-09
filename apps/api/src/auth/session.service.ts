@@ -1,7 +1,12 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { and, eq, ilike, isNull } from 'drizzle-orm';
-import { userSessions, users } from '@life-rpg/database';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { and, asc, eq, ilike, isNull } from 'drizzle-orm';
+import { userSessions, users, userCharacter } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import type { AuthUser } from './current-user.decorator';
 
@@ -36,11 +41,12 @@ export class SessionService {
   async validateSession(rawToken: string): Promise<AuthUser> {
     const hashed = hashToken(rawToken);
 
-    const [row] = await this.db
+    const [session] = await this.db
       .select({
         userId: userSessions.userId,
         expiresAt: userSessions.expiresAt,
         email: users.email,
+        selectedCharacterId: userSessions.selectedCharacterId,
       })
       .from(userSessions)
       .innerJoin(users, eq(userSessions.userId, users.id))
@@ -48,11 +54,77 @@ export class SessionService {
         and(eq(userSessions.token, hashed), isNull(userSessions.revokedAt)),
       );
 
-    if (!row || row.expiresAt < new Date()) {
+    if (!session || session.expiresAt < new Date()) {
       throw new UnauthorizedException();
     }
 
-    return { id: row.userId, email: row.email };
+    let userCharacterId: number;
+
+    if (session.selectedCharacterId) {
+      const [char] = await this.db
+        .select({ id: userCharacter.id })
+        .from(userCharacter)
+        .where(
+          and(
+            eq(userCharacter.id, session.selectedCharacterId),
+            eq(userCharacter.userId, session.userId),
+          ),
+        );
+      userCharacterId =
+        char?.id ?? (await this.getFirstCharacterId(session.userId));
+    } else {
+      userCharacterId = await this.getFirstCharacterId(session.userId);
+    }
+
+    return {
+      id: session.userId,
+      email: session.email,
+      userCharacterId,
+    };
+  }
+
+  async selectCharacter(
+    rawToken: string,
+    characterId: number,
+    userId: number,
+  ): Promise<void> {
+    const [char] = await this.db
+      .select({ id: userCharacter.id })
+      .from(userCharacter)
+      .where(
+        and(
+          eq(userCharacter.id, characterId),
+          eq(userCharacter.userId, userId),
+        ),
+      );
+
+    if (!char) {
+      throw new ForbiddenException('Character does not belong to this user');
+    }
+
+    const hashed = hashToken(rawToken);
+    await this.db
+      .update(userSessions)
+      .set({ selectedCharacterId: characterId })
+      .where(eq(userSessions.token, hashed));
+  }
+
+  async getUserCharacters(
+    userId: number,
+  ): Promise<
+    { id: number; name: string; level: number; xp: number; coins: number }[]
+  > {
+    return this.db
+      .select({
+        id: userCharacter.id,
+        name: userCharacter.name,
+        level: userCharacter.level,
+        xp: userCharacter.xp,
+        coins: userCharacter.coins,
+      })
+      .from(userCharacter)
+      .where(eq(userCharacter.userId, userId))
+      .orderBy(asc(userCharacter.id));
   }
 
   async findUserByEmail(
@@ -80,5 +152,20 @@ export class SessionService {
       .where(
         and(eq(userSessions.userId, userId), isNull(userSessions.revokedAt)),
       );
+  }
+
+  private async getFirstCharacterId(userId: number): Promise<number> {
+    const [first] = await this.db
+      .select({ id: userCharacter.id })
+      .from(userCharacter)
+      .where(eq(userCharacter.userId, userId))
+      .orderBy(asc(userCharacter.id))
+      .limit(1);
+
+    if (!first) {
+      throw new UnauthorizedException('User has no characters');
+    }
+
+    return first.id;
   }
 }

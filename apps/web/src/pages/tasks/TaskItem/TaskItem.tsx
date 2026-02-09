@@ -27,7 +27,7 @@ export default function TaskItem({
   icon,
   amountUnit,
   blocks,
-  userId,
+  userCharacterId,
   index = 0,
 }: TaskItemProps) {
   const {
@@ -55,11 +55,6 @@ export default function TaskItem({
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/users').queryKey,
-      });
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/users/{id}', {
-          params: { path: { id: userId } },
-        }).queryKey,
       });
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/user-character/goals/progress')

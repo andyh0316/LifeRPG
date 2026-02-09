@@ -1,27 +1,44 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import StarIcon from '@mui/icons-material/Star';
 import CoinIcon from './icons/CoinIcon';
+import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import { GAME_COLORS } from '@/theme/gameTheme';
 import useAnimateCountUp from '@/hooks/useAnimateCountUp';
 
-export default function ProfileCard() {
-  const { data: users = [] } = $api.useQuery('get', '/users');
-  const userId = users[0]?.id;
+interface CharacterSummary {
+  id: number;
+  name: string;
+  level: number;
+  xp: number;
+  coins: number;
+}
 
-  const { data: profile } = $api.useQuery(
-    'get',
-    '/users/{id}',
-    { params: { path: { id: userId! } } },
-    { enabled: !!userId },
-  );
+interface ProfileCardProps {
+  characters: CharacterSummary[];
+  activeCharacterId: number;
+}
 
-  const animatedCoins = useAnimateCountUp(profile?.coins ?? 0);
-  const animatedXp = useAnimateCountUp(profile?.xp ?? 0);
+export default function ProfileCard({
+  characters,
+  activeCharacterId,
+}: ProfileCardProps) {
+  const queryClient = useQueryClient();
+  const active =
+    characters.find((c) => c.id === activeCharacterId) ?? characters[0];
 
-  if (!profile) return null;
+  const selectCharacter = $api.useMutation('patch', '/auth/select-character', {
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+
+  const animatedCoins = useAnimateCountUp(active.coins);
+  const animatedXp = useAnimateCountUp(active.xp);
 
   return (
     <Box
@@ -40,22 +57,51 @@ export default function ProfileCard() {
             bgcolor: GAME_COLORS.avatarBg,
             fontSize: '0.9rem',
             fontWeight: 700,
+            flexShrink: 0,
           }}
         >
-          {profile.fullName.charAt(0).toUpperCase()}
+          {active.name.charAt(0).toUpperCase()}
         </Avatar>
-        <Typography
-          sx={{
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            color: GAME_COLORS.sidebarText,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {profile.fullName}
-        </Typography>
+
+        {characters.length > 1 ? (
+          <Select
+            size="small"
+            fullWidth
+            value={activeCharacterId}
+            onChange={(e) =>
+              selectCharacter.mutate({
+                body: { characterId: Number(e.target.value) },
+              })
+            }
+            sx={{
+              color: '#fff',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+              '& .MuiSelect-select': { py: 0.5, pl: 0 },
+              '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' },
+            }}
+          >
+            {characters.map((c) => (
+              <MenuItem key={c.id} value={c.id}>
+                {c.name}
+              </MenuItem>
+            ))}
+          </Select>
+        ) : (
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              color: GAME_COLORS.sidebarText,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {active.name}
+          </Typography>
+        )}
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1 }}>

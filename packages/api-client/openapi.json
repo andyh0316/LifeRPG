@@ -39,6 +39,37 @@
         ]
       }
     },
+    "/auth/select-character": {
+      "patch": {
+        "operationId": "AuthController_selectCharacter",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectCharacterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/google-login": {
       "get": {
         "operationId": "AuthController_googleLogin",
@@ -414,6 +445,28 @@
       }
     },
     "/task-completions": {
+      "get": {
+        "operationId": "TaskCompletionController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaskCompletionResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "TaskCompletion"
+        ]
+      },
       "post": {
         "operationId": "TaskCompletionController_complete",
         "parameters": [],
@@ -514,6 +567,30 @@
           "UserCharacter"
         ]
       }
+    },
+    "/user-character/xp-levels": {
+      "get": {
+        "operationId": "UserCharacterController_getXpLevels",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/XpLevelDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "UserCharacter"
+        ]
+      }
     }
   },
   "info": {
@@ -526,6 +603,33 @@
   "servers": [],
   "components": {
     "schemas": {
+      "CharacterSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "number"
+          },
+          "xp": {
+            "type": "number"
+          },
+          "coins": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "level",
+          "xp",
+          "coins"
+        ]
+      },
       "AuthUserDto": {
         "type": "object",
         "properties": {
@@ -534,11 +638,33 @@
           },
           "email": {
             "type": "string"
+          },
+          "userCharacterId": {
+            "type": "number"
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CharacterSummaryDto"
+            }
           }
         },
         "required": [
           "id",
-          "email"
+          "email",
+          "userCharacterId",
+          "characters"
+        ]
+      },
+      "SelectCharacterDto": {
+        "type": "object",
+        "properties": {
+          "characterId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "characterId"
         ]
       },
       "UserDetailDto": {
@@ -649,7 +775,7 @@
           "id": {
             "type": "number"
           },
-          "userId": {
+          "userCharacterId": {
             "type": "number"
           },
           "name": {
@@ -662,6 +788,9 @@
           "icon": {
             "type": "string",
             "nullable": true
+          },
+          "sortOrder": {
+            "type": "number"
           },
           "amountUnit": {
             "type": "string",
@@ -679,8 +808,9 @@
         },
         "required": [
           "id",
-          "userId",
+          "userCharacterId",
           "name",
+          "sortOrder",
           "amountUnit",
           "blocks"
         ]
@@ -837,17 +967,6 @@
           "blocks"
         ]
       },
-      "CompleteTaskDto": {
-        "type": "object",
-        "properties": {
-          "blockId": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "blockId"
-        ]
-      },
       "TaskCompletionResponseDto": {
         "type": "object",
         "properties": {
@@ -857,7 +976,7 @@
           "taskId": {
             "type": "number"
           },
-          "userId": {
+          "userCharacterId": {
             "type": "number"
           },
           "xpEarned": {
@@ -874,10 +993,21 @@
         "required": [
           "id",
           "taskId",
-          "userId",
+          "userCharacterId",
           "xpEarned",
           "coinsEarned",
           "completedAt"
+        ]
+      },
+      "CompleteTaskDto": {
+        "type": "object",
+        "properties": {
+          "blockId": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "blockId"
         ]
       },
       "GoalsResponseDto": {
@@ -886,7 +1016,7 @@
           "id": {
             "type": "number"
           },
-          "userId": {
+          "userCharacterId": {
             "type": "number"
           },
           "dailyXpTarget": {
@@ -912,7 +1042,7 @@
         },
         "required": [
           "id",
-          "userId",
+          "userCharacterId",
           "dailyXpTarget",
           "weeklyXpTarget",
           "monthlyXpTarget",
@@ -986,6 +1116,26 @@
           "monthly",
           "quarterly",
           "yearly"
+        ]
+      },
+      "XpLevelDto": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "number"
+          },
+          "xpToNext": {
+            "type": "number",
+            "nullable": true
+          },
+          "cumulativeXp": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "level",
+          "xpToNext",
+          "cumulativeXp"
         ]
       }
     }

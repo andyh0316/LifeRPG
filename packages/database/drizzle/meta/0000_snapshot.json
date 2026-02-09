@@ -1,5 +1,5 @@
 {
-  "id": "12e00337-09ae-4231-b971-e9fab7ee6902",
+  "id": "87e0c4ef-166f-4a37-bddf-a78d513f77f9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -46,8 +46,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "user_id": {
-          "name": "user_id",
+        "user_character_id": {
+          "name": "user_character_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -100,12 +100,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "reward_redemptions_user_id_users_id_fk": {
-          "name": "reward_redemptions_user_id_users_id_fk",
+        "reward_redemptions_user_character_id_user_character_id_fk": {
+          "name": "reward_redemptions_user_character_id_user_character_id_fk",
           "tableFrom": "reward_redemptions",
-          "tableTo": "users",
+          "tableTo": "user_character",
           "columnsFrom": [
-            "user_id"
+            "user_character_id"
           ],
           "columnsTo": [
             "id"
@@ -175,6 +175,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "user_character_id": {
+          "name": "user_character_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -221,6 +227,144 @@
           "tableTo": "users",
           "columnsFrom": [
             "updated_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "rewards_user_character_id_user_character_id_fk": {
+          "name": "rewards_user_character_id_user_character_id_fk",
+          "tableFrom": "rewards",
+          "tableTo": "user_character",
+          "columnsFrom": [
+            "user_character_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.task_blocks": {
+      "name": "task_blocks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by_user_id": {
+          "name": "updated_by_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "task_id": {
+          "name": "task_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "xp_reward": {
+          "name": "xp_reward",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "coin_reward": {
+          "name": "coin_reward",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "task_blocks_created_by_user_id_users_id_fk": {
+          "name": "task_blocks_created_by_user_id_users_id_fk",
+          "tableFrom": "task_blocks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_blocks_updated_by_user_id_users_id_fk": {
+          "name": "task_blocks_updated_by_user_id_users_id_fk",
+          "tableFrom": "task_blocks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "updated_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "task_blocks_task_id_tasks_id_fk": {
+          "name": "task_blocks_task_id_tasks_id_fk",
+          "tableFrom": "task_blocks",
+          "tableTo": "tasks",
+          "columnsFrom": [
+            "task_id"
           ],
           "columnsTo": [
             "id"
@@ -277,8 +421,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "user_id": {
-          "name": "user_id",
+        "user_character_id": {
+          "name": "user_character_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -288,6 +432,12 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         },
         "xp_earned": {
           "name": "xp_earned",
@@ -337,12 +487,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "task_completions_user_id_users_id_fk": {
-          "name": "task_completions_user_id_users_id_fk",
+        "task_completions_user_character_id_user_character_id_fk": {
+          "name": "task_completions_user_character_id_user_character_id_fk",
           "tableFrom": "task_completions",
-          "tableTo": "users",
+          "tableTo": "user_character",
           "columnsFrom": [
-            "user_id"
+            "user_character_id"
           ],
           "columnsTo": [
             "id"
@@ -412,8 +562,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "user_id": {
-          "name": "user_id",
+        "user_character_id": {
+          "name": "user_character_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -430,25 +580,26 @@
           "primaryKey": false,
           "notNull": false
         },
-        "xp_reward": {
-          "name": "xp_reward",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "coin_reward": {
-          "name": "coin_reward",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
         "icon": {
           "name": "icon",
           "type": "varchar(50)",
           "primaryKey": false,
           "notNull": false
+        },
+        "amount_unit": {
+          "name": "amount_unit",
+          "type": "amount_unit",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'count'"
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         }
       },
       "indexes": {},
@@ -479,12 +630,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "tasks_user_id_users_id_fk": {
-          "name": "tasks_user_id_users_id_fk",
+        "tasks_user_character_id_user_character_id_fk": {
+          "name": "tasks_user_character_id_user_character_id_fk",
           "tableFrom": "tasks",
-          "tableTo": "users",
+          "tableTo": "user_character",
           "columnsFrom": [
-            "user_id"
+            "user_character_id"
           ],
           "columnsTo": [
             "id"
@@ -547,6 +698,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
         "level": {
           "name": "level",
           "type": "integer",
@@ -567,18 +725,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
-        },
-        "daily_xp_target": {
-          "name": "daily_xp_target",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "weekly_xp_target": {
-          "name": "weekly_xp_target",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
@@ -624,12 +770,211 @@
         }
       },
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_character_settings": {
+      "name": "user_character_settings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_by_user_id": {
+          "name": "updated_by_user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_character_id": {
+          "name": "user_character_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "daily_xp_target": {
+          "name": "daily_xp_target",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weekly_xp_target": {
+          "name": "weekly_xp_target",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "monthly_xp_target": {
+          "name": "monthly_xp_target",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quarterly_xp_target": {
+          "name": "quarterly_xp_target",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "yearly_xp_target": {
+          "name": "yearly_xp_target",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_character_settings_created_by_user_id_users_id_fk": {
+          "name": "user_character_settings_created_by_user_id_users_id_fk",
+          "tableFrom": "user_character_settings",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_character_settings_updated_by_user_id_users_id_fk": {
+          "name": "user_character_settings_updated_by_user_id_users_id_fk",
+          "tableFrom": "user_character_settings",
+          "tableTo": "users",
+          "columnsFrom": [
+            "updated_by_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_character_settings_user_character_id_user_character_id_fk": {
+          "name": "user_character_settings_user_character_id_user_character_id_fk",
+          "tableFrom": "user_character_settings",
+          "tableTo": "user_character",
+          "columnsFrom": [
+            "user_character_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "user_character_user_id_unique": {
-          "name": "user_character_user_id_unique",
+        "user_character_settings_user_character_id_unique": {
+          "name": "user_character_settings_user_character_id_unique",
           "nullsNotDistinct": false,
           "columns": [
+            "user_character_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_sessions": {
+      "name": "user_sessions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_sessions_user_id_users_id_fk": {
+          "name": "user_sessions_user_id_users_id_fk",
+          "tableFrom": "user_sessions",
+          "tableTo": "users",
+          "columnsFrom": [
             "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_sessions_token_unique": {
+          "name": "user_sessions_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token"
           ]
         }
       },
@@ -742,7 +1087,16 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.amount_unit": {
+      "name": "amount_unit",
+      "schema": "public",
+      "values": [
+        "count",
+        "minutes"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

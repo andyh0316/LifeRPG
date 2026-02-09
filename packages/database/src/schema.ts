@@ -40,39 +40,40 @@ export const users = pgTable('users', {
   lastName: varchar('last_name', { length: 255 }),
 });
 
-export const usersRelations = relations(users, ({ one, many }) => ({
-  character: one(userCharacter, {
-    fields: [users.id],
-    references: [userCharacter.userId],
-  }),
-  characterSettings: one(userCharacterSettings, {
-    fields: [users.id],
-    references: [userCharacterSettings.userId],
-  }),
-  tasks: many(tasks),
-  taskCompletions: many(taskCompletions),
-  rewardRedemptions: many(rewardRedemptions),
+export const usersRelations = relations(users, ({ many }) => ({
+  characters: many(userCharacter),
 }));
 
-/** Stores RPG progression state for a user (1:1 with users). */
+/** Stores RPG progression state for a user (many per user). */
 export const userCharacter = pgTable('user_character', {
   id: serial('id').primaryKey(),
   ...auditColumns,
   userId: integer('user_id')
     .notNull()
-    .unique()
     .references(() => users.id),
+  name: varchar('name', { length: 255 }).notNull().default(''),
   level: integer('level').notNull().default(1),
   xp: integer('xp').notNull().default(0),
   coins: integer('coins').notNull().default(0),
 });
 
-export const userCharacterRelations = relations(userCharacter, ({ one }) => ({
-  user: one(users, {
-    fields: [userCharacter.userId],
-    references: [users.id],
+export const userCharacterRelations = relations(
+  userCharacter,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [userCharacter.userId],
+      references: [users.id],
+    }),
+    settings: one(userCharacterSettings, {
+      fields: [userCharacter.id],
+      references: [userCharacterSettings.userCharacterId],
+    }),
+    tasks: many(tasks),
+    taskCompletions: many(taskCompletions),
+    rewards: many(rewards),
+    rewardRedemptions: many(rewardRedemptions),
   }),
-}));
+);
 
 // ============================================================================
 // User Character Settings
@@ -81,10 +82,10 @@ export const userCharacterRelations = relations(userCharacter, ({ one }) => ({
 export const userCharacterSettings = pgTable('user_character_settings', {
   id: serial('id').primaryKey(),
   ...auditColumns,
-  userId: integer('user_id')
+  userCharacterId: integer('user_character_id')
     .notNull()
     .unique()
-    .references(() => users.id),
+    .references(() => userCharacter.id),
   dailyXpTarget: integer('daily_xp_target'),
   weeklyXpTarget: integer('weekly_xp_target'),
   monthlyXpTarget: integer('monthly_xp_target'),
@@ -95,9 +96,9 @@ export const userCharacterSettings = pgTable('user_character_settings', {
 export const userCharacterSettingsRelations = relations(
   userCharacterSettings,
   ({ one }) => ({
-    user: one(users, {
-      fields: [userCharacterSettings.userId],
-      references: [users.id],
+    character: one(userCharacter, {
+      fields: [userCharacterSettings.userCharacterId],
+      references: [userCharacter.id],
     }),
   }),
 );
@@ -115,6 +116,9 @@ export const userSessions = pgTable('user_sessions', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  selectedCharacterId: integer('selected_character_id').references(
+    () => userCharacter.id,
+  ),
 });
 
 export const userSessionsRelations = relations(userSessions, ({ one }) => ({
@@ -133,9 +137,9 @@ export const amountUnitEnum = pgEnum('amount_unit', ['count', 'minutes']);
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   ...auditColumns,
-  userId: integer('user_id')
+  userCharacterId: integer('user_character_id')
     .notNull()
-    .references(() => users.id),
+    .references(() => userCharacter.id),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   icon: varchar('icon', { length: 50 }),
@@ -144,9 +148,9 @@ export const tasks = pgTable('tasks', {
 });
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
-  user: one(users, {
-    fields: [tasks.userId],
-    references: [users.id],
+  character: one(userCharacter, {
+    fields: [tasks.userCharacterId],
+    references: [userCharacter.id],
   }),
   blocks: many(taskBlocks),
   completions: many(taskCompletions),
@@ -174,9 +178,9 @@ export const taskBlocksRelations = relations(taskBlocks, ({ one }) => ({
 export const taskCompletions = pgTable('task_completions', {
   id: serial('id').primaryKey(),
   ...auditColumns,
-  userId: integer('user_id')
+  userCharacterId: integer('user_character_id')
     .notNull()
-    .references(() => users.id),
+    .references(() => userCharacter.id),
   taskId: integer('task_id')
     .notNull()
     .references(() => tasks.id),
@@ -191,9 +195,9 @@ export const taskCompletions = pgTable('task_completions', {
 export const taskCompletionsRelations = relations(
   taskCompletions,
   ({ one }) => ({
-    user: one(users, {
-      fields: [taskCompletions.userId],
-      references: [users.id],
+    character: one(userCharacter, {
+      fields: [taskCompletions.userCharacterId],
+      references: [userCharacter.id],
     }),
     task: one(tasks, {
       fields: [taskCompletions.taskId],
@@ -209,22 +213,29 @@ export const taskCompletionsRelations = relations(
 export const rewards = pgTable('rewards', {
   id: serial('id').primaryKey(),
   ...auditColumns,
+  userCharacterId: integer('user_character_id')
+    .notNull()
+    .references(() => userCharacter.id),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
   coinCost: integer('coin_cost').notNull(),
   icon: varchar('icon', { length: 50 }),
 });
 
-export const rewardsRelations = relations(rewards, ({ many }) => ({
+export const rewardsRelations = relations(rewards, ({ one, many }) => ({
+  character: one(userCharacter, {
+    fields: [rewards.userCharacterId],
+    references: [userCharacter.id],
+  }),
   redemptions: many(rewardRedemptions),
 }));
 
 export const rewardRedemptions = pgTable('reward_redemptions', {
   id: serial('id').primaryKey(),
   ...auditColumns,
-  userId: integer('user_id')
+  userCharacterId: integer('user_character_id')
     .notNull()
-    .references(() => users.id),
+    .references(() => userCharacter.id),
   rewardId: integer('reward_id')
     .notNull()
     .references(() => rewards.id),
@@ -237,9 +248,9 @@ export const rewardRedemptions = pgTable('reward_redemptions', {
 export const rewardRedemptionsRelations = relations(
   rewardRedemptions,
   ({ one }) => ({
-    user: one(users, {
-      fields: [rewardRedemptions.userId],
-      references: [users.id],
+    character: one(userCharacter, {
+      fields: [rewardRedemptions.userCharacterId],
+      references: [userCharacter.id],
     }),
     reward: one(rewards, {
       fields: [rewardRedemptions.rewardId],
