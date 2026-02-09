@@ -10,7 +10,7 @@ describe('User Character Integration', () => {
   let app: INestApplication;
   let db: Db;
   let request: TestAgent;
-  let currentUserId: number;
+  let currentUserCharacterId: number;
   let startTransaction: () => Promise<void>;
   let rollbackTransaction: () => Promise<void>;
 
@@ -19,7 +19,7 @@ describe('User Character Integration', () => {
       app,
       db,
       request,
-      currentUserId,
+      currentUserCharacterId,
       startTransaction,
       rollbackTransaction,
     } = await createIntegrationApp());
@@ -55,7 +55,7 @@ describe('User Character Integration', () => {
     // assert
     const body: GoalsResponseDto = res.body;
     expect(body.id).toBeDefined();
-    expect(body.userId).toBe(currentUserId);
+    expect(body.userCharacterId).toBe(currentUserCharacterId);
     expect(body.dailyXpTarget).toBe(100);
     expect(body.weeklyXpTarget).toBeNull();
     expect(body.monthlyXpTarget).toBeNull();
@@ -75,7 +75,7 @@ describe('User Character Integration', () => {
 
     // assert
     const body: GoalsResponseDto = res.body;
-    expect(body.userId).toBe(currentUserId);
+    expect(body.userCharacterId).toBe(currentUserCharacterId);
     expect(body.dailyXpTarget).toBe(100);
   });
 
@@ -150,42 +150,42 @@ describe('User Character Integration', () => {
 
     await db.insert(taskCompletions).values([
       {
-        userId: currentUserId,
+        userCharacterId: currentUserCharacterId,
         taskId: task.id,
         xpEarned: 10,
         coinsEarned: 0,
         completedAt: new Date('2026-05-15T00:00:00Z'),
       }, // day start
       {
-        userId: currentUserId,
+        userCharacterId: currentUserCharacterId,
         taskId: task.id,
         xpEarned: 10,
         coinsEarned: 0,
         completedAt: new Date('2026-05-11T00:00:00Z'),
       }, // week start (Mon)
       {
-        userId: currentUserId,
+        userCharacterId: currentUserCharacterId,
         taskId: task.id,
         xpEarned: 10,
         coinsEarned: 0,
         completedAt: new Date('2026-05-01T00:00:00Z'),
       }, // month start
       {
-        userId: currentUserId,
+        userCharacterId: currentUserCharacterId,
         taskId: task.id,
         xpEarned: 10,
         coinsEarned: 0,
         completedAt: new Date('2026-04-01T00:00:00Z'),
       }, // quarter start
       {
-        userId: currentUserId,
+        userCharacterId: currentUserCharacterId,
         taskId: task.id,
         xpEarned: 10,
         coinsEarned: 0,
         completedAt: new Date('2026-01-01T00:00:00Z'),
       }, // year start
       {
-        userId: currentUserId,
+        userCharacterId: currentUserCharacterId,
         taskId: task.id,
         xpEarned: 10,
         coinsEarned: 0,
@@ -197,7 +197,10 @@ describe('User Character Integration', () => {
 
     // #region act
     const service = app.get(UserCharacterService);
-    const body = await service.getGoalsProgress(currentUserId, referenceTime);
+    const body = await service.getGoalsProgress(
+      currentUserCharacterId,
+      referenceTime,
+    );
     // #endregion act
 
     // #region assert

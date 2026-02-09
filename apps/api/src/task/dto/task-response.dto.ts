@@ -6,7 +6,7 @@ export class TaskResponseDto {
   id!: number;
 
   @ApiProperty({ type: Number })
-  userId!: number;
+  userCharacterId!: number;
 
   @ApiProperty()
   name!: string;

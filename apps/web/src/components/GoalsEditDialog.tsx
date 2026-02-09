@@ -26,11 +26,15 @@ interface GoalsFormValues {
 }
 
 const FIELDS = [
-  { name: 'dailyXpTarget' as const, label: 'Today' },
-  { name: 'weeklyXpTarget' as const, label: 'This Week' },
-  { name: 'monthlyXpTarget' as const, label: 'This Month' },
-  { name: 'quarterlyXpTarget' as const, label: 'This Quarter' },
-  { name: 'yearlyXpTarget' as const, label: 'This Year' },
+  { name: 'dailyXpTarget' as const, label: 'Daily', placeholder: '600' },
+  { name: 'weeklyXpTarget' as const, label: 'Weekly', placeholder: '4000' },
+  { name: 'monthlyXpTarget' as const, label: 'Monthly', placeholder: '15000' },
+  {
+    name: 'quarterlyXpTarget' as const,
+    label: 'Quarterly',
+    placeholder: '45000',
+  },
+  { name: 'yearlyXpTarget' as const, label: 'Yearly', placeholder: '180000' },
 ];
 
 function toFormValues(
@@ -113,6 +117,7 @@ export default function GoalsEditDialog({ open, onClose }: GoalsDialogProps) {
               <TextField
                 key={field.name}
                 label={field.label}
+                placeholder={field.placeholder}
                 type="number"
                 {...register(field.name)}
                 fullWidth

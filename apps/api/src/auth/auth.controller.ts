@@ -31,8 +31,11 @@ export class AuthController {
   @Get('me')
   @ApiOkResponse({ type: AuthUserDto })
   @ApiUnauthorizedResponse({ description: 'Not authenticated' })
-  me(@CurrentUser() user: AuthUser): AuthUserDto {
-    return { id: user.id, email: user.email };
+  async me(@CurrentUser() user: AuthUser): Promise<AuthUserDto> {
+    return {
+      id: user.id,
+      email: user.email,
+    };
   }
 
   @Public()

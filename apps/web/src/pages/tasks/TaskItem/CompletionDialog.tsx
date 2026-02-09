@@ -6,70 +6,9 @@ import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import StarIcon from '@mui/icons-material/Star';
 import CoinIcon from '../../../components/icons/CoinIcon';
+import LevelBar from '../../../components/LevelBar';
 import CompletionProgressBar from './CompletionProgressBar';
 import type { Block } from './types';
-
-function CompletionRewards({
-  earnedCoins,
-  progress,
-  preCompletionXp,
-  onClose,
-}: {
-  earnedCoins: number;
-  progress: { current: number; target: number } | undefined;
-  preCompletionXp: number;
-  onClose: () => void;
-}) {
-  const animatedCoins = useAnimateCountUp(earnedCoins);
-
-  return (
-    <Box sx={{ width: '100%', mt: 1 }}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 0.75,
-          mb: 2,
-        }}
-      >
-        <CoinIcon sx={{ fontSize: '1.5rem' }} />
-        <Typography
-          sx={{
-            fontWeight: 800,
-            fontSize: '1.5rem',
-            color: GAME_COLORS.coinGold,
-          }}
-        >
-          +{animatedCoins.toLocaleString()} G
-        </Typography>
-      </Box>
-
-      {progress && (
-        <CompletionProgressBar
-          current={progress.current}
-          target={progress.target}
-          initialCurrent={preCompletionXp}
-          onClose={onClose}
-        />
-      )}
-
-      {!progress && (
-        <Button
-          variant="text"
-          onClick={onClose}
-          sx={{
-            fontWeight: 700,
-            color: GAME_COLORS.textMuted,
-            fontSize: '0.9rem',
-          }}
-        >
-          Done
-        </Button>
-      )}
-    </Box>
-  );
-}
 
 export default function CompletionDialog({
   name,
@@ -88,12 +27,14 @@ export default function CompletionDialog({
   confirmBlock: Block | null;
   completed: boolean;
   isPending: boolean;
-  progress: { current: number; target: number } | undefined;
+  progress: { current: number; target: number | null } | undefined;
   preCompletionXp: number;
   earnedCoins: number;
   onConfirm: () => void;
   onClose: () => void;
 }) {
+  const animatedCoins = useAnimateCountUp(completed ? earnedCoins : 0);
+
   return (
     <Dialog
       open={!!confirmBlock}
@@ -187,43 +128,93 @@ export default function CompletionDialog({
               </Typography>
             </Box>
           </Box>
-
-          <Button
-            variant="contained"
-            onClick={onConfirm}
-            disabled={isPending}
-            sx={{
-              fontWeight: 800,
-              fontSize: '1.1rem',
-              py: 2,
-              px: 6,
-              borderRadius: GAME_RADII.card,
-              bgcolor: GAME_COLORS.accent,
-              color: '#fff',
-              boxShadow: `0 4px 16px ${GAME_COLORS.accent}40`,
-              '&:hover': {
-                bgcolor: GAME_COLORS.accent,
-                boxShadow: `0 6px 24px ${GAME_COLORS.accent}60`,
-                transform: 'translateY(-1px)',
-              },
-              '&:active': {
-                transform: 'translateY(1px)',
-                boxShadow: `0 2px 8px ${GAME_COLORS.accent}30`,
-              },
-            }}
-          >
-            Complete
-          </Button>
         </>
       )}
 
       {completed && (
-        <CompletionRewards
-          earnedCoins={earnedCoins}
-          progress={progress}
-          preCompletionXp={preCompletionXp}
-          onClose={onClose}
-        />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 0.75,
+            mb: 2,
+          }}
+        >
+          <CoinIcon sx={{ fontSize: '1.5rem' }} />
+          <Typography
+            sx={{
+              fontWeight: 800,
+              fontSize: '1.5rem',
+              color: GAME_COLORS.coinGold,
+            }}
+          >
+            +{animatedCoins.toLocaleString()} G
+          </Typography>
+        </Box>
+      )}
+
+      {/* Always-visible bars */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.5,
+          width: '100%',
+          mb: 3,
+        }}
+      >
+        {progress && (
+          <CompletionProgressBar
+            current={progress.current}
+            target={progress.target}
+            initialCurrent={completed ? preCompletionXp : progress.current}
+          />
+        )}
+        <LevelBar />
+      </Box>
+
+      {confirmBlock && !completed && (
+        <Button
+          variant="contained"
+          onClick={onConfirm}
+          disabled={isPending}
+          sx={{
+            fontWeight: 800,
+            fontSize: '1.1rem',
+            py: 2,
+            px: 6,
+            borderRadius: GAME_RADII.card,
+            bgcolor: GAME_COLORS.accent,
+            color: '#fff',
+            boxShadow: `0 4px 16px ${GAME_COLORS.accent}40`,
+            '&:hover': {
+              bgcolor: GAME_COLORS.accent,
+              boxShadow: `0 6px 24px ${GAME_COLORS.accent}60`,
+              transform: 'translateY(-1px)',
+            },
+            '&:active': {
+              transform: 'translateY(1px)',
+              boxShadow: `0 2px 8px ${GAME_COLORS.accent}30`,
+            },
+          }}
+        >
+          Complete
+        </Button>
+      )}
+
+      {completed && (
+        <Button
+          variant="text"
+          onClick={onClose}
+          sx={{
+            fontWeight: 700,
+            color: GAME_COLORS.textMuted,
+            fontSize: '0.9rem',
+          }}
+        >
+          Done
+        </Button>
       )}
     </Dialog>
   );

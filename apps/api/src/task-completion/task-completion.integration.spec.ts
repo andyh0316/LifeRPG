@@ -7,13 +7,18 @@ import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
 describe('Task Completion Integration', () => {
   let app: INestApplication;
   let request: TestAgent;
-  let currentUserId: number;
+  let currentUserCharacterId: number;
   let startTransaction: () => Promise<void>;
   let rollbackTransaction: () => Promise<void>;
 
   beforeAll(async () => {
-    ({ app, request, currentUserId, startTransaction, rollbackTransaction } =
-      await createIntegrationApp());
+    ({
+      app,
+      request,
+      currentUserCharacterId,
+      startTransaction,
+      rollbackTransaction,
+    } = await createIntegrationApp());
   });
 
   beforeEach(async () => {
@@ -51,7 +56,7 @@ describe('Task Completion Integration', () => {
     const completion: TaskCompletionResponseDto = res.body;
     expect(completion.id).toBeDefined();
     expect(completion.taskId).toBe(task.id);
-    expect(completion.userId).toBe(currentUserId);
+    expect(completion.userCharacterId).toBe(currentUserCharacterId);
     expect(completion.xpEarned).toBe(15);
     expect(completion.coinsEarned).toBe(10);
     expect(completion.completedAt).toBeDefined();
@@ -120,7 +125,7 @@ describe('Task Completion Integration', () => {
     // assert
     const completions: TaskCompletionResponseDto[] = res.body;
     expect(completions).toHaveLength(2);
-    expect(completions[0].userId).toBe(currentUserId);
-    expect(completions[1].userId).toBe(currentUserId);
+    expect(completions[0].userCharacterId).toBe(currentUserCharacterId);
+    expect(completions[1].userCharacterId).toBe(currentUserCharacterId);
   });
 });

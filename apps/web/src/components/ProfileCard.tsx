@@ -1,27 +1,32 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
-import StarIcon from '@mui/icons-material/Star';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import CoinIcon from './icons/CoinIcon';
+import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import { GAME_COLORS } from '@/theme/gameTheme';
+import useActiveCharacter from '@/hooks/useActiveCharacter';
 import useAnimateCountUp from '@/hooks/useAnimateCountUp';
+import LevelBar from './LevelBar';
 
 export default function ProfileCard() {
-  const { data: users = [] } = $api.useQuery('get', '/users');
-  const userId = users[0]?.id;
+  const queryClient = useQueryClient();
 
-  const { data: profile } = $api.useQuery(
-    'get',
-    '/users/{id}',
-    { params: { path: { id: userId! } } },
-    { enabled: !!userId },
-  );
+  const { characters, activeCharacterId, active } = useActiveCharacter();
 
-  const animatedCoins = useAnimateCountUp(profile?.coins ?? 0);
-  const animatedXp = useAnimateCountUp(profile?.xp ?? 0);
+  const selectCharacter = $api.useMutation('patch', '/user-character/select', {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
+      });
+    },
+  });
 
-  if (!profile) return null;
+  const animatedCoins = useAnimateCountUp(active?.coins ?? 0);
+
+  if (!active) return null;
 
   return (
     <Box
@@ -40,72 +45,75 @@ export default function ProfileCard() {
             bgcolor: GAME_COLORS.avatarBg,
             fontSize: '0.9rem',
             fontWeight: 700,
+            flexShrink: 0,
           }}
         >
-          {profile.fullName.charAt(0).toUpperCase()}
+          {active.name.charAt(0).toUpperCase()}
         </Avatar>
+
+        {characters.length > 1 ? (
+          <Select
+            size="small"
+            fullWidth
+            value={activeCharacterId}
+            onChange={(e) =>
+              selectCharacter.mutate({
+                body: { characterId: Number(e.target.value) },
+              })
+            }
+            sx={{
+              color: '#fff',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+              '& .MuiSelect-select': { py: 0.5, pl: 0 },
+              '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.5)' },
+            }}
+          >
+            {characters.map((c) => (
+              <MenuItem key={c.id} value={c.id}>
+                {c.name}
+              </MenuItem>
+            ))}
+          </Select>
+        ) : (
+          <Typography
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              color: GAME_COLORS.sidebarText,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {active.name}
+          </Typography>
+        )}
+      </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.75,
+          pt: 0.75,
+          pb: 1.5,
+        }}
+      >
+        <CoinIcon sx={{ fontSize: 21 }} />
         <Typography
           sx={{
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            color: GAME_COLORS.sidebarText,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            fontSize: '1.125rem',
+            fontWeight: 700,
+            color: GAME_COLORS.coinGold,
           }}
         >
-          {profile.fullName}
+          {animatedCoins.toLocaleString()} G
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1,
-            py: 0.25,
-            borderRadius: '6px',
-            bgcolor: GAME_COLORS.coinGoldSubtle,
-            border: `1px solid ${GAME_COLORS.coinGold}33`,
-          }}
-        >
-          <CoinIcon sx={{ fontSize: 14 }} />
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              color: GAME_COLORS.coinGold,
-            }}
-          >
-            {animatedCoins.toLocaleString()}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1,
-            py: 0.25,
-            borderRadius: '6px',
-            bgcolor: GAME_COLORS.xpGreenSubtle,
-            border: `1px solid ${GAME_COLORS.xpGreen}33`,
-          }}
-        >
-          <StarIcon sx={{ fontSize: 14, color: GAME_COLORS.xpGreen }} />
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              color: GAME_COLORS.xpGreen,
-            }}
-          >
-            {animatedXp.toLocaleString()} XP
-          </Typography>
-        </Box>
-      </Box>
+      <LevelBar />
     </Box>
   );
 }

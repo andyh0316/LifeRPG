@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { createDb, users, type Db } from '@life-rpg/database';
+import { createDb, users, userCharacter, type Db } from '@life-rpg/database';
 import { TransactionRollbackError } from 'drizzle-orm';
 import cookieParser from 'cookie-parser';
 import supertest from 'supertest';
@@ -23,6 +23,7 @@ export async function createIntegrationApp(): Promise<{
   db: Db;
   request: TestAgent;
   currentUserId: number;
+  currentUserCharacterId: number;
   startTransaction: () => Promise<void>;
   rollbackTransaction: () => Promise<void>;
 }> {
@@ -104,6 +105,17 @@ export async function createIntegrationApp(): Promise<{
     .from(users)
     .where(eq(users.email, TEST_USER.email));
 
+  // Ensure a character exists for the test user (required by session validation)
+  await realDb
+    .insert(userCharacter)
+    .values({ userId: testUser.id, name: 'Test Character' })
+    .onConflictDoNothing();
+
+  const [character] = await realDb
+    .select({ id: userCharacter.id })
+    .from(userCharacter)
+    .where(eq(userCharacter.userId, testUser.id));
+
   const sessionService = app.get(SessionService);
   const { raw } = await sessionService.createSession(testUser);
 
@@ -116,6 +128,7 @@ export async function createIntegrationApp(): Promise<{
     db: dbProxy,
     request,
     currentUserId: testUser.id,
+    currentUserCharacterId: character.id,
     startTransaction,
     rollbackTransaction,
   };

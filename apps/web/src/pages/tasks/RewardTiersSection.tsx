@@ -127,6 +127,18 @@ export default function RewardTiersSection({
         </SortableContext>
       </DndContext>
 
+      <Typography
+        sx={{
+          fontSize: '0.75rem',
+          color: GAME_COLORS.textSecondary,
+          fontStyle: 'italic',
+          mt: 0.5,
+          mb: 1,
+        }}
+      >
+        Guideline: 1 minute of work = 1 XP, 1 Gold
+      </Typography>
+
       <Button
         size="small"
         startIcon={<AddIcon />}

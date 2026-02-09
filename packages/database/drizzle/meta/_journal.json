@@ -5,78 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1770156800222,
-      "tag": "0000_cold_sue_storm",
+      "when": 1770615168316,
+      "tag": "0000_init",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1770229549647,
-      "tag": "0001_solid_crusher_hogan",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1770274911559,
-      "tag": "0002_luxuriant_omega_flight",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1770275901032,
-      "tag": "0003_quiet_wolfpack",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1770277335022,
-      "tag": "0004_smart_lucky_pierre",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1770358029172,
-      "tag": "0005_zippy_millenium_guard",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1770394954666,
-      "tag": "0006_dizzy_lilandra",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1770431066633,
-      "tag": "0007_wonderful_swarm",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1770431209037,
-      "tag": "0008_even_vengeance",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1770487138795,
-      "tag": "0009_stiff_layla_miller",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1770534709455,
-      "tag": "0010_messy_greymalkin",
+      "when": 1770615859337,
+      "tag": "0001_add_selected_character",
       "breakpoints": true
     }
   ]

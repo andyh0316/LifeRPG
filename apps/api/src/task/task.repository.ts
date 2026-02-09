@@ -11,13 +11,13 @@ export class TaskRepository {
   constructor(@Inject('DATABASE') private db: Db) {}
 
   async findAll(options?: {
-    userId?: number;
+    userCharacterId?: number;
     includeBlocks?: boolean;
     includeCompletions?: boolean;
   }) {
     const conditions = [isNull(tasks.deletedAt)];
-    if (options?.userId != null) {
-      conditions.push(eq(tasks.userId, options.userId));
+    if (options?.userCharacterId != null) {
+      conditions.push(eq(tasks.userCharacterId, options.userCharacterId));
     }
 
     const rows = await this.db.query.tasks.findMany({
@@ -40,11 +40,16 @@ export class TaskRepository {
     return row;
   }
 
-  async getNextSortOrder(userId: number, tx?: Db): Promise<number> {
+  async getNextSortOrder(userCharacterId: number, tx?: Db): Promise<number> {
     const [row] = await (tx ?? this.db)
       .select({ value: sql<number>`coalesce(max(${tasks.sortOrder}), -1) + 1` })
       .from(tasks)
-      .where(and(eq(tasks.userId, userId), isNull(tasks.deletedAt)));
+      .where(
+        and(
+          eq(tasks.userCharacterId, userCharacterId),
+          isNull(tasks.deletedAt),
+        ),
+      );
     return row.value;
   }
 
