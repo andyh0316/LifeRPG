@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
-import { tasks } from '@life-rpg/database';
+import { taskBlocks, tasks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
 export type TaskRow = typeof tasks.$inferSelect;
@@ -24,7 +24,9 @@ export class TaskRepository {
       where: and(...conditions),
       orderBy: [asc(tasks.sortOrder), asc(tasks.id)],
       with: {
-        ...(options?.includeBlocks && { blocks: true }),
+        ...(options?.includeBlocks && {
+          blocks: { orderBy: asc(taskBlocks.sortOrder) },
+        }),
         ...(options?.includeCompletions && { completions: true }),
       },
     });
