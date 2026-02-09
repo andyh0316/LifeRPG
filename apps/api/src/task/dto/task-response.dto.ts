@@ -17,6 +17,9 @@ export class TaskResponseDto {
   @ApiPropertyOptional({ type: String, nullable: true })
   icon!: string | null;
 
+  @ApiProperty({ type: Number })
+  sortOrder!: number;
+
   @ApiProperty({ enum: ['count', 'minutes'] })
   amountUnit!: string;
 

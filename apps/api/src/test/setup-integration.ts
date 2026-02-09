@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { users, type Db } from '@life-rpg/database';
+import { createDb, users, type Db } from '@life-rpg/database';
+import { TransactionRollbackError } from 'drizzle-orm';
 import cookieParser from 'cookie-parser';
 import supertest from 'supertest';
 import { eq } from 'drizzle-orm';
@@ -22,6 +23,8 @@ export async function createIntegrationApp(): Promise<{
   db: Db;
   request: TestAgent;
   currentUserId: number;
+  startTransaction: () => Promise<void>;
+  rollbackTransaction: () => Promise<void>;
 }> {
   // Validate that the test database URL is configured
   if (!process.env.TEST_DATABASE_URL) {
@@ -29,10 +32,60 @@ export async function createIntegrationApp(): Promise<{
   }
   process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
 
-  // Bootstrap the NestJS application with validation
+  // Create a real DB connection outside NestJS DI for seeding and transactions
+  const realDb = createDb(process.env.TEST_DATABASE_URL);
+
+  // Proxy that delegates all access to a swappable target (realDb by default).
+  // During tests, the target is swapped to a transaction for rollback isolation.
+  let currentTarget: Db = realDb;
+  const dbProxy = new Proxy({} as Db, {
+    get(_, prop) {
+      const value = (currentTarget as any)[prop];
+      return typeof value === 'function' ? value.bind(currentTarget) : value;
+    },
+  });
+
+  // Transaction control state
+  let rollbackFn: (() => void) | null = null;
+  let transactionPromise: Promise<void> | null = null;
+
+  async function startTransaction() {
+    await new Promise<void>((resolveReady) => {
+      transactionPromise = realDb
+        .transaction(async (tx) => {
+          currentTarget = tx as unknown as Db;
+          const rollbackPromise = new Promise<void>((r) => {
+            rollbackFn = r;
+          });
+          resolveReady();
+          await rollbackPromise;
+          throw new TransactionRollbackError();
+        })
+        .catch((err) => {
+          if (!(err instanceof TransactionRollbackError)) throw err;
+        });
+    });
+  }
+
+  async function rollbackTransaction() {
+    if (rollbackFn) {
+      rollbackFn();
+      rollbackFn = null;
+    }
+    if (transactionPromise) {
+      await transactionPromise;
+      transactionPromise = null;
+    }
+    currentTarget = realDb;
+  }
+
+  // Bootstrap the NestJS application, overriding DATABASE in all modules
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideProvider('DATABASE')
+    .useValue(dbProxy)
+    .compile();
 
   const app = moduleRef.createNestApplication();
   app.use(cookieParser());
@@ -40,14 +93,13 @@ export async function createIntegrationApp(): Promise<{
   await app.init();
 
   // Seed a test user (idempotent — skips if email already exists)
-  const db = app.get<Db>('DATABASE');
-  await db
+  await realDb
     .insert(users)
     .values(TEST_USER)
     .onConflictDoNothing({ target: users.email });
 
   // Look up the test user and create a session directly
-  const [testUser] = await db
+  const [testUser] = await realDb
     .select({ id: users.id })
     .from(users)
     .where(eq(users.email, TEST_USER.email));
@@ -59,5 +111,12 @@ export async function createIntegrationApp(): Promise<{
   const request = supertest.agent(app.getHttpServer());
   request.set('Cookie', `session_token=${raw}`);
 
-  return { app, db, request, currentUserId: testUser.id };
+  return {
+    app,
+    db: dbProxy,
+    request,
+    currentUserId: testUser.id,
+    startTransaction,
+    rollbackTransaction,
+  };
 }

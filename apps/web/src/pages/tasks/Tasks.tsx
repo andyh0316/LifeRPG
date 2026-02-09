@@ -1,42 +1,28 @@
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-import List from '@mui/material/List';
-import { useNavigate } from 'react-router-dom';
 import { $api } from '@life-rpg/api-client';
-import TaskItem from './TaskItem';
+import TaskList from './TaskList';
+import CompletionOverview from './CompletionOverview';
 
 /** Displays the full list of available tasks with their rewards. */
 export default function Tasks() {
-  const navigate = useNavigate();
-  const { data: tasks = [], isLoading } = $api.useQuery('get', '/tasks');
-  const { data: users = [] } = $api.useQuery('get', '/users');
-  const userId = users[0]?.id;
+  const { isLoading } = $api.useQuery('get', '/tasks');
 
   if (isLoading) {
     return <Typography>Loading…</Typography>;
   }
 
   return (
-    <>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-        <Typography variant="h4">Tasks</Typography>
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/tasks/create')}
-        >
-          Create
-        </Button>
+    <Box sx={{ display: 'flex', gap: 3, height: 'calc(100vh - 48px)' }}>
+      {/* Left panel – Tasks */}
+      <Box sx={{ flex: 1, overflowY: 'auto', maxWidth: 600 }}>
+        <TaskList />
       </Box>
-      <List>
-        {userId &&
-          tasks.map((task) => (
-            <TaskItem key={task.id} {...task} userId={userId} />
-          ))}
-      </List>
-    </>
+
+      {/* Right panel – Completion overview */}
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <CompletionOverview />
+      </Box>
+    </Box>
   );
 }

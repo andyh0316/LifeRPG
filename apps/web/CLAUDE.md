@@ -1,2 +1,3 @@
 - Try to leverage MUI for where applicable.
 - Prefer `Stack` over `Box` when positioning more than one child.
+- Always show a toast (via `useToast()`) for **every mutation** (POST, PUT, PATCH, DELETE) — both `onSuccess` and `onError`.

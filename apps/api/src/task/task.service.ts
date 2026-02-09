@@ -11,6 +11,7 @@ import { TaskResponseDto } from './dto/task-response.dto';
 import { TaskBlockResponseDto } from './dto/task-block-response.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { UpdateTaskBlockDto } from './dto/update-task-block.dto';
 
 @Injectable()
 export class TaskService {
@@ -27,10 +28,12 @@ export class TaskService {
       name: row.name,
       desc: row.description,
       icon: row.icon,
+      sortOrder: row.sortOrder,
       amountUnit: row.amountUnit,
       blocks: blockRows.map(
         (o): TaskBlockResponseDto => ({
           id: o.id,
+          sortOrder: o.sortOrder,
           amount: o.amount,
           xpReward: o.xpReward,
           coinReward: o.coinReward,
@@ -39,8 +42,11 @@ export class TaskService {
     };
   }
 
-  async findAll(): Promise<TaskResponseDto[]> {
-    const rows = await this.taskRepository.findAll({ includeBlocks: true });
+  async findAll(userId: number): Promise<TaskResponseDto[]> {
+    const rows = await this.taskRepository.findAll({
+      userId,
+      includeBlocks: true,
+    });
     return rows.map((row) => this.toDto(row, row.blocks));
   }
 
@@ -57,6 +63,7 @@ export class TaskService {
 
   async create(dto: CreateTaskDto, userId: number): Promise<TaskResponseDto> {
     return this.db.transaction(async (tx) => {
+      const sortOrder = await this.taskRepository.getNextSortOrder(userId, tx);
       const task = await this.taskRepository.create(
         {
           userId,
@@ -64,6 +71,7 @@ export class TaskService {
           description: dto.desc,
           icon: dto.icon,
           amountUnit: dto.amountUnit,
+          sortOrder,
         },
         tx,
       );
@@ -89,6 +97,20 @@ export class TaskService {
     });
   }
 
+  async reorder(ids: number[]): Promise<void> {
+    const updates = ids.map((id, i) => ({ id, sortOrder: i }));
+    await this.taskRepository.updateSortOrders(updates);
+  }
+
+  async remove(id: number): Promise<TaskResponseDto> {
+    const row = await this.taskRepository.softDelete(id);
+    if (!row) {
+      throw new NotFoundException(`Task ${id} not found`);
+    }
+    const blocks = await this.taskBlockRepository.findByTaskId(id);
+    return this.toDto(row, blocks);
+  }
+
   async update(id: number, dto: UpdateTaskDto): Promise<TaskResponseDto> {
     return this.db.transaction(async (tx) => {
       const task = await this.taskRepository.update(
@@ -106,55 +128,50 @@ export class TaskService {
         throw new NotFoundException(`Task ${id} not found`);
       }
 
-      let blocks: TaskBlockRow[];
+      const toUpdate: { dto: UpdateTaskBlockDto; sortOrder: number }[] = [];
+      const toCreate: { dto: UpdateTaskBlockDto; sortOrder: number }[] = [];
 
-      if (dto.blocks) {
-        const toDelete = dto.blocks.filter((o) => o.id != null && o.delete);
-        const toUpdate = dto.blocks.filter((o) => o.id != null && !o.delete);
-        const toCreate = dto.blocks.filter((o) => o.id == null);
+      dto.blocks.forEach((block, i) => {
+        if (block.id != null) {
+          toUpdate.push({ dto: block, sortOrder: i });
+        } else {
+          toCreate.push({ dto: block, sortOrder: i });
+        }
+      });
 
-        await this.taskBlockRepository.deleteByIds(
-          toDelete.map((o) => o.id!),
+      const keepIds = toUpdate.map((o) => o.dto.id!);
+
+      await this.taskBlockRepository.deleteByTaskIdExcept(id, keepIds, tx);
+
+      await Promise.all(
+        toUpdate.map((o) =>
+          this.taskBlockRepository.update(
+            o.dto.id!,
+            {
+              amount: o.dto.amount,
+              xpReward: o.dto.xpReward,
+              coinReward: o.dto.coinReward,
+              sortOrder: o.sortOrder,
+            },
+            tx,
+          ),
+        ),
+      );
+
+      if (toCreate.length) {
+        await this.taskBlockRepository.createMany(
+          toCreate.map((o) => ({
+            taskId: id,
+            amount: o.dto.amount,
+            xpReward: o.dto.xpReward,
+            coinReward: o.dto.coinReward,
+            sortOrder: o.sortOrder,
+          })),
           tx,
         );
-
-        await Promise.all(
-          toUpdate.map((o, i) =>
-            this.taskBlockRepository.update(
-              o.id!,
-              {
-                amount: o.amount,
-                xpReward: o.xpReward,
-                coinReward: o.coinReward,
-                sortOrder: i,
-              },
-              tx,
-            ),
-          ),
-        );
-
-        if (toCreate.length) {
-          await this.taskBlockRepository.createMany(
-            toCreate.map((o, i) => ({
-              taskId: id,
-              amount: o.amount,
-              xpReward: o.xpReward,
-              coinReward: o.coinReward,
-              sortOrder: toUpdate.length + i,
-            })),
-            tx,
-          );
-        }
       }
 
-      // Re-read blocks after mutations to verify at least one remains.
-      // Needed because patch semantics allow deleting some blocks while
-      // keeping others that weren't mentioned in the request.
-      blocks = await this.taskBlockRepository.findByTaskId(id, tx);
-
-      if (!blocks.length) {
-        throw new BadRequestException('Task must have at least one block');
-      }
+      const blocks = await this.taskBlockRepository.findByTaskId(id, tx);
 
       return this.toDto(task, blocks);
     });

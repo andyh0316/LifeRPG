@@ -2,16 +2,25 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@/components/mui/TextField';
-import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
-import InputAdornment from '@mui/material/InputAdornment';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import StarIcon from '@mui/icons-material/Star';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import TimerIcon from '@mui/icons-material/Timer';
-import TagIcon from '@mui/icons-material/Tag';
+import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
 import { Controller, useWatch, FieldValues } from 'react-hook-form';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import SortableRewardTierRow from './SortableRewardTierRow';
 
 interface RewardTiersSectionProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +34,7 @@ interface RewardTiersSectionProps {
     coinReward: number;
   }) => void;
   remove: (index: number) => void;
+  move: (from: number, to: number) => void;
   onUnitChange: (value: string) => void;
 }
 
@@ -34,10 +44,27 @@ export default function RewardTiersSection({
   fields,
   append,
   remove,
+  move,
   onUnitChange,
 }: RewardTiersSectionProps) {
   const amountUnit = useWatch({ control, name: 'amountUnit' });
   const isTimed = amountUnit === 'minutes';
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = fields.findIndex((f) => f.id === active.id);
+      const newIndex = fields.findIndex((f) => f.id === over.id);
+      move(oldIndex, newIndex);
+    }
+  };
 
   return (
     <Box>
@@ -49,7 +76,13 @@ export default function RewardTiersSection({
           mb: 1,
         }}
       >
-        <Typography variant="subtitle1" fontWeight={600}>
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: '0.95rem',
+            color: GAME_COLORS.textPrimary,
+          }}
+        >
           Reward Tiers
         </Typography>
         <Controller
@@ -71,87 +104,39 @@ export default function RewardTiersSection({
         />
       </Box>
 
-      {fields.map((field, index) => (
-        <Box
-          key={field.id}
-          sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={fields.map((f) => f.id)}
+          strategy={verticalListSortingStrategy}
         >
-          <TextField
-            label={isTimed ? 'Minutes' : 'Count'}
-            type="number"
-            size="small"
-            sx={{ width: 110 }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {isTimed ? (
-                      <TimerIcon fontSize="small" />
-                    ) : (
-                      <TagIcon fontSize="small" />
-                    )}
-                  </InputAdornment>
-                ),
-              },
-            }}
-            {...register(`blocks.${index}.amount`, {
-              valueAsNumber: true,
-              min: 1,
-            })}
-          />
-          <TextField
-            label="XP"
-            type="number"
-            size="small"
-            sx={{ flex: 1 }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <StarIcon fontSize="small" sx={{ color: 'primary.main' }} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            {...register(`blocks.${index}.xpReward`, {
-              valueAsNumber: true,
-              min: 0,
-            })}
-          />
-          <TextField
-            label="Coins"
-            type="number"
-            size="small"
-            sx={{ flex: 1 }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MonetizationOnIcon
-                      fontSize="small"
-                      sx={{ color: 'warning.main' }}
-                    />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            {...register(`blocks.${index}.coinReward`, {
-              valueAsNumber: true,
-              min: 0,
-            })}
-          />
-          {fields.length > 1 && (
-            <IconButton size="small" onClick={() => remove(index)}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          )}
-        </Box>
-      ))}
+          {fields.map((field, index) => (
+            <SortableRewardTierRow
+              key={field.id}
+              id={field.id}
+              index={index}
+              isTimed={isTimed}
+              register={register}
+              canDelete={fields.length > 1}
+              onRemove={() => remove(index)}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
 
       <Button
         size="small"
         startIcon={<AddIcon />}
         onClick={() => append({ amount: 1, xpReward: 0, coinReward: 0 })}
+        sx={{
+          textTransform: 'none',
+          fontWeight: 600,
+          borderRadius: GAME_RADII.button,
+          color: GAME_COLORS.accent,
+        }}
       >
         Add tier
       </Button>

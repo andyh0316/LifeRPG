@@ -12,8 +12,20 @@ describe('Auth Integration', () => {
   let app: INestApplication;
   let db: Db;
   let request: TestAgent;
+  let startTransaction: () => Promise<void>;
+  let rollbackTransaction: () => Promise<void>;
+
   beforeAll(async () => {
-    ({ app, db, request } = await createIntegrationApp());
+    ({ app, db, request, startTransaction, rollbackTransaction } =
+      await createIntegrationApp());
+  });
+
+  beforeEach(async () => {
+    await startTransaction();
+  });
+
+  afterEach(async () => {
+    await rollbackTransaction();
   });
 
   afterAll(async () => {

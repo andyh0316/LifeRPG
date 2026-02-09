@@ -1,5 +1,11 @@
 import { TaskTemplateDto } from './dto/task-template.dto';
 
+// - brainstorming categories:
+//     - physical health: gym, walk, cleaning, chores
+//     - mental health: travel, meditate, journaling
+//     - relationship: spend time with X
+//     - work: work
+//     - learning: study
 export const TASK_TEMPLATES: TaskTemplateDto[] = [
   {
     name: 'Meditate',
@@ -7,7 +13,7 @@ export const TASK_TEMPLATES: TaskTemplateDto[] = [
     amountUnit: 'minutes',
     blocks: [
       { amount: 10, xpReward: 20, coinReward: 20 },
-      { amount: 20, xpReward: 50, coinReward: 50 },
+      { amount: 15, xpReward: 30, coinReward: 30 },
     ],
   },
   {
@@ -21,23 +27,23 @@ export const TASK_TEMPLATES: TaskTemplateDto[] = [
     ],
   },
   {
-    name: 'Work',
-    icon: 'Computer',
-    amountUnit: 'minutes',
-    blocks: [
-      { amount: 30, xpReward: 60, coinReward: 60 },
-      { amount: 60, xpReward: 150, coinReward: 150 },
-      { amount: 90, xpReward: 250, coinReward: 250 },
-    ],
-  },
-  {
     name: 'Study',
     icon: 'MenuBook',
     amountUnit: 'minutes',
     blocks: [
-      { amount: 30, xpReward: 60, coinReward: 60 },
-      { amount: 60, xpReward: 150, coinReward: 150 },
-      { amount: 90, xpReward: 250, coinReward: 250 },
+      { amount: 30, xpReward: 30, coinReward: 30 },
+      { amount: 60, xpReward: 60, coinReward: 60 },
+      { amount: 90, xpReward: 90, coinReward: 90 },
+    ],
+  },
+  {
+    name: 'Work',
+    icon: 'Computer',
+    amountUnit: 'minutes',
+    blocks: [
+      { amount: 30, xpReward: 30, coinReward: 30 },
+      { amount: 60, xpReward: 60, coinReward: 60 },
+      { amount: 90, xpReward: 90, coinReward: 90 },
     ],
   },
   {
@@ -45,9 +51,21 @@ export const TASK_TEMPLATES: TaskTemplateDto[] = [
     icon: 'CleaningServices',
     amountUnit: 'minutes',
     blocks: [
-      { amount: 30, xpReward: 60, coinReward: 60 },
-      { amount: 60, xpReward: 150, coinReward: 150 },
-      { amount: 90, xpReward: 250, coinReward: 250 },
+      { amount: 30, xpReward: 30, coinReward: 30 },
+      { amount: 60, xpReward: 60, coinReward: 60 },
+      { amount: 90, xpReward: 90, coinReward: 90 },
     ],
+  },
+  {
+    name: 'Review & Plan',
+    icon: 'EditNote',
+    amountUnit: 'count',
+    blocks: [{ amount: 1, xpReward: 30, coinReward: 30 }],
+  },
+  {
+    name: 'Vitamins',
+    icon: 'Medication',
+    amountUnit: 'count',
+    blocks: [{ amount: 1, xpReward: 10, coinReward: 10 }],
   },
 ];

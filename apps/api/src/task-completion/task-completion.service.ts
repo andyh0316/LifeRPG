@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, sql } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import {
   tasks,
   taskCompletions,
@@ -26,6 +26,14 @@ const completionSelect = {
 @Injectable()
 export class TaskCompletionService {
   constructor(@Inject('DATABASE') private db: Db) {}
+
+  async findAll(userId: number): Promise<TaskCompletionResponseDto[]> {
+    return this.db
+      .select(completionSelect)
+      .from(taskCompletions)
+      .where(eq(taskCompletions.userId, userId))
+      .orderBy(desc(taskCompletions.completedAt));
+  }
 
   // Marks a task block as completed for a user. Looks up the block's rewards,
   // records a completion entry, and credits the user's XP and coins—all
