@@ -6,17 +6,15 @@ import MenuItem from '@mui/material/MenuItem';
 import CoinIcon from './icons/CoinIcon';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
-import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
+import { GAME_COLORS } from '@/theme/gameTheme';
+import useActiveCharacter from '@/hooks/useActiveCharacter';
 import useAnimateCountUp from '@/hooks/useAnimateCountUp';
+import LevelBar from './LevelBar';
 
 export default function ProfileCard() {
   const queryClient = useQueryClient();
 
-  const { data: summary } = $api.useQuery('get', '/user-character/summary');
-  const characters = summary?.characters ?? [];
-  const activeCharacterId = summary?.activeCharacterId;
-  const active =
-    characters.find((c) => c.id === activeCharacterId) ?? characters[0];
+  const { characters, activeCharacterId, active } = useActiveCharacter();
 
   const selectCharacter = $api.useMutation('patch', '/user-character/select', {
     onSuccess: () => {
@@ -27,14 +25,6 @@ export default function ProfileCard() {
   });
 
   const animatedCoins = useAnimateCountUp(active?.coins ?? 0);
-
-  const { data: xpLevels } = $api.useQuery('get', '/user-character/xp-levels');
-  const entry = xpLevels?.find((e) => e.level === active?.level);
-  const xpInLevel = entry && active ? active.xp - entry.cumulativeXp : 0;
-  const xpToNext = entry?.xpToNext ?? 0;
-  const isMaxLevel = xpToNext === 0;
-  const pct = isMaxLevel ? 100 : Math.min((xpInLevel / xpToNext) * 100, 100);
-  const animatedXpInLevel = useAnimateCountUp(xpInLevel);
 
   if (!active) return null;
 
@@ -102,58 +92,8 @@ export default function ProfileCard() {
         )}
       </Box>
 
-      {/* Level bar */}
       <Box sx={{ mb: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            mb: 0.5,
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              color: GAME_COLORS.xpGreen,
-            }}
-          >
-            Lv. {active.level}
-          </Typography>
-          <Typography
-            sx={{
-              fontSize: '0.65rem',
-              fontWeight: 600,
-              color: GAME_COLORS.sidebarTextMuted,
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {isMaxLevel
-              ? 'MAX'
-              : `${animatedXpInLevel.toLocaleString()} / ${xpToNext.toLocaleString()} XP`}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            position: 'relative',
-            height: 6,
-            borderRadius: GAME_RADII.progressBar,
-            bgcolor: 'rgba(255,255,255,0.1)',
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              width: `${pct}%`,
-              borderRadius: GAME_RADII.progressBar,
-              bgcolor: GAME_COLORS.xpGreen,
-              transition: 'width 0.6s ease',
-            }}
-          />
-        </Box>
+        <LevelBar />
       </Box>
 
       <Box sx={{ display: 'flex', gap: 1 }}>
