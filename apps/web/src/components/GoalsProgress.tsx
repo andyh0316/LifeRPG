@@ -13,21 +13,23 @@ function getBarGreen(pct: number): string {
 }
 
 const PERIODS = [
-  { key: 'daily' as const, label: 'Today' },
-  { key: 'weekly' as const, label: 'This Week' },
-  { key: 'monthly' as const, label: 'This Month' },
-  { key: 'quarterly' as const, label: 'This Quarter' },
-  { key: 'yearly' as const, label: 'This Year' },
+  { key: 'daily' as const, label: 'Today', height: 32 },
+  { key: 'weekly' as const, label: 'This Week', height: 26 },
+  { key: 'monthly' as const, label: 'This Month', height: 22 },
+  { key: 'quarterly' as const, label: 'This Quarter', height: 22 },
+  { key: 'yearly' as const, label: 'This Year', height: 22 },
 ];
 
 function GoalBar({
   label,
   current,
   target,
+  height = 28,
 }: {
   label: string;
   current: number;
   target: number;
+  height?: number;
 }) {
   const animatedCurrent = useAnimateCountUp(current);
   const pct = Math.min((animatedCurrent / target) * 100, 100);
@@ -38,7 +40,7 @@ function GoalBar({
     <Box
       sx={{
         position: 'relative',
-        height: 28,
+        height,
         borderRadius: GAME_RADII.progressBar,
         bgcolor: GAME_COLORS.progressTrack,
         overflow: 'hidden',
@@ -52,6 +54,10 @@ function GoalBar({
           borderRadius: GAME_RADII.progressBar,
           bgcolor: barColor,
           animation: isComplete ? 'subtlePulse 2s ease infinite' : undefined,
+          ...(isComplete && {
+            boxShadow:
+              '0 0 8px rgba(76, 175, 80, 0.5), inset 0 0 6px rgba(255,255,255,0.15)',
+          }),
         }}
       />
       <Box
@@ -101,12 +107,13 @@ export default function GoalsProgress() {
 
   return (
     <Stack spacing={1} sx={{ mb: 2 }}>
-      {activePeriods.map(({ key, label }) => (
+      {activePeriods.map(({ key, label, height }) => (
         <GoalBar
           key={key}
           label={label}
           current={progress[key].current}
           target={progress[key].target!}
+          height={height}
         />
       ))}
     </Stack>

@@ -12,6 +12,9 @@ export interface TaskItemProps {
   desc?: string | null;
   icon?: string | null;
   amountUnit: string;
+  goalAmount?: number | null;
+  goalPeriod?: string | null;
+  goalCompletedAmount?: number | null;
   blocks: Block[];
   userCharacterId: number;
   index?: number;

@@ -51,6 +51,8 @@ describe('Task Integration', () => {
       desc: 'Daily meditation',
       icon: 'lotus',
       amountUnit: 'minutes',
+      goalAmount: 600,
+      goalPeriod: 'week-long',
       blocks: [
         { amount: 15, xpReward: 10, coinReward: 5 },
         { amount: 30, xpReward: 25, coinReward: 12 },
@@ -66,6 +68,9 @@ describe('Task Integration', () => {
     expect(task.id).toBeDefined();
     expect(task.name).toBe(input.name);
     expect(task.amountUnit).toBe('minutes');
+    expect(task.goalAmount).toBe(600);
+    expect(task.goalPeriod).toBe('week-long');
+    expect(task.goalCompletedAmount).toBeNull();
     expect(task.blocks).toHaveLength(3);
     expect(task.blocks[0]).toMatchObject({
       amount: 15,
@@ -112,6 +117,8 @@ describe('Task Integration', () => {
         desc: null,
         icon: null,
         amountUnit: 'count',
+        goalAmount: null,
+        goalPeriod: null,
         blocks: [],
       } as unknown as UpdateTaskDto)
       .expect(400);
@@ -140,6 +147,8 @@ describe('Task Integration', () => {
       desc: 'Read two chapters',
       icon: 'books',
       amountUnit: 'minutes',
+      goalAmount: 300,
+      goalPeriod: 'month-long',
       blocks: [
         // blocks[0]: included with id — kept and updated
         {
@@ -201,6 +210,10 @@ describe('Task Integration', () => {
     const originalIds = setupTask.blocks.map((o) => o.id);
     const created = updatedTask.blocks.find((o) => !originalIds.includes(o.id));
     expect(created).toMatchObject({ amount: 90, xpReward: 80, coinReward: 40 });
+
+    // goal fields updated
+    expect(updatedTask.goalAmount).toBe(300);
+    expect(updatedTask.goalPeriod).toBe('month-long');
   });
 
   it('PUT /tasks/:id - preserves natural input order for blocks', async () => {
@@ -222,6 +235,8 @@ describe('Task Integration', () => {
         desc: null,
         icon: null,
         amountUnit: 'count',
+        goalAmount: null,
+        goalPeriod: null,
         blocks: [
           { amount: 10, xpReward: 100, coinReward: 50 },
           {
@@ -380,6 +395,42 @@ describe('Task Integration', () => {
     expect(tasks[0].id).toBe(createdTask.id);
     expect(tasks[0].name).toBe(input.name);
     expect(tasks[0].blocks).toHaveLength(2);
+  });
+
+  it('GET /tasks - returns goalCompletedAmount from completions', async () => {
+    // setup — create task with goal and two blocks
+    const createRes = await request
+      .post('/tasks')
+      .send({
+        name: 'Running',
+        amountUnit: 'minutes',
+        goalAmount: 100,
+        goalPeriod: 'day-long',
+        blocks: [
+          { amount: 15, xpReward: 15, coinReward: 10 },
+          { amount: 30, xpReward: 30, coinReward: 20 },
+        ],
+      } as CreateTaskDto)
+      .expect(201);
+    const task: TaskResponseDto = createRes.body;
+
+    // act — complete both blocks
+    await request
+      .post('/task-completions')
+      .send({ blockId: task.blocks[0].id })
+      .expect(201);
+    await request
+      .post('/task-completions')
+      .send({ blockId: task.blocks[1].id })
+      .expect(201);
+
+    const res = await request.get('/tasks').expect(200);
+
+    // assert
+    const tasks: TaskResponseDto[] = res.body;
+    const fetched = tasks.find((t) => t.id === task.id)!;
+    expect(fetched.goalCompletedAmount).toBe(45);
+    expect(fetched.goalAmount).toBe(100);
   });
 
   it('POST /tasks - auto-assigns sequential sortOrder per user', async () => {

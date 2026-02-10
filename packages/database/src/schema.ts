@@ -133,6 +133,11 @@ export const userSessionsRelations = relations(userSessions, ({ one }) => ({
 // ============================================================================
 
 export const amountUnitEnum = pgEnum('amount_unit', ['count', 'minutes']);
+export const goalPeriodEnum = pgEnum('goal_period', [
+  'day-long',
+  'week-long',
+  'month-long',
+]);
 
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
@@ -144,6 +149,8 @@ export const tasks = pgTable('tasks', {
   description: text('description'),
   icon: varchar('icon', { length: 50 }),
   amountUnit: amountUnitEnum('amount_unit').notNull().default('count'),
+  goalAmount: integer('goal_amount'),
+  goalPeriod: goalPeriodEnum('goal_period'),
   sortOrder: integer('sort_order').notNull().default(0),
 });
 

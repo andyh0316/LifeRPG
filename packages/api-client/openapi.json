@@ -466,6 +466,61 @@
         ]
       }
     },
+    "/task-completions/undo": {
+      "post": {
+        "operationId": "TaskCompletionController_undo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskCompletionResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "TaskCompletion"
+        ]
+      }
+    },
+    "/task-completions/weekly-tracker": {
+      "get": {
+        "operationId": "TaskCompletionController_getWeeklyTracker",
+        "parameters": [
+          {
+            "name": "weekStart",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "2025-02-03",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeeklyTrackerTaskDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "TaskCompletion"
+        ]
+      }
+    },
     "/user-character/summary": {
       "get": {
         "operationId": "UserCharacterController_getSummary",
@@ -771,6 +826,23 @@
               "minutes"
             ]
           },
+          "goalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "goalPeriod": {
+            "type": "string",
+            "enum": [
+              "day-long",
+              "week-long",
+              "month-long"
+            ],
+            "nullable": true
+          },
+          "goalCompletedAmount": {
+            "type": "number",
+            "nullable": true
+          },
           "blocks": {
             "type": "array",
             "items": {
@@ -872,6 +944,19 @@
               "minutes"
             ]
           },
+          "goalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "goalPeriod": {
+            "type": "string",
+            "enum": [
+              "day-long",
+              "week-long",
+              "month-long"
+            ],
+            "nullable": true
+          },
           "blocks": {
             "type": "array",
             "items": {
@@ -924,6 +1009,19 @@
               "minutes"
             ]
           },
+          "goalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "goalPeriod": {
+            "type": "string",
+            "enum": [
+              "day-long",
+              "week-long",
+              "month-long"
+            ],
+            "nullable": true
+          },
           "blocks": {
             "type": "array",
             "items": {
@@ -936,6 +1034,8 @@
           "desc",
           "icon",
           "amountUnit",
+          "goalAmount",
+          "goalPeriod",
           "blocks"
         ]
       },
@@ -980,6 +1080,45 @@
         },
         "required": [
           "blockId"
+        ]
+      },
+      "WeeklyTrackerTaskDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "count",
+              "minutes"
+            ]
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "dailyTotals": {
+            "description": "Mon–Sun totals (7 elements)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "amountUnit",
+          "sortOrder",
+          "dailyTotals"
         ]
       },
       "CharacterSummaryItemDto": {

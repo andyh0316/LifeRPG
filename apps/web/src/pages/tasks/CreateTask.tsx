@@ -11,6 +11,7 @@ import { $api, type components } from '@life-rpg/api-client';
 import TaskFormHeader from './TaskFormHeader';
 import TaskFormFields from './TaskFormFields';
 import RewardTiersSection from './RewardTiersSection';
+import GoalSection from './GoalSection';
 import TaskIcon from '@/components/icons/TaskIcon';
 import { sxCard, sxOutlinedButton } from '@/theme/gameTheme';
 
@@ -21,6 +22,8 @@ const BLANK_DEFAULTS: CreateTaskDto = {
   desc: null,
   icon: null,
   amountUnit: 'count',
+  goalAmount: null,
+  goalPeriod: null,
   blocks: [{ amount: 1, xpReward: 0, coinReward: 0 }],
 };
 
@@ -78,6 +81,8 @@ export default function CreateTask() {
       desc: template.desc,
       icon: template.icon,
       amountUnit: template.amountUnit,
+      goalAmount: null,
+      goalPeriod: null,
       blocks: template.blocks.map((b) => ({
         amount: b.amount,
         xpReward: b.xpReward,
@@ -145,6 +150,8 @@ export default function CreateTask() {
           move={move}
           onUnitChange={handleUnitChange}
         />
+
+        <GoalSection register={register} control={control} />
       </Box>
     </Box>
   );

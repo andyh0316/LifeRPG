@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import AddIcon from '@mui/icons-material/Add';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import UndoIcon from '@mui/icons-material/Undo';
 import List from '@mui/material/List';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -42,6 +45,27 @@ export default function TaskList() {
   const { data: tasks = [] } = $api.useQuery('get', '/tasks');
 
   const [goalsOpen, setGoalsOpen] = useState(false);
+
+  const undoCompletion = $api.useMutation('post', '/task-completions/undo', {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/user-character/goals/progress')
+          .queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/tasks').queryKey,
+      });
+      toast.success(
+        `Undid completion: -${data.xpEarned.toLocaleString()} XP, -${data.coinsEarned.toLocaleString()} gold`,
+      );
+    },
+    onError: () => {
+      toast.error('Nothing to undo');
+    },
+  });
 
   const reorder = $api.useMutation('patch', '/tasks/reorder', {
     onSuccess: () => {
@@ -93,6 +117,16 @@ export default function TaskList() {
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Typography sx={{ ...sxPageTitle, flex: 1 }}>Quests</Typography>
+
+        <Tooltip title="Undo last completion">
+          <IconButton
+            size="small"
+            disabled={undoCompletion.isPending}
+            onClick={() => undoCompletion.mutate({})}
+          >
+            <UndoIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
 
         <Button
           variant="contained"
