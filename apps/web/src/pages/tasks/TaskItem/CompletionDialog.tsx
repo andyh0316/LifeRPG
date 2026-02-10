@@ -171,7 +171,7 @@ export default function CompletionDialog({
             initialCurrent={completed ? preCompletionXp : progress.current}
           />
         )}
-        <LevelBar />
+        <LevelBar enableSound />
       </Box>
 
       {confirmBlock && !completed && (
