@@ -466,6 +466,27 @@
         ]
       }
     },
+    "/task-completions/undo": {
+      "post": {
+        "operationId": "TaskCompletionController_undo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskCompletionResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "TaskCompletion"
+        ]
+      }
+    },
     "/task-completions/weekly-tracker": {
       "get": {
         "operationId": "TaskCompletionController_getWeeklyTracker",

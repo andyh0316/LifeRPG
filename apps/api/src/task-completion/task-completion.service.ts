@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -95,6 +96,39 @@ export class TaskCompletionService {
       );
 
       return completion;
+    });
+  }
+
+  async undoLast(userCharacterId: number): Promise<TaskCompletionResponseDto> {
+    const [latest] = await this.db
+      .select(completionSelect)
+      .from(taskCompletions)
+      .where(eq(taskCompletions.userCharacterId, userCharacterId))
+      .orderBy(desc(taskCompletions.completedAt))
+      .limit(1);
+
+    if (!latest) {
+      throw new NotFoundException('No completions to undo');
+    }
+
+    const ageMs = Date.now() - new Date(latest.completedAt).getTime();
+    if (ageMs > 24 * 60 * 60 * 1000) {
+      throw new BadRequestException(
+        'Cannot undo completions older than 24 hours',
+      );
+    }
+
+    return this.db.transaction(async (tx) => {
+      await tx.delete(taskCompletions).where(eq(taskCompletions.id, latest.id));
+
+      await this.userCharacterService.addXp(
+        userCharacterId,
+        -latest.xpEarned,
+        -latest.coinsEarned,
+        tx,
+      );
+
+      return latest;
     });
   }
 }

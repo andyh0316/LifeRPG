@@ -153,20 +153,22 @@ export default function TaskItem({
           transform: 'translateY(-1px)',
         },
         '&:hover .quest-edit-btn': { opacity: 1 },
+        ...(goalPercent >= 100 && {
+          border: '1px solid #4caf50',
+          boxShadow: '0 0 8px rgba(76, 175, 80, 0.3)',
+        }),
         ...(goalPercent > 0 && {
           '&::before': {
             content: '""',
             position: 'absolute',
             top: 0,
             left: 0,
-            bottom: 0,
+            height: 3,
             width: `${goalPercent}%`,
-            bgcolor: GAME_COLORS.accentSubtle,
+            bgcolor: '#4caf50',
             transition: 'width 0.4s ease',
-            zIndex: 0,
           },
         }),
-        '& > *': { position: 'relative', zIndex: 1 },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>

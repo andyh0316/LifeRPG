@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, HttpCode } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { TaskCompletionService } from './task-completion.service';
 import { CompleteTaskDto } from './dto/complete-task.dto';
@@ -24,6 +24,13 @@ export class TaskCompletionController {
       body.blockId,
       user.userCharacterId,
     );
+  }
+
+  @Post('undo')
+  @HttpCode(200)
+  @ApiOkResponse({ type: TaskCompletionResponseDto })
+  undo(@CurrentUser() user: AuthUser) {
+    return this.taskCompletionService.undoLast(user.userCharacterId);
   }
 
   // TODO: not used yet

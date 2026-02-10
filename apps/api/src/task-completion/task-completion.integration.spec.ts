@@ -1,12 +1,14 @@
 import { INestApplication } from '@nestjs/common';
+import { taskCompletions, userCharacter, type Db } from '@life-rpg/database';
+import { eq } from 'drizzle-orm';
 import { TestAgent, createIntegrationApp } from '../test/setup-integration';
 import { CreateTaskDto } from '../task/dto/create-task.dto';
 import { TaskResponseDto } from '../task/dto/task-response.dto';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
-import { WeeklyTrackerTaskDto } from './dto/weekly-tracker-response.dto';
 
 describe('Task Completion Integration', () => {
   let app: INestApplication;
+  let db: Db;
   let request: TestAgent;
   let currentUserCharacterId: number;
   let startTransaction: () => Promise<void>;
@@ -15,6 +17,7 @@ describe('Task Completion Integration', () => {
   beforeAll(async () => {
     ({
       app,
+      db,
       request,
       currentUserCharacterId,
       startTransaction,
@@ -175,5 +178,76 @@ describe('Task Completion Integration', () => {
     expect(completions).toHaveLength(2);
     expect(completions[0].userCharacterId).toBe(currentUserCharacterId);
     expect(completions[1].userCharacterId).toBe(currentUserCharacterId);
+  });
+
+  it('POST /task-completions/undo - deletes most recent completion and reverses rewards', async () => {
+    // setup
+    const createRes = await request
+      .post('/tasks')
+      .send({
+        name: 'Undo Test',
+        blocks: [{ amount: 1, xpReward: 20, coinReward: 10 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const task: TaskResponseDto = createRes.body;
+
+    const [charBefore] = await db
+      .select({ xp: userCharacter.xp, coins: userCharacter.coins })
+      .from(userCharacter)
+      .where(eq(userCharacter.id, currentUserCharacterId));
+
+    await request
+      .post('/task-completions')
+      .send({ blockId: task.blocks[0].id })
+      .expect(201);
+
+    // act
+    const res = await request.post('/task-completions/undo').expect(200);
+
+    // assert
+    const undone: TaskCompletionResponseDto = res.body;
+    expect(undone.taskId).toBe(task.id);
+    expect(undone.xpEarned).toBe(20);
+    expect(undone.coinsEarned).toBe(10);
+
+    const [charAfter] = await db
+      .select({ xp: userCharacter.xp, coins: userCharacter.coins })
+      .from(userCharacter)
+      .where(eq(userCharacter.id, currentUserCharacterId));
+    expect(charAfter.xp).toBe(charBefore.xp);
+    expect(charAfter.coins).toBe(charBefore.coins);
+
+    const listRes = await request.get('/task-completions').expect(200);
+    expect(listRes.body).toHaveLength(0);
+  });
+
+  it('POST /task-completions/undo - returns 404 when no completions exist', async () => {
+    // act + assert
+    await request.post('/task-completions/undo').expect(404);
+  });
+
+  it('POST /task-completions/undo - returns 400 when most recent completion is older than 24h', async () => {
+    // setup
+    const createRes = await request
+      .post('/tasks')
+      .send({
+        name: 'Old Task',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const task: TaskResponseDto = createRes.body;
+
+    await request
+      .post('/task-completions')
+      .send({ blockId: task.blocks[0].id })
+      .expect(201);
+
+    // backdate the completion to 25 hours ago
+    await db
+      .update(taskCompletions)
+      .set({ completedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
+
+    // act + assert
+    await request.post('/task-completions/undo').expect(400);
   });
 });
