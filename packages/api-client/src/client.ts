@@ -20,5 +20,16 @@ export function initApiClient(opts: ApiClientOptions) {
   }
   initialized = true;
   api = createClient<paths>({ baseUrl: opts.baseUrl, credentials: 'include' });
+
+  api.use({
+    onRequest({ request }) {
+      request.headers.set(
+        'X-Timezone',
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      );
+      return request;
+    },
+  });
+
   $api = createQueryClient(api);
 }
