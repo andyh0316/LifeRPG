@@ -15,6 +15,13 @@
       "when": 1770615859337,
       "tag": "0001_add_selected_character",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770680870224,
+      "tag": "0002_panoramic_post",
+      "breakpoints": true
     }
   ]
 }

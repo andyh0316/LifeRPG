@@ -23,6 +23,18 @@ export class TaskResponseDto {
   @ApiProperty({ enum: ['count', 'minutes'] })
   amountUnit!: string;
 
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  goalAmount!: number | null;
+
+  @ApiPropertyOptional({
+    enum: ['day-long', 'week-long', 'month-long'],
+    nullable: true,
+  })
+  goalPeriod!: string | null;
+
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  goalCompletedAmount!: number | null;
+
   @ApiProperty({ type: [TaskBlockResponseDto] })
   blocks!: TaskBlockResponseDto[];
 }

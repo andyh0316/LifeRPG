@@ -3,6 +3,7 @@ import { createDb } from '@life-rpg/database';
 import { UserCharacterModule } from '../user-character/user-character.module';
 import { TaskCompletionController } from './task-completion.controller';
 import { TaskCompletionService } from './task-completion.service';
+import { TaskCompletionRepository } from './task-completion.repository';
 
 @Module({
   imports: [UserCharacterModule],
@@ -15,6 +16,8 @@ import { TaskCompletionService } from './task-completion.service';
       },
     },
     TaskCompletionService,
+    TaskCompletionRepository,
   ],
+  exports: [TaskCompletionRepository],
 })
 export class TaskCompletionModule {}

@@ -1,7 +1,9 @@
+import { useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { GAME_COLORS, GAME_RADII } from '@/theme/gameTheme';
 import useAnimateCountUp from '@/hooks/useAnimateCountUp';
+import playXpGoalSound from '@/utils/playXpGoalSound';
 
 function getBarGreen(pct: number): string {
   const l = 78 - (pct / 100) * 36;
@@ -21,6 +23,16 @@ export default function CompletionProgressBar({
   const pct = target ? Math.min((animated / target) * 100, 100) : 0;
   const barColor = getBarGreen(pct);
 
+  const goalReached = !!target && current >= target && initialCurrent < target;
+  const bouncing = goalReached && pct >= 100;
+  const playedRef = useRef(false);
+  useEffect(() => {
+    if (bouncing && !playedRef.current) {
+      playedRef.current = true;
+      playXpGoalSound();
+    }
+  }, [bouncing]);
+
   return (
     <Box
       sx={{
@@ -29,6 +41,9 @@ export default function CompletionProgressBar({
         borderRadius: GAME_RADII.progressBar,
         bgcolor: GAME_COLORS.progressTrack,
         overflow: 'hidden',
+        ...(bouncing && {
+          animation: 'levelUpBounce 0.35s ease-out',
+        }),
       }}
     >
       <Box

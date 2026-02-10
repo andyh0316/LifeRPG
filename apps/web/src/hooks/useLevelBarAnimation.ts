@@ -28,6 +28,7 @@ interface LevelBarAnimationResult {
   displayXpToNext: number;
   isMaxLevel: boolean;
   isAnimating: boolean;
+  levelUpCount: number;
 }
 
 interface LevelState {
@@ -150,6 +151,7 @@ export default function useLevelBarAnimation(
   level: number,
   xp: number,
   xpLevels: XpLevelEntry[] | undefined,
+  characterId: number | undefined,
 ): LevelBarAnimationResult {
   const [animDisplay, setAnimDisplay] = useState<{
     pct: number;
@@ -158,10 +160,13 @@ export default function useLevelBarAnimation(
     xpToNext: number;
     isMaxLevel: boolean;
     animating: boolean;
+    levelUpCount: number;
   } | null>(null);
 
   const prevStateRef = useRef<LevelState | null>(null);
+  const prevCharacterIdRef = useRef<number | undefined>(undefined);
   const rafRef = useRef(0);
+  const levelUpCountRef = useRef(0);
 
   // Derive current state from props (used as static fallback before any animation)
   const currentState = xpLevels ? deriveLevelState(level, xp, xpLevels) : null;
@@ -169,6 +174,16 @@ export default function useLevelBarAnimation(
   // Lazy-init prevStateRef when data first becomes available (safe ref init during render)
   if (currentState && prevStateRef.current === null) {
     prevStateRef.current = currentState;
+  }
+
+  // On character switch, reset to new state immediately (skip animation)
+  if (characterId !== prevCharacterIdRef.current) {
+    prevCharacterIdRef.current = characterId;
+    if (currentState) {
+      prevStateRef.current = currentState;
+      cancelAnimationFrame(rafRef.current);
+      setAnimDisplay(null);
+    }
   }
 
   useEffect(() => {
@@ -229,11 +244,16 @@ export default function useLevelBarAnimation(
         xpToNext: cur.xpToNext,
         isMaxLevel: next.isMaxLevel && stageIndex === stages.length - 1,
         animating: true,
+        levelUpCount: levelUpCountRef.current,
       });
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else if (cur.pauseAfterMs > 0) {
+        levelUpCountRef.current += 1;
+        setAnimDisplay((d) =>
+          d ? { ...d, levelUpCount: levelUpCountRef.current } : d,
+        );
         pauseUntil = now + cur.pauseAfterMs;
         rafRef.current = requestAnimationFrame(tick);
       } else {
@@ -259,6 +279,7 @@ export default function useLevelBarAnimation(
     xpToNext: currentState?.xpToNext ?? 0,
     isMaxLevel: currentState?.isMaxLevel ?? false,
     animating: false,
+    levelUpCount: 0,
   };
 
   return {
@@ -268,5 +289,6 @@ export default function useLevelBarAnimation(
     displayXpToNext: display.xpToNext,
     isMaxLevel: display.isMaxLevel,
     isAnimating: display.animating,
+    levelUpCount: display.levelUpCount,
   };
 }

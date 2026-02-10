@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Db } from '@life-rpg/database';
+import { TaskCompletionRepository } from '../task-completion/task-completion.repository';
 import { TaskRepository, TaskRow } from './task.repository';
 import { TaskBlockRepository, TaskBlockRow } from './task-block.repository';
 import { TaskResponseDto } from './dto/task-response.dto';
@@ -18,10 +19,15 @@ export class TaskService {
   constructor(
     private readonly taskRepository: TaskRepository,
     private readonly taskBlockRepository: TaskBlockRepository,
+    private readonly taskCompletionRepository: TaskCompletionRepository,
     @Inject('DATABASE') private db: Db,
   ) {}
 
-  private toDto(row: TaskRow, blockRows: TaskBlockRow[]): TaskResponseDto {
+  private toDto(
+    row: TaskRow,
+    blockRows: TaskBlockRow[],
+    goalCompletedAmount?: number | null,
+  ): TaskResponseDto {
     return {
       id: row.id,
       userCharacterId: row.userCharacterId,
@@ -30,6 +36,9 @@ export class TaskService {
       icon: row.icon,
       sortOrder: row.sortOrder,
       amountUnit: row.amountUnit,
+      goalAmount: row.goalAmount ?? null,
+      goalPeriod: row.goalPeriod ?? null,
+      goalCompletedAmount: goalCompletedAmount ?? null,
       blocks: blockRows.map(
         (o): TaskBlockResponseDto => ({
           id: o.id,
@@ -47,7 +56,23 @@ export class TaskService {
       userCharacterId,
       includeBlocks: true,
     });
-    return rows.map((row) => this.toDto(row, row.blocks));
+
+    const goalProgressMap = await this.getGoalProgress(rows);
+
+    return rows.map((row) =>
+      this.toDto(row, row.blocks, goalProgressMap.get(row.id) ?? null),
+    );
+  }
+
+  // Map<taskId, completedAmount> for tasks that have goals
+  private async getGoalProgress(
+    rows: (TaskRow & { blocks: TaskBlockRow[] })[],
+  ): Promise<Map<number, number>> {
+    const taskIdsWithGoals = rows
+      .filter((r) => r.goalAmount != null && r.goalPeriod != null)
+      .map((r) => r.id);
+
+    return this.taskCompletionRepository.sumAmountsByTaskIds(taskIdsWithGoals);
   }
 
   async findOne(id: number): Promise<TaskResponseDto> {
@@ -77,6 +102,8 @@ export class TaskService {
           description: dto.desc,
           icon: dto.icon,
           amountUnit: dto.amountUnit,
+          goalAmount: dto.goalAmount,
+          goalPeriod: dto.goalPeriod,
           sortOrder,
         },
         tx,
@@ -126,6 +153,8 @@ export class TaskService {
           description: dto.desc,
           icon: dto.icon,
           amountUnit: dto.amountUnit,
+          goalAmount: dto.goalAmount,
+          goalPeriod: dto.goalPeriod,
         },
         tx,
       );

@@ -38,6 +38,21 @@ body {
   }
 }
 
+@keyframes levelUpBounce {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+  70% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @keyframes subtlePulse {
   0%,
   100% {
