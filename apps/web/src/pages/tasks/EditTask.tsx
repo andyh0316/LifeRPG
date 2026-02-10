@@ -7,6 +7,7 @@ import { $api, type components } from '@life-rpg/api-client';
 import TaskFormHeader from './TaskFormHeader';
 import TaskFormFields from './TaskFormFields';
 import RewardTiersSection from './RewardTiersSection';
+import GoalSection from './GoalSection';
 import { sxCard } from '@/theme/gameTheme';
 
 type UpdateTaskDto = components['schemas']['UpdateTaskDto'];
@@ -37,6 +38,8 @@ export default function EditTask() {
       desc: task.desc,
       icon: task.icon,
       amountUnit: task.amountUnit,
+      goalAmount: task.goalAmount ?? null,
+      goalPeriod: task.goalPeriod ?? null,
       blocks: task.blocks.map((b) => ({
         id: b.id,
         amount: b.amount,
@@ -111,6 +114,8 @@ export default function EditTask() {
           move={move}
           onUnitChange={handleUnitChange}
         />
+
+        <GoalSection register={register} control={control} />
       </Box>
     </Box>
   );

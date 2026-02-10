@@ -20,12 +20,21 @@ import BlockButton from './BlockButton';
 import CompletionDialog from './CompletionDialog';
 import type { Block, TaskItemProps } from './types';
 
+const PERIOD_LABEL: Record<string, string> = {
+  'day-long': 'today',
+  'week-long': 'this week',
+  'month-long': 'this month',
+};
+
 export default function TaskItem({
   id,
   name,
   desc,
   icon,
   amountUnit,
+  goalAmount,
+  goalPeriod,
+  goalCompletedAmount,
   blocks,
   userCharacterId,
   index = 0,
@@ -59,6 +68,9 @@ export default function TaskItem({
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/user-character/goals/progress')
           .queryKey,
+      });
+      queryClient.invalidateQueries({
+        queryKey: $api.queryOptions('get', '/tasks').queryKey,
       });
       playSuccessSound();
       setCompleted(true);
@@ -118,6 +130,11 @@ export default function TaskItem({
 
   const dailyProgress = progress?.daily;
 
+  const goalPercent =
+    goalAmount && goalAmount > 0
+      ? Math.min(100, ((goalCompletedAmount ?? 0) / goalAmount) * 100)
+      : 0;
+
   return (
     <Box
       ref={setNodeRef}
@@ -126,6 +143,8 @@ export default function TaskItem({
         ...sxCard,
         mb: 1.5,
         p: 2,
+        position: 'relative',
+        overflow: 'hidden',
         animation: 'slideUpFadeIn 0.3s ease forwards',
         animationDelay: `${index * 0.04}s`,
         opacity: 0,
@@ -134,6 +153,20 @@ export default function TaskItem({
           transform: 'translateY(-1px)',
         },
         '&:hover .quest-edit-btn': { opacity: 1 },
+        ...(goalPercent > 0 && {
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: `${goalPercent}%`,
+            bgcolor: GAME_COLORS.accentSubtle,
+            transition: 'width 0.4s ease',
+            zIndex: 0,
+          },
+        }),
+        '& > *': { position: 'relative', zIndex: 1 },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
@@ -169,6 +202,14 @@ export default function TaskItem({
               sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
             >
               {desc}
+            </Typography>
+          )}
+          {goalAmount != null && goalPeriod && (
+            <Typography
+              sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
+            >
+              {goalCompletedAmount ?? 0} / {goalAmount} {amountUnit}{' '}
+              {PERIOD_LABEL[goalPeriod]}
             </Typography>
           )}
         </Box>
