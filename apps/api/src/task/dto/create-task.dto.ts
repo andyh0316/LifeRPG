@@ -2,6 +2,7 @@ import {
   IsString,
   IsOptional,
   IsIn,
+  IsInt,
   IsArray,
   ValidateNested,
   MaxLength,
@@ -32,6 +33,19 @@ export class CreateTaskDto {
   @IsOptional()
   @IsIn(['count', 'minutes'])
   amountUnit?: 'count' | 'minutes';
+
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  @IsOptional()
+  @IsInt()
+  goalAmount?: number | null;
+
+  @ApiPropertyOptional({
+    enum: ['day-long', 'week-long', 'month-long'],
+    nullable: true,
+  })
+  @IsOptional()
+  @IsIn(['day-long', 'week-long', 'month-long'])
+  goalPeriod?: 'day-long' | 'week-long' | 'month-long' | null;
 
   @ApiPropertyOptional({ type: [CreateTaskBlockDto] })
   @IsOptional()

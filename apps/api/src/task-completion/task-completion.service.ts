@@ -9,6 +9,7 @@ import { tasks, taskCompletions, taskBlocks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import { UserCharacterService } from '../user-character/user-character.service';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
+import { WeeklyTrackerTaskDto } from './dto/weekly-tracker-response.dto';
 
 const completionSelect = {
   id: taskCompletions.id,
@@ -37,6 +38,14 @@ export class TaskCompletionService {
   // Marks a task block as completed for a user. Looks up the block's rewards,
   // records a completion entry, and credits the user's XP and coins—all
   // within a single transaction so rewards stay consistent.
+  async getWeeklyTracker(
+    _userCharacterId: number,
+    _weekStart: string,
+  ): Promise<WeeklyTrackerTaskDto[]> {
+    // TODO: query completions grouped by task + day, build dailyTotals
+    return [];
+  }
+
   async complete(
     blockId: number,
     userCharacterId: number,
