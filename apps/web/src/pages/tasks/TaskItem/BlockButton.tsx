@@ -78,7 +78,7 @@ export default function BlockButton({
             color: GAME_COLORS.coinGold,
           }}
         >
-          {block.coinReward.toLocaleString()} G
+          {block.coinReward.toLocaleString()}g{' '}
         </Typography>
         <Typography
           sx={{
@@ -87,7 +87,7 @@ export default function BlockButton({
             color: GAME_COLORS.xpGreen,
           }}
         >
-          {block.xpReward.toLocaleString()} XP
+          {block.xpReward.toLocaleString()}xp
         </Typography>
       </Box>
     </Button>
