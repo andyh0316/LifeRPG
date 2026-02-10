@@ -23,7 +23,7 @@ export default function BlockButton({
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 88,
-        height: 88,
+        height: 64,
         borderRadius: GAME_RADII.card,
         bgcolor: GAME_COLORS.pageBg,
         border: `1.5px solid ${GAME_COLORS.cardBorder}`,
@@ -43,7 +43,13 @@ export default function BlockButton({
         },
       }}
     >
-      <Box sx={{ textAlign: 'center' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 0.5,
+        }}
+      >
         <Typography
           sx={{ fontWeight: 900, fontSize: '1.25rem', lineHeight: 1 }}
         >

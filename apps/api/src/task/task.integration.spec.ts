@@ -1,11 +1,14 @@
 import { INestApplication } from '@nestjs/common';
+import { taskCompletions, type Db } from '@life-rpg/database';
 import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { TaskCompletionRepository } from '../task-completion/task-completion.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
 describe('Task Integration', () => {
   let app: INestApplication;
+  let db: Db;
   let request: TestAgent;
   let currentUserCharacterId: number;
   let startTransaction: () => Promise<void>;
@@ -14,6 +17,7 @@ describe('Task Integration', () => {
   beforeAll(async () => {
     ({
       app,
+      db,
       request,
       currentUserCharacterId,
       startTransaction,
@@ -397,6 +401,30 @@ describe('Task Integration', () => {
     expect(tasks[0].blocks).toHaveLength(2);
   });
 
+  it('POST /tasks - auto-assigns sequential sortOrder per user', async () => {
+    // act
+    const res1 = await request
+      .post('/tasks')
+      .send({
+        name: 'First Task',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const res2 = await request
+      .post('/tasks')
+      .send({
+        name: 'Second Task',
+        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+
+    // assert
+    const task1: TaskResponseDto = res1.body;
+    const task2: TaskResponseDto = res2.body;
+    expect(task1.sortOrder).toBe(0);
+    expect(task2.sortOrder).toBe(1);
+  });
+
   it('GET /tasks - returns goalCompletedAmount from completions', async () => {
     // setup — create task with goal and two blocks
     const createRes = await request
@@ -433,27 +461,51 @@ describe('Task Integration', () => {
     expect(fetched.goalAmount).toBe(100);
   });
 
-  it('POST /tasks - auto-assigns sequential sortOrder per user', async () => {
+  it('goalCompletedAmount - uses client timezone for period boundaries', async () => {
+    // A completion at 2026-05-15 03:00 UTC = 2026-05-14 23:00 America/New_York.
+    // Reference time: 2026-05-15 12:00 UTC.
+    // With UTC: completion is on May 15 -> counts in daily total.
+    // With America/New_York: completion is on May 14 -> does NOT count.
+
+    // setup
+    const referenceTime = new Date('2026-05-15T12:00:00Z');
+
+    const createRes = await request
+      .post('/tasks')
+      .send({
+        name: 'TZ Task',
+        amountUnit: 'minutes',
+        goalAmount: 100,
+        goalPeriod: 'day-long',
+        blocks: [{ amount: 30, xpReward: 10, coinReward: 5 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const task: TaskResponseDto = createRes.body;
+
+    await db.insert(taskCompletions).values({
+      userCharacterId: currentUserCharacterId,
+      taskId: task.id,
+      amount: 30,
+      xpEarned: 10,
+      coinsEarned: 5,
+      completedAt: new Date('2026-05-15T03:00:00Z'),
+    });
+
     // act
-    const res1 = await request
-      .post('/tasks')
-      .send({
-        name: 'First Task',
-        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
-      } as CreateTaskDto)
-      .expect(201);
-    const res2 = await request
-      .post('/tasks')
-      .send({
-        name: 'Second Task',
-        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
-      } as CreateTaskDto)
-      .expect(201);
+    const repo = app.get(TaskCompletionRepository);
+    const utcResult = await repo.sumAmountsByTaskIds(
+      [task.id],
+      'UTC',
+      referenceTime,
+    );
+    const nyResult = await repo.sumAmountsByTaskIds(
+      [task.id],
+      'America/New_York',
+      referenceTime,
+    );
 
     // assert
-    const task1: TaskResponseDto = res1.body;
-    const task2: TaskResponseDto = res2.body;
-    expect(task1.sortOrder).toBe(0);
-    expect(task2.sortOrder).toBe(1);
+    expect(utcResult.get(task.id)).toBe(30);
+    expect(nyResult.get(task.id)).toBeUndefined();
   });
 });
