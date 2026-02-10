@@ -24,7 +24,7 @@ export default function LevelBar() {
     displayXpToNext,
     isMaxLevel,
     isAnimating,
-  } = useLevelBarAnimation(level, xp, xpLevels);
+  } = useLevelBarAnimation(level, xp, xpLevels, active?.id);
 
   return (
     <Box

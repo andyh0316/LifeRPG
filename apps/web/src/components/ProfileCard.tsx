@@ -18,9 +18,7 @@ export default function ProfileCard() {
 
   const selectCharacter = $api.useMutation('patch', '/user-character/select', {
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
-      });
+      queryClient.invalidateQueries();
     },
   });
 

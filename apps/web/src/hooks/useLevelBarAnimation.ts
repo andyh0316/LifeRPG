@@ -150,6 +150,7 @@ export default function useLevelBarAnimation(
   level: number,
   xp: number,
   xpLevels: XpLevelEntry[] | undefined,
+  characterId: number | undefined,
 ): LevelBarAnimationResult {
   const [animDisplay, setAnimDisplay] = useState<{
     pct: number;
@@ -161,6 +162,7 @@ export default function useLevelBarAnimation(
   } | null>(null);
 
   const prevStateRef = useRef<LevelState | null>(null);
+  const prevCharacterIdRef = useRef<number | undefined>(undefined);
   const rafRef = useRef(0);
 
   // Derive current state from props (used as static fallback before any animation)
@@ -169,6 +171,16 @@ export default function useLevelBarAnimation(
   // Lazy-init prevStateRef when data first becomes available (safe ref init during render)
   if (currentState && prevStateRef.current === null) {
     prevStateRef.current = currentState;
+  }
+
+  // On character switch, reset to new state immediately (skip animation)
+  if (characterId !== prevCharacterIdRef.current) {
+    prevCharacterIdRef.current = characterId;
+    if (currentState) {
+      prevStateRef.current = currentState;
+      cancelAnimationFrame(rafRef.current);
+      setAnimDisplay(null);
+    }
   }
 
   useEffect(() => {
