@@ -51,13 +51,16 @@ export class TaskService {
     };
   }
 
-  async findAll(userCharacterId: number): Promise<TaskResponseDto[]> {
+  async findAll(
+    userCharacterId: number,
+    timezone: string = 'UTC',
+  ): Promise<TaskResponseDto[]> {
     const rows = await this.taskRepository.findAll({
       userCharacterId,
       includeBlocks: true,
     });
 
-    const goalProgressMap = await this.getGoalProgress(rows);
+    const goalProgressMap = await this.getGoalProgress(rows, timezone);
 
     return rows.map((row) =>
       this.toDto(row, row.blocks, goalProgressMap.get(row.id) ?? null),
@@ -67,12 +70,16 @@ export class TaskService {
   // Map<taskId, completedAmount> for tasks that have goals
   private async getGoalProgress(
     rows: (TaskRow & { blocks: TaskBlockRow[] })[],
+    timezone: string,
   ): Promise<Map<number, number>> {
     const taskIdsWithGoals = rows
       .filter((r) => r.goalAmount != null && r.goalPeriod != null)
       .map((r) => r.id);
 
-    return this.taskCompletionRepository.sumAmountsByTaskIds(taskIdsWithGoals);
+    return this.taskCompletionRepository.sumAmountsByTaskIds(
+      taskIdsWithGoals,
+      timezone,
+    );
   }
 
   async findOne(id: number): Promise<TaskResponseDto> {

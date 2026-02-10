@@ -7,9 +7,15 @@ import type { Db } from '@life-rpg/database';
 export class TaskCompletionRepository {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  async sumAmountsByTaskIds(taskIds: number[]): Promise<Map<number, number>> {
+  async sumAmountsByTaskIds(
+    taskIds: number[],
+    timezone: string = 'UTC',
+    referenceTime: Date = new Date(),
+  ): Promise<Map<number, number>> {
     if (taskIds.length === 0) return new Map();
 
+    const tz = sql`${timezone}`;
+    const ref = sql`${referenceTime.toISOString()}::timestamptz`;
     const rows = await this.db
       .select({
         taskId: taskCompletions.taskId,
@@ -21,9 +27,9 @@ export class TaskCompletionRepository {
         and(
           inArray(taskCompletions.taskId, taskIds),
           sql`${taskCompletions.completedAt} >= CASE ${tasks.goalPeriod}
-            WHEN 'day-long' THEN date_trunc('day', NOW() AT TIME ZONE 'UTC')
-            WHEN 'week-long' THEN date_trunc('week', NOW() AT TIME ZONE 'UTC')
-            WHEN 'month-long' THEN date_trunc('month', NOW() AT TIME ZONE 'UTC')
+            WHEN 'day-long' THEN date_trunc('day', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
+            WHEN 'week-long' THEN date_trunc('week', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
+            WHEN 'month-long' THEN date_trunc('month', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
           END`,
         ),
       )

@@ -20,6 +20,7 @@ import { TaskResponseDto } from './dto/task-response.dto';
 import { TaskTemplateDto } from './dto/task-template.dto';
 import { TASK_TEMPLATES } from './task-templates.data';
 import { CurrentUser, type AuthUser } from '../auth/current-user.decorator';
+import { ClientTimezone } from '../common/client-timezone.decorator';
 
 @Controller('tasks')
 export class TaskController {
@@ -27,8 +28,8 @@ export class TaskController {
 
   @Get()
   @ApiOkResponse({ type: [TaskResponseDto] })
-  findAll(@CurrentUser() user: AuthUser) {
-    return this.taskService.findAll(user.userCharacterId);
+  findAll(@CurrentUser() user: AuthUser, @ClientTimezone() timezone: string) {
+    return this.taskService.findAll(user.userCharacterId, timezone);
   }
 
   @Get('templates')
