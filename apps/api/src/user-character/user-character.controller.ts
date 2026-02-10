@@ -10,6 +10,7 @@ import { CharacterSummaryResponseDto } from './dto/character-summary-response.dt
 import { SelectCharacterDto } from '../auth/dto/select-character.dto';
 import { XpLevelDto } from './dto/xp-level.dto';
 import { CurrentUser, type AuthUser } from '../auth/current-user.decorator';
+import { ClientTimezone } from '../common/client-timezone.decorator';
 import { XP_TABLE } from './leveling';
 
 @Controller('user-character')
@@ -65,8 +66,15 @@ export class UserCharacterController {
 
   @Get('goals/progress')
   @ApiOkResponse({ type: GoalsProgressResponseDto })
-  getGoalsProgress(@CurrentUser() user: AuthUser) {
-    return this.userCharacterService.getGoalsProgress(user.userCharacterId);
+  getGoalsProgress(
+    @CurrentUser() user: AuthUser,
+    @ClientTimezone() timezone: string,
+  ) {
+    return this.userCharacterService.getGoalsProgress(
+      user.userCharacterId,
+      undefined,
+      timezone,
+    );
   }
 
   @Get('xp-levels')

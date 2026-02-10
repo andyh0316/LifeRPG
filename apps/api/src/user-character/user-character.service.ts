@@ -97,21 +97,23 @@ export class UserCharacterService {
   async getGoalsProgress(
     userCharacterId: number,
     referenceTime: Date = new Date(),
+    timezone: string = 'UTC',
   ): Promise<GoalsProgressResponseDto> {
     const goals = await this.getGoals(userCharacterId);
     const ref = sql`${referenceTime.toISOString()}::timestamptz`;
+    const tz = sql`${timezone}`;
 
     const [xpRow] = await this.db
       .select({
-        dailyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('day', ${ref}) then ${taskCompletions.xpEarned} else 0 end), 0)`,
-        weeklyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('week', ${ref}) then ${taskCompletions.xpEarned} else 0 end), 0)`,
-        monthlyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('month', ${ref}) then ${taskCompletions.xpEarned} else 0 end), 0)`,
-        quarterlyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('quarter', ${ref}) then ${taskCompletions.xpEarned} else 0 end), 0)`,
-        yearlyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('year', ${ref}) then ${taskCompletions.xpEarned} else 0 end), 0)`,
+        dailyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('day', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} then ${taskCompletions.xpEarned} else 0 end), 0)`,
+        weeklyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('week', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} then ${taskCompletions.xpEarned} else 0 end), 0)`,
+        monthlyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('month', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} then ${taskCompletions.xpEarned} else 0 end), 0)`,
+        quarterlyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('quarter', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} then ${taskCompletions.xpEarned} else 0 end), 0)`,
+        yearlyXp: sql<number>`coalesce(sum(case when ${taskCompletions.completedAt} >= date_trunc('year', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} then ${taskCompletions.xpEarned} else 0 end), 0)`,
       })
       .from(taskCompletions)
       .where(
-        sql`${taskCompletions.userCharacterId} = ${userCharacterId} and ${taskCompletions.completedAt} >= date_trunc('year', ${ref})`,
+        sql`${taskCompletions.userCharacterId} = ${userCharacterId} and ${taskCompletions.completedAt} >= date_trunc('year', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}`,
       );
 
     return {

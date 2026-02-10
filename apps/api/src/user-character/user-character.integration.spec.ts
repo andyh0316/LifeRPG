@@ -211,4 +211,52 @@ describe('User Character Integration', () => {
     expect(body.yearly.current).toBe(50);
     // #endregion assert
   });
+
+  it('getGoalsProgress - uses client timezone for period boundaries', async () => {
+    // A completion at 2026-05-15 03:00 UTC = 2026-05-14 23:00 America/New_York.
+    // With UTC: falls on May 15 -> counts in daily XP for May 15.
+    // With America/New_York: falls on May 14 -> does NOT count in daily XP for May 15.
+
+    // setup
+    const referenceTime = new Date('2026-05-15T12:00:00Z');
+
+    const taskRes = await request
+      .post('/tasks')
+      .send({
+        name: 'TZ Test Task',
+        blocks: [{ amount: 1, xpReward: 1, coinReward: 0 }],
+      } as CreateTaskDto)
+      .expect(201);
+    const task: TaskResponseDto = taskRes.body;
+
+    await db.insert(taskCompletions).values([
+      {
+        userCharacterId: currentUserCharacterId,
+        taskId: task.id,
+        xpEarned: 25,
+        coinsEarned: 0,
+        completedAt: new Date('2026-05-15T03:00:00Z'),
+      },
+    ]);
+
+    // act
+    const service = app.get(UserCharacterService);
+    const utcResult = await service.getGoalsProgress(
+      currentUserCharacterId,
+      referenceTime,
+      'UTC',
+    );
+    const nyResult = await service.getGoalsProgress(
+      currentUserCharacterId,
+      referenceTime,
+      'America/New_York',
+    );
+
+    // assert
+    expect(utcResult.daily.current).toBe(25);
+    expect(nyResult.daily.current).toBe(0);
+    // Both should include it in weekly total (same week regardless of tz)
+    expect(utcResult.weekly.current).toBe(25);
+    expect(nyResult.weekly.current).toBe(25);
+  });
 });
