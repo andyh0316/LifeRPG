@@ -8,6 +8,7 @@ import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '@life-rpg/api-client';
@@ -25,6 +26,7 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { label: 'Home', icon: <HomeIcon />, to: '/' },
   { label: 'Quests', icon: <TaskAltIcon />, to: '/tasks' },
+  { label: 'Items', icon: <Inventory2Icon />, to: '/items' },
   { label: 'Rewards', icon: <EmojiEventsIcon />, to: '/rewards' },
 ];
 

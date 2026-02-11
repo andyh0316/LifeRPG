@@ -9,6 +9,9 @@ import Home from './pages/home/Home';
 import Tasks from './pages/tasks/Tasks';
 import CreateTask from './pages/tasks/CreateTask';
 import EditTask from './pages/tasks/EditTask';
+import Items from './pages/items/Items';
+import CreateItem from './pages/items/CreateItem';
+import EditItem from './pages/items/EditItem';
 import Rewards from './pages/rewards/Rewards';
 import Login from './pages/login/Login';
 import { GAME_COLORS } from '@/theme/gameTheme';
@@ -66,6 +69,9 @@ function App() {
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/tasks/create" element={<CreateTask />} />
           <Route path="/tasks/:id/edit" element={<EditTask />} />
+          <Route path="/items" element={<Items />} />
+          <Route path="/items/create" element={<CreateItem />} />
+          <Route path="/items/:id/edit" element={<EditItem />} />
           <Route path="/rewards" element={<Rewards />} />
         </Routes>
       </Box>

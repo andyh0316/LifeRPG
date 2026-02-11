@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { TaskModule } from './task/task.module';
 import { TaskCompletionModule } from './task-completion/task-completion.module';
 import { UserCharacterModule } from './user-character/user-character.module';
+import { ItemModule } from './item/item.module';
 import { AuthModule } from './auth/auth.module';
 import { SessionGuard } from './auth/session.guard';
 
@@ -14,6 +15,7 @@ import { SessionGuard } from './auth/session.guard';
     TaskModule,
     TaskCompletionModule,
     UserCharacterModule,
+    ItemModule,
   ],
   providers: [
     {
