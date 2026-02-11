@@ -7,9 +7,9 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import BackpackIcon from '@mui/icons-material/Backpack';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '@life-rpg/api-client';
@@ -29,7 +29,7 @@ const NAV_ITEMS = [
   { label: 'Quests', icon: <TaskAltIcon />, to: '/tasks' },
   { label: 'Items', icon: <Inventory2Icon />, to: '/items' },
   { label: 'Shop', icon: <StorefrontIcon />, to: '/shop' },
-  { label: 'Rewards', icon: <EmojiEventsIcon />, to: '/rewards' },
+  { label: 'Inventory', icon: <BackpackIcon />, to: '/inventory' },
 ];
 
 export default function Sidebar({ onLogout }: SidebarProps) {

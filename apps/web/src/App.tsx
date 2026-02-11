@@ -15,7 +15,9 @@ import EditItem from './pages/items/EditItem';
 import Shop from './pages/shop/Shop';
 import CreateShopListing from './pages/shop/CreateShopListing';
 import EditShopListing from './pages/shop/EditShopListing';
-import Rewards from './pages/rewards/Rewards';
+import Inventory from './pages/inventory/Inventory';
+import CreateInventoryItem from './pages/inventory/CreateInventoryItem';
+import EditInventoryItem from './pages/inventory/EditInventoryItem';
 import Login from './pages/login/Login';
 import { GAME_COLORS } from '@/theme/gameTheme';
 
@@ -78,7 +80,9 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/create" element={<CreateShopListing />} />
           <Route path="/shop/:id/edit" element={<EditShopListing />} />
-          <Route path="/rewards" element={<Rewards />} />
+          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/inventory/create" element={<CreateInventoryItem />} />
+          <Route path="/inventory/:id/edit" element={<EditInventoryItem />} />
         </Routes>
       </Box>
     </Box>

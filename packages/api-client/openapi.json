@@ -965,6 +965,185 @@
           "ShopListing"
         ]
       }
+    },
+    "/shop-listings/{id}/buy": {
+      "post": {
+        "operationId": "ShopListingController_buy",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      }
+    },
+    "/inventory-items": {
+      "get": {
+        "operationId": "InventoryItemController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryItemResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      },
+      "post": {
+        "operationId": "InventoryItemController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInventoryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      }
+    },
+    "/inventory-items/{id}": {
+      "get": {
+        "operationId": "InventoryItemController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      },
+      "put": {
+        "operationId": "InventoryItemController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInventoryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      },
+      "delete": {
+        "operationId": "InventoryItemController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      }
     }
   },
   "info": {
@@ -1766,6 +1945,89 @@
           "itemId",
           "coinCost",
           "sortOrder"
+        ]
+      },
+      "InventoryItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userCharacterId": {
+            "type": "number"
+          },
+          "itemId": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "shop",
+              "drop",
+              "achievement",
+              "gift"
+            ]
+          },
+          "acquiredAt": {
+            "type": "string"
+          },
+          "usedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "userCharacterId",
+          "itemId",
+          "source",
+          "acquiredAt"
+        ]
+      },
+      "CreateInventoryItemDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "shop",
+              "drop",
+              "achievement",
+              "gift"
+            ]
+          }
+        },
+        "required": [
+          "itemId"
+        ]
+      },
+      "UpdateInventoryItemDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "shop",
+              "drop",
+              "achievement",
+              "gift"
+            ]
+          },
+          "usedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "itemId",
+          "source",
+          "usedAt"
         ]
       }
     }

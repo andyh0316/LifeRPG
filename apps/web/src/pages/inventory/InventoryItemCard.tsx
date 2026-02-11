@@ -1,86 +1,55 @@
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import BackpackIcon from '@mui/icons-material/Backpack';
+import Chip from '@mui/material/Chip';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { $api, type components } from '@life-rpg/api-client';
 import TaskIcon from '@/components/icons/TaskIcon';
 import { useToast } from '@/components/toast';
-import useActiveCharacter from '@/hooks/useActiveCharacter';
-import {
-  GAME_COLORS,
-  GAME_SHADOWS,
-  sxCard,
-  sxAccentButton,
-} from '@/theme/gameTheme';
+import { GAME_COLORS, GAME_SHADOWS, sxCard } from '@/theme/gameTheme';
 
-type ShopListingResponseDto = components['schemas']['ShopListingResponseDto'];
+type InventoryItemResponseDto =
+  components['schemas']['InventoryItemResponseDto'];
 type ItemResponseDto = components['schemas']['ItemResponseDto'];
 
-interface ShopListingCardProps extends ShopListingResponseDto {
+interface InventoryItemCardProps extends InventoryItemResponseDto {
   item?: ItemResponseDto;
   index?: number;
 }
 
-export default function ShopListingCard({
+export default function InventoryItemCard({
   id,
   itemId,
-  coinCost,
-  sortOrder,
+  source,
+  acquiredAt,
+  usedAt,
   item,
   index = 0,
-}: ShopListingCardProps) {
+}: InventoryItemCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { active } = useActiveCharacter();
 
-  const deleteListing = $api.useMutation('delete', '/shop-listings/{id}', {
+  const deleteItem = $api.useMutation('delete', '/inventory-items/{id}', {
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/shop-listings').queryKey,
-      });
-      toast.success('Listing deleted');
-    },
-    onError: () => {
-      toast.error('Failed to delete listing');
-    },
-  });
-
-  const buyListing = $api.useMutation('post', '/shop-listings/{id}/buy', {
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/shop-listings').queryKey,
-      });
       queryClient.invalidateQueries({
         queryKey: $api.queryOptions('get', '/inventory-items').queryKey,
       });
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
-      });
-      toast.success(`Purchased ${item?.name ?? 'item'}!`);
+      toast.success('Inventory item deleted');
     },
     onError: () => {
-      toast.error('Purchase failed — not enough coins?');
+      toast.error('Failed to delete inventory item');
     },
   });
 
-  const canAfford = (active?.coins ?? 0) >= coinCost;
-
   const handleDelete = () => {
-    const label = item?.name ?? `Listing #${id}`;
-    if (!window.confirm(`Delete "${label}" from shop?`)) return;
-    deleteListing.mutate({ params: { path: { id } } });
-  };
-
-  const handleBuy = () => {
-    const label = item?.name ?? `Item #${itemId}`;
-    if (!window.confirm(`Buy "${label}" for ${coinCost} coins?`)) return;
-    buyListing.mutate({ params: { path: { id } } });
+    const label = item?.name ?? `Inventory item #${id}`;
+    if (!window.confirm(`Delete "${label}" from inventory?`)) return;
+    deleteItem.mutate({ params: { path: { id } } });
   };
 
   return (
@@ -96,7 +65,7 @@ export default function ShopListingCard({
           boxShadow: GAME_SHADOWS.cardHover,
           transform: 'translateY(-1px)',
         },
-        '&:hover .shop-action-btn': { opacity: 1 },
+        '&:hover .inv-action-btn': { opacity: 1 },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -107,13 +76,16 @@ export default function ShopListingCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: GAME_COLORS.accentSubtle,
+            bgcolor: usedAt ? GAME_COLORS.cardBg : GAME_COLORS.accentSubtle,
             borderRadius: '10px',
             flexShrink: 0,
-            '& .MuiSvgIcon-root': { color: GAME_COLORS.accent, fontSize: 20 },
+            '& .MuiSvgIcon-root': {
+              color: usedAt ? GAME_COLORS.textMuted : GAME_COLORS.accent,
+              fontSize: 20,
+            },
           }}
         >
-          {item?.icon ? <TaskIcon name={item.icon} /> : <MonetizationOnIcon />}
+          {item?.icon ? <TaskIcon name={item.icon} /> : <BackpackIcon />}
         </Box>
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -121,8 +93,9 @@ export default function ShopListingCard({
             sx={{
               fontWeight: 600,
               fontSize: '0.95rem',
-              color: GAME_COLORS.textPrimary,
+              color: usedAt ? GAME_COLORS.textMuted : GAME_COLORS.textPrimary,
               lineHeight: 1.3,
+              textDecoration: usedAt ? 'line-through' : 'none',
             }}
           >
             {item?.name ?? `Item #${itemId}`}
@@ -130,41 +103,43 @@ export default function ShopListingCard({
           <Box
             sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}
           >
-            <MonetizationOnIcon
-              sx={{ fontSize: 14, color: GAME_COLORS.accent }}
+            <Chip
+              label={source}
+              size="small"
+              sx={{
+                height: 18,
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                bgcolor: GAME_COLORS.accentSubtle,
+                color: GAME_COLORS.accent,
+              }}
             />
             <Typography
               sx={{
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: GAME_COLORS.accent,
+                fontSize: '0.75rem',
+                color: GAME_COLORS.textMuted,
+                ml: 0.5,
               }}
             >
-              {coinCost}
+              {new Date(acquiredAt).toLocaleDateString()}
             </Typography>
+            {usedAt && (
+              <Typography
+                sx={{
+                  fontSize: '0.75rem',
+                  color: GAME_COLORS.textMuted,
+                }}
+              >
+                · used {new Date(usedAt).toLocaleDateString()}
+              </Typography>
+            )}
           </Box>
         </Box>
 
-        <Button
-          size="small"
-          variant="contained"
-          disabled={!canAfford || buyListing.isPending}
-          onClick={handleBuy}
-          sx={{
-            ...sxAccentButton,
-            minWidth: 'auto',
-            px: 1.5,
-            py: 0.25,
-            fontSize: '0.75rem',
-          }}
-        >
-          Buy
-        </Button>
-
         <IconButton
-          className="shop-action-btn"
+          className="inv-action-btn"
           size="small"
-          onClick={() => navigate(`/shop/${id}/edit`)}
+          onClick={() => navigate(`/inventory/${id}/edit`)}
           sx={{
             opacity: 0,
             transition: 'opacity 0.15s ease',
@@ -174,7 +149,7 @@ export default function ShopListingCard({
           <EditIcon fontSize="small" />
         </IconButton>
         <IconButton
-          className="shop-action-btn"
+          className="inv-action-btn"
           size="small"
           onClick={handleDelete}
           sx={{

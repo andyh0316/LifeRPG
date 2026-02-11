@@ -6,6 +6,7 @@ import { TaskCompletionModule } from './task-completion/task-completion.module';
 import { UserCharacterModule } from './user-character/user-character.module';
 import { ItemModule } from './item/item.module';
 import { ShopListingModule } from './shop-listing/shop-listing.module';
+import { InventoryItemModule } from './inventory-item/inventory-item.module';
 import { AuthModule } from './auth/auth.module';
 import { SessionGuard } from './auth/session.guard';
 
@@ -18,6 +19,7 @@ import { SessionGuard } from './auth/session.guard';
     UserCharacterModule,
     ItemModule,
     ShopListingModule,
+    InventoryItemModule,
   ],
   providers: [
     {

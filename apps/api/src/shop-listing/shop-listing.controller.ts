@@ -13,6 +13,7 @@ import { ShopListingService } from './shop-listing.service';
 import { CreateShopListingDto } from './dto/create-shop-listing.dto';
 import { UpdateShopListingDto } from './dto/update-shop-listing.dto';
 import { ShopListingResponseDto } from './dto/shop-listing-response.dto';
+import { InventoryItemResponseDto } from '../inventory-item/dto/inventory-item-response.dto';
 import { CurrentUser, type AuthUser } from '../auth/current-user.decorator';
 
 @Controller('shop-listings')
@@ -50,5 +51,11 @@ export class ShopListingController {
   @ApiOkResponse({ type: ShopListingResponseDto })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.shopListingService.remove(id);
+  }
+
+  @Post(':id/buy')
+  @ApiCreatedResponse({ type: InventoryItemResponseDto })
+  buy(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: AuthUser) {
+    return this.shopListingService.buy(id, user.userCharacterId);
   }
 }
