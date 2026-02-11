@@ -816,6 +816,155 @@
           "Item"
         ]
       }
+    },
+    "/shop-listings": {
+      "get": {
+        "operationId": "ShopListingController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopListingResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      },
+      "post": {
+        "operationId": "ShopListingController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShopListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      }
+    },
+    "/shop-listings/{id}": {
+      "get": {
+        "operationId": "ShopListingController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      },
+      "put": {
+        "operationId": "ShopListingController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShopListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      },
+      "delete": {
+        "operationId": "ShopListingController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      }
     }
   },
   "info": {
@@ -1553,6 +1702,70 @@
           "icon",
           "amount",
           "amountUnit"
+        ]
+      },
+      "ShopListingResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userCharacterId": {
+            "type": "number"
+          },
+          "itemId": {
+            "type": "number"
+          },
+          "coinCost": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "userCharacterId",
+          "itemId",
+          "coinCost",
+          "sortOrder"
+        ]
+      },
+      "CreateShopListingDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "coinCost": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "itemId",
+          "coinCost"
+        ]
+      },
+      "UpdateShopListingDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "coinCost": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "itemId",
+          "coinCost",
+          "sortOrder"
         ]
       }
     }

@@ -12,6 +12,9 @@ import EditTask from './pages/tasks/EditTask';
 import Items from './pages/items/Items';
 import CreateItem from './pages/items/CreateItem';
 import EditItem from './pages/items/EditItem';
+import Shop from './pages/shop/Shop';
+import CreateShopListing from './pages/shop/CreateShopListing';
+import EditShopListing from './pages/shop/EditShopListing';
 import Rewards from './pages/rewards/Rewards';
 import Login from './pages/login/Login';
 import { GAME_COLORS } from '@/theme/gameTheme';
@@ -72,6 +75,9 @@ function App() {
           <Route path="/items" element={<Items />} />
           <Route path="/items/create" element={<CreateItem />} />
           <Route path="/items/:id/edit" element={<EditItem />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/create" element={<CreateShopListing />} />
+          <Route path="/shop/:id/edit" element={<EditShopListing />} />
           <Route path="/rewards" element={<Rewards />} />
         </Routes>
       </Box>
