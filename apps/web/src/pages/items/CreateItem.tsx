@@ -6,8 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { $api, type components } from '@life-rpg/api-client';
 import TaskFormHeader from '@/pages/tasks/TaskFormHeader';
 import TextField from '@/components/mui/TextField';
-import IconPicker from '@/components/icons/IconPicker';
-import { GAME_COLORS, GAME_RADII, sxCard } from '@/theme/gameTheme';
+import { sxCard } from '@/theme/gameTheme';
 
 type CreateItemDto = components['schemas']['CreateItemDto'];
 
@@ -59,32 +58,13 @@ export default function CreateItem() {
           p: 2.5,
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Box
-            sx={{
-              border: `1px solid ${GAME_COLORS.cardBorder}`,
-              borderRadius: GAME_RADII.button,
-            }}
-          >
-            <Controller
-              name="icon"
-              control={control}
-              render={({ field }) => (
-                <IconPicker
-                  value={field.value ?? null}
-                  onChange={(v) => field.onChange(v)}
-                />
-              )}
-            />
-          </Box>
-          <TextField
-            label="Name"
-            {...register('name', { required: 'Name is required' })}
-            error={!!errors.name}
-            helperText={errors.name?.message}
-            fullWidth
-          />
-        </Stack>
+        <TextField
+          label="Name"
+          {...register('name', { required: 'Name is required' })}
+          error={!!errors.name}
+          helperText={errors.name?.message}
+          fullWidth
+        />
 
         <TextField
           label="Description"

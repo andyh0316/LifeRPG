@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
@@ -11,19 +11,37 @@ import TextField from '@/components/mui/TextField';
 import { sxCard } from '@/theme/gameTheme';
 
 type UpdateShopListingDto = components['schemas']['UpdateShopListingDto'];
+type UpdateItemDto = components['schemas']['UpdateItemDto'];
+
+interface FormValues {
+  itemId: number;
+  coinCost: number;
+  sortOrder: number;
+  itemName: string;
+  itemDesc: string | null;
+  itemIcon: string | null;
+  itemAmount: number;
+  itemAmountUnit: 'count' | 'minutes';
+}
 
 export default function EditShopListing() {
   const { id } = useParams<{ id: string }>();
   const listingId = Number(id);
   const navigate = useNavigate();
+  const [isPending, setIsPending] = useState(false);
 
-  const { data: listing, isLoading } = $api.useQuery(
+  const { data: listing, isLoading: listingLoading } = $api.useQuery(
     'get',
     '/shop-listings/{id}',
     { params: { path: { id: listingId } } },
   );
 
-  const { data: items = [] } = $api.useQuery('get', '/items');
+  const { data: linkedItem, isLoading: itemLoading } = $api.useQuery(
+    'get',
+    '/items/{id}',
+    { params: { path: { id: listing?.itemId ?? 0 } } },
+    { enabled: !!listing },
+  );
 
   const {
     register,
@@ -31,30 +49,58 @@ export default function EditShopListing() {
     control,
     reset,
     formState: { errors },
-  } = useForm<UpdateShopListingDto>();
+  } = useForm<FormValues>();
 
   useEffect(() => {
-    if (!listing) return;
+    if (!listing || !linkedItem) return;
     reset({
       itemId: listing.itemId,
       coinCost: listing.coinCost,
       sortOrder: listing.sortOrder,
+      itemName: linkedItem.name,
+      itemDesc: linkedItem.desc,
+      itemIcon: linkedItem.icon,
+      itemAmount: linkedItem.amount,
+      itemAmountUnit: linkedItem.amountUnit,
     });
-  }, [listing, reset]);
+  }, [listing, linkedItem, reset]);
 
-  const updateListing = $api.useMutation('put', '/shop-listings/{id}', {
-    onSuccess: () =>
-      navigate('/shop', { state: { flash: 'Shop listing saved!' } }),
-  });
+  const updateListing = $api.useMutation('put', '/shop-listings/{id}');
+  const updateItem = $api.useMutation('put', '/items/{id}');
 
-  const onSubmit = (data: UpdateShopListingDto) => {
-    updateListing.mutate({
-      params: { path: { id: listingId } },
-      body: data,
-    });
+  const onSubmit = async (data: FormValues) => {
+    if (!listing) return;
+    setIsPending(true);
+    try {
+      const itemBody: UpdateItemDto = {
+        name: data.itemName,
+        desc: data.itemDesc,
+        icon: data.itemIcon,
+        amount: data.itemAmount,
+        amountUnit: data.itemAmountUnit,
+      };
+      await updateItem.mutateAsync({
+        params: { path: { id: data.itemId } },
+        body: itemBody,
+      });
+
+      const listingBody: UpdateShopListingDto = {
+        itemId: data.itemId,
+        coinCost: data.coinCost,
+        sortOrder: data.sortOrder,
+      };
+      await updateListing.mutateAsync({
+        params: { path: { id: listingId } },
+        body: listingBody,
+      });
+
+      navigate('/shop', { state: { flash: 'Shop listing saved!' } });
+    } finally {
+      setIsPending(false);
+    }
   };
 
-  if (isLoading) {
+  if (listingLoading || itemLoading) {
     return <Typography>Loading...</Typography>;
   }
 
@@ -64,7 +110,7 @@ export default function EditShopListing() {
         title="Edit Shop Listing"
         onCancel={() => navigate('/shop')}
         onSubmit={handleSubmit(onSubmit)}
-        isPending={updateListing.isPending}
+        isPending={isPending}
       />
 
       <Box
@@ -78,28 +124,58 @@ export default function EditShopListing() {
           p: 2.5,
         }}
       >
-        <Controller
-          name="itemId"
-          control={control}
-          rules={{ validate: (v) => v > 0 || 'Select an item' }}
-          render={({ field }) => (
-            <TextField
-              label="Item"
-              select
-              value={field.value || ''}
-              onChange={(e) => field.onChange(Number(e.target.value))}
-              error={!!errors.itemId}
-              helperText={errors.itemId?.message}
-              fullWidth
-            >
-              {items.map((item) => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
+        <Typography
+          sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', mt: -0.5 }}
+        >
+          Item
+        </Typography>
+
+        <TextField
+          label="Name"
+          {...register('itemName', { required: 'Name is required' })}
+          error={!!errors.itemName}
+          helperText={errors.itemName?.message}
+          fullWidth
         />
+
+        <TextField
+          label="Description"
+          multiline
+          rows={3}
+          {...register('itemDesc')}
+        />
+
+        <Stack direction="row" spacing={2}>
+          <TextField
+            label="Amount"
+            type="number"
+            {...register('itemAmount', { valueAsNumber: true, min: 1 })}
+            slotProps={{ htmlInput: { min: 1 } }}
+            sx={{ width: 120 }}
+          />
+          <Controller
+            name="itemAmountUnit"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                label="Unit"
+                select
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                sx={{ width: 140 }}
+              >
+                <MenuItem value="count">Count</MenuItem>
+                <MenuItem value="minutes">Minutes</MenuItem>
+              </TextField>
+            )}
+          />
+        </Stack>
+
+        <Typography
+          sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', mt: 1 }}
+        >
+          Listing
+        </Typography>
 
         <Stack direction="row" spacing={2}>
           <TextField

@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -13,9 +15,9 @@ import { useToast } from '@/components/toast';
 import useActiveCharacter from '@/hooks/useActiveCharacter';
 import {
   GAME_COLORS,
+  GAME_RADII,
   GAME_SHADOWS,
   sxCard,
-  sxAccentButton,
 } from '@/theme/gameTheme';
 
 type ShopListingResponseDto = components['schemas']['ShopListingResponseDto'];
@@ -24,6 +26,7 @@ type ItemResponseDto = components['schemas']['ItemResponseDto'];
 interface ShopListingCardProps extends ShopListingResponseDto {
   item?: ItemResponseDto;
   index?: number;
+  editing?: boolean;
 }
 
 export default function ShopListingCard({
@@ -33,11 +36,14 @@ export default function ShopListingCard({
   sortOrder,
   item,
   index = 0,
+  editing = false,
 }: ShopListingCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
   const { active } = useActiveCharacter();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
   const deleteListing = $api.useMutation('delete', '/shop-listings/{id}', {
     onSuccess: () => {
@@ -51,23 +57,20 @@ export default function ShopListingCard({
     },
   });
 
-  const buyListing = $api.useMutation('post', '/shop-listings/{id}/buy', {
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/shop-listings').queryKey,
-      });
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/inventory-items').queryKey,
-      });
-      queryClient.invalidateQueries({
-        queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
-      });
-      toast.success(`Purchased ${item?.name ?? 'item'}!`);
-    },
-    onError: () => {
-      toast.error('Purchase failed — not enough coins?');
-    },
-  });
+  const buyListing = $api.useMutation('post', '/shop-listings/{id}/buy');
+  const useInventoryItem = $api.useMutation('put', '/inventory-items/{id}');
+
+  const invalidateAfterBuy = () => {
+    queryClient.invalidateQueries({
+      queryKey: $api.queryOptions('get', '/shop-listings').queryKey,
+    });
+    queryClient.invalidateQueries({
+      queryKey: $api.queryOptions('get', '/inventory-items').queryKey,
+    });
+    queryClient.invalidateQueries({
+      queryKey: $api.queryOptions('get', '/user-character/summary').queryKey,
+    });
+  };
 
   const canAfford = (active?.coins ?? 0) >= coinCost;
 
@@ -77,116 +80,303 @@ export default function ShopListingCard({
     deleteListing.mutate({ params: { path: { id } } });
   };
 
-  const handleBuy = () => {
-    const label = item?.name ?? `Item #${itemId}`;
-    if (!window.confirm(`Buy "${label}" for ${coinCost} coins?`)) return;
-    buyListing.mutate({ params: { path: { id } } });
+  const handleBuy = async () => {
+    setIsPending(true);
+    try {
+      await buyListing.mutateAsync({ params: { path: { id } } });
+      invalidateAfterBuy();
+      setDialogOpen(false);
+      toast.success(`Purchased ${item?.name ?? 'item'}!`);
+    } catch {
+      toast.error('Purchase failed — not enough coins?');
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  const handleBuyAndUse = async () => {
+    setIsPending(true);
+    try {
+      const inventoryItem = await buyListing.mutateAsync({
+        params: { path: { id } },
+      });
+      await useInventoryItem.mutateAsync({
+        params: { path: { id: inventoryItem.id } },
+        body: {
+          itemId: inventoryItem.itemId,
+          source: inventoryItem.source,
+          usedAt: new Date().toISOString(),
+        },
+      });
+      invalidateAfterBuy();
+      setDialogOpen(false);
+      toast.success(`Purchased and used ${item?.name ?? 'item'}!`);
+    } catch {
+      toast.error('Purchase failed — not enough coins?');
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  const itemName = item?.name ?? `Item #${itemId}`;
+
+  const sxBuyButton = {
+    fontWeight: 800,
+    fontSize: '1.1rem',
+    py: 2,
+    width: '100%',
+    borderRadius: GAME_RADII.card,
+    bgcolor: GAME_COLORS.accent,
+    color: '#fff',
+    boxShadow: `0 4px 16px ${GAME_COLORS.accent}40`,
+    '&:hover': {
+      bgcolor: GAME_COLORS.accent,
+      boxShadow: `0 6px 24px ${GAME_COLORS.accent}60`,
+      transform: 'translateY(-1px)',
+    },
+    '&:active': {
+      transform: 'translateY(1px)',
+      boxShadow: `0 2px 8px ${GAME_COLORS.accent}30`,
+    },
   };
 
   return (
-    <Box
-      sx={{
-        ...sxCard,
-        mb: 1.5,
-        p: 2,
-        animation: 'slideUpFadeIn 0.3s ease forwards',
-        animationDelay: `${index * 0.04}s`,
-        opacity: 0,
-        '&:hover': {
-          boxShadow: GAME_SHADOWS.cardHover,
-          transform: 'translateY(-1px)',
-        },
-        '&:hover .shop-action-btn': { opacity: 1 },
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+    <>
+      <Box
+        onClick={() => setDialogOpen(true)}
+        sx={{
+          ...sxCard,
+          mb: 1.5,
+          p: 2,
+          cursor: 'pointer',
+          animation: 'slideUpFadeIn 0.3s ease forwards',
+          animationDelay: `${index * 0.04}s`,
+          opacity: 0,
+          '&:hover': {
+            boxShadow: GAME_SHADOWS.cardHover,
+            transform: 'translateY(-1px)',
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              width: 38,
+              height: 38,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: GAME_COLORS.accentSubtle,
+              borderRadius: '10px',
+              flexShrink: 0,
+              '& .MuiSvgIcon-root': {
+                color: GAME_COLORS.accent,
+                fontSize: 20,
+              },
+            }}
+          >
+            {item?.icon ? (
+              <TaskIcon name={item.icon} />
+            ) : (
+              <MonetizationOnIcon />
+            )}
+          </Box>
+
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              sx={{
+                fontWeight: 600,
+                fontSize: '0.95rem',
+                color: GAME_COLORS.textPrimary,
+                lineHeight: 1.3,
+              }}
+            >
+              {itemName}
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                mt: 0.25,
+              }}
+            >
+              <MonetizationOnIcon
+                sx={{ fontSize: 14, color: GAME_COLORS.accent }}
+              />
+              <Typography
+                sx={{
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: GAME_COLORS.accent,
+                }}
+              >
+                {coinCost}
+              </Typography>
+              {item && (
+                <Typography
+                  sx={{
+                    fontSize: '0.75rem',
+                    color: GAME_COLORS.textMuted,
+                    ml: 0.5,
+                  }}
+                >
+                  · {item.amount} {item.amountUnit}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+
+          {editing && (
+            <>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/shop/${id}/edit`);
+                }}
+                sx={{ color: GAME_COLORS.textMuted }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete();
+                }}
+                sx={{
+                  color: GAME_COLORS.textMuted,
+                  '&:hover': { color: '#e53935' },
+                }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </>
+          )}
+        </Box>
+      </Box>
+
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        slotProps={{
+          paper: {
+            sx: {
+              ...sxCard,
+              p: 4,
+              textAlign: 'center',
+              minWidth: 320,
+            },
+          },
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            color: GAME_COLORS.textPrimary,
+            mb: 1,
+          }}
+        >
+          {itemName}
+        </Typography>
+
+        {item?.desc && (
+          <Typography
+            sx={{
+              fontSize: '0.85rem',
+              color: GAME_COLORS.textSecondary,
+              mb: 1,
+            }}
+          >
+            {item.desc}
+          </Typography>
+        )}
+
         <Box
           sx={{
-            width: 38,
-            height: 38,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: GAME_COLORS.accentSubtle,
-            borderRadius: '10px',
-            flexShrink: 0,
-            '& .MuiSvgIcon-root': { color: GAME_COLORS.accent, fontSize: 20 },
+            gap: 0.5,
+            mb: 1,
           }}
         >
-          {item?.icon ? <TaskIcon name={item.icon} /> : <MonetizationOnIcon />}
-        </Box>
-
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <MonetizationOnIcon
+            sx={{ fontSize: 16, color: GAME_COLORS.accent }}
+          />
           <Typography
             sx={{
+              fontSize: '0.9rem',
               fontWeight: 600,
-              fontSize: '0.95rem',
-              color: GAME_COLORS.textPrimary,
-              lineHeight: 1.3,
+              color: GAME_COLORS.accent,
             }}
           >
-            {item?.name ?? `Item #${itemId}`}
+            {coinCost} coins
           </Typography>
-          <Box
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}
-          >
-            <MonetizationOnIcon
-              sx={{ fontSize: 14, color: GAME_COLORS.accent }}
-            />
-            <Typography
-              sx={{
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: GAME_COLORS.accent,
-              }}
-            >
-              {coinCost}
-            </Typography>
-          </Box>
         </Box>
 
-        <Button
-          size="small"
-          variant="contained"
-          disabled={!canAfford || buyListing.isPending}
-          onClick={handleBuy}
-          sx={{
-            ...sxAccentButton,
-            minWidth: 'auto',
-            px: 1.5,
-            py: 0.25,
-            fontSize: '0.75rem',
-          }}
-        >
-          Buy
-        </Button>
+        {item && (
+          <Typography
+            sx={{
+              fontSize: '0.85rem',
+              color: GAME_COLORS.textSecondary,
+              mb: 3,
+            }}
+          >
+            {item.amount} {item.amountUnit}
+          </Typography>
+        )}
 
-        <IconButton
-          className="shop-action-btn"
-          size="small"
-          onClick={() => navigate(`/shop/${id}/edit`)}
+        {!canAfford && (
+          <Typography sx={{ fontSize: '0.8rem', color: '#e53935', mb: 2 }}>
+            Not enough coins
+          </Typography>
+        )}
+
+        <Box
           sx={{
-            opacity: 0,
-            transition: 'opacity 0.15s ease',
-            color: GAME_COLORS.textMuted,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1.5,
+            width: '100%',
           }}
         >
-          <EditIcon fontSize="small" />
-        </IconButton>
-        <IconButton
-          className="shop-action-btn"
-          size="small"
-          onClick={handleDelete}
-          sx={{
-            opacity: 0,
-            transition: 'opacity 0.15s ease',
-            color: GAME_COLORS.textMuted,
-            '&:hover': { color: '#e53935' },
-          }}
-        >
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </Box>
-    </Box>
+          <Button
+            variant="contained"
+            onClick={handleBuyAndUse}
+            disabled={!canAfford || isPending}
+            sx={{
+              ...sxBuyButton,
+              py: 0.6,
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              bgcolor: '#e53935',
+              boxShadow: '0 4px 16px rgba(229,57,53,0.4)',
+              '&:hover': {
+                bgcolor: '#c62828',
+                boxShadow: '0 6px 24px rgba(229,57,53,0.6)',
+                transform: 'translateY(-1px)',
+              },
+              '&:active': {
+                transform: 'translateY(1px)',
+                boxShadow: '0 2px 8px rgba(229,57,53,0.3)',
+              },
+            }}
+          >
+            Buy and use now
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleBuy}
+            disabled={!canAfford || isPending}
+            sx={sxBuyButton}
+          >
+            Buy
+          </Button>
+        </Box>
+      </Dialog>
+    </>
   );
 }

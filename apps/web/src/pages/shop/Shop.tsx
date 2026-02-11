@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { $api } from '@life-rpg/api-client';
 import { useToast } from '@/components/toast';
@@ -22,6 +23,7 @@ export default function Shop() {
   const { data: listings = [] } = $api.useQuery('get', '/shop-listings');
   const { data: items = [] } = $api.useQuery('get', '/items');
 
+  const [editing, setEditing] = useState(false);
   const itemMap = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
 
   useEffect(() => {
@@ -34,8 +36,22 @@ export default function Shop() {
 
   return (
     <Box sx={{ maxWidth: 600 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <Typography sx={{ ...sxPageTitle, flex: 1 }}>Shop</Typography>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<EditIcon />}
+          onClick={() => setEditing((v) => !v)}
+          sx={{
+            color: editing ? GAME_COLORS.accent : GAME_COLORS.textMuted,
+            borderColor: editing ? GAME_COLORS.accent : GAME_COLORS.cardBorder,
+            fontSize: '0.75rem',
+            textTransform: 'none',
+          }}
+        >
+          {editing ? 'Done' : 'Edit'}
+        </Button>
         <Button
           variant="contained"
           size="small"
@@ -62,6 +78,7 @@ export default function Shop() {
             {...listing}
             item={itemMap.get(listing.itemId)}
             index={index}
+            editing={editing}
           />
         ))
       )}
