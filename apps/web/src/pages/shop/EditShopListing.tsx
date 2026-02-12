@@ -3,12 +3,14 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { $api, type components } from '@life-rpg/api-client';
 import TaskFormHeader from '@/pages/tasks/TaskFormHeader';
 import TextField from '@/components/mui/TextField';
-import { sxCard } from '@/theme/gameTheme';
+import TaskIcon from '@/components/icons/TaskIcon';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import { GAME_COLORS, GAME_RADII, sxCard } from '@/theme/gameTheme';
 
 type UpdateShopListingDto = components['schemas']['UpdateShopListingDto'];
 type UpdateItemDto = components['schemas']['UpdateItemDto'];
@@ -21,13 +23,19 @@ interface FormValues {
   itemDesc: string | null;
   itemIcon: string | null;
   itemAmount: number;
-  itemAmountUnit: 'count' | 'minutes';
+  itemAmountUnit: 'count' | 'minutes' | 'hours' | 'days';
+}
+
+interface LocationState {
+  selectedIcon?: string | null;
 }
 
 export default function EditShopListing() {
   const { id } = useParams<{ id: string }>();
   const listingId = Number(id);
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as LocationState | null;
   const [isPending, setIsPending] = useState(false);
 
   const { data: listing, isLoading: listingLoading } = $api.useQuery(
@@ -48,6 +56,8 @@ export default function EditShopListing() {
     handleSubmit,
     control,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>();
 
@@ -64,6 +74,23 @@ export default function EditShopListing() {
       itemAmountUnit: linkedItem.amountUnit,
     });
   }, [listing, linkedItem, reset]);
+
+  useEffect(() => {
+    if (state?.selectedIcon !== undefined) {
+      setValue('itemIcon', state.selectedIcon);
+    }
+  }, [state, setValue]);
+
+  const iconValue = watch('itemIcon');
+
+  const handlePickIcon = () => {
+    navigate('/items/pick-icon', {
+      state: {
+        returnTo: `/shop/${id}/edit`,
+        currentIcon: iconValue,
+      },
+    });
+  };
 
   const updateListing = $api.useMutation('put', '/shop-listings/{id}');
   const updateItem = $api.useMutation('put', '/items/{id}');
@@ -130,13 +157,43 @@ export default function EditShopListing() {
           Item
         </Typography>
 
-        <TextField
-          label="Name"
-          {...register('itemName', { required: 'Name is required' })}
-          error={!!errors.itemName}
-          helperText={errors.itemName?.message}
-          fullWidth
-        />
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Box
+            onClick={handlePickIcon}
+            sx={{
+              width: 44,
+              height: 44,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: `1.5px solid ${GAME_COLORS.cardBorder}`,
+              borderRadius: GAME_RADII.button,
+              cursor: 'pointer',
+              flexShrink: 0,
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                borderColor: GAME_COLORS.accent,
+                bgcolor: GAME_COLORS.accentSubtle,
+              },
+              '& .MuiSvgIcon-root': {
+                color: iconValue ? GAME_COLORS.accent : GAME_COLORS.textMuted,
+              },
+            }}
+          >
+            {iconValue ? (
+              <TaskIcon name={iconValue} />
+            ) : (
+              <AddPhotoAlternateIcon />
+            )}
+          </Box>
+          <TextField
+            label="Name"
+            {...register('itemName', { required: 'Name is required' })}
+            error={!!errors.itemName}
+            helperText={errors.itemName?.message}
+            fullWidth
+          />
+        </Stack>
 
         <TextField
           label="Description"
@@ -166,6 +223,8 @@ export default function EditShopListing() {
               >
                 <MenuItem value="count">Count</MenuItem>
                 <MenuItem value="minutes">Minutes</MenuItem>
+                <MenuItem value="hours">Hours</MenuItem>
+                <MenuItem value="days">Days</MenuItem>
               </TextField>
             )}
           />

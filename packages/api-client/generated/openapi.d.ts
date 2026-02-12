@@ -590,7 +590,7 @@ export interface components {
             icon?: string | null;
             amount?: number;
             /** @enum {string} */
-            amountUnit?: "count" | "minutes";
+            amountUnit?: "count" | "minutes" | "hours" | "days";
         };
         UpdateItemDto: {
             name: string;
@@ -598,7 +598,7 @@ export interface components {
             icon: string | null;
             amount: number;
             /** @enum {string} */
-            amountUnit: "count" | "minutes";
+            amountUnit: "count" | "minutes" | "hours" | "days";
         };
         ShopListingResponseDto: {
             id: number;

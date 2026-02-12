@@ -30,7 +30,7 @@ export class UpdateItemDto {
   @Min(1)
   amount!: number;
 
-  @ApiProperty({ enum: ['count', 'minutes'] })
-  @IsIn(['count', 'minutes'])
-  amountUnit!: 'count' | 'minutes';
+  @ApiProperty({ enum: ['count', 'minutes', 'hours', 'days'] })
+  @IsIn(['count', 'minutes', 'hours', 'days'])
+  amountUnit!: 'count' | 'minutes' | 'hours' | 'days';
 }

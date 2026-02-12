@@ -31,8 +31,8 @@ export class CreateItemDto {
   @Min(1)
   amount?: number;
 
-  @ApiPropertyOptional({ enum: ['count', 'minutes'] })
+  @ApiPropertyOptional({ enum: ['count', 'minutes', 'hours', 'days'] })
   @IsOptional()
-  @IsIn(['count', 'minutes'])
-  amountUnit?: 'count' | 'minutes';
+  @IsIn(['count', 'minutes', 'hours', 'days'])
+  amountUnit?: 'count' | 'minutes' | 'hours' | 'days';
 }

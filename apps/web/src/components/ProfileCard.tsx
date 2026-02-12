@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import CoinIcon from './icons/CoinIcon';
+import CoinDisplay from './CoinDisplay';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import { GAME_COLORS } from '@/theme/gameTheme';
@@ -90,25 +90,8 @@ export default function ProfileCard() {
         )}
       </Box>
 
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.75,
-          pt: 0.75,
-          pb: 1.5,
-        }}
-      >
-        <CoinIcon sx={{ fontSize: 21 }} />
-        <Typography
-          sx={{
-            fontSize: '1.125rem',
-            fontWeight: 700,
-            color: GAME_COLORS.coinGold,
-          }}
-        >
-          {animatedCoins.toLocaleString()} G
-        </Typography>
+      <Box sx={{ pt: 0.75, pb: 1.5 }}>
+        <CoinDisplay amount={animatedCoins} size="md" />
       </Box>
 
       <LevelBar />

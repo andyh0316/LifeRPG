@@ -1842,7 +1842,9 @@
             "type": "string",
             "enum": [
               "count",
-              "minutes"
+              "minutes",
+              "hours",
+              "days"
             ]
           }
         },
@@ -1871,7 +1873,9 @@
             "type": "string",
             "enum": [
               "count",
-              "minutes"
+              "minutes",
+              "hours",
+              "days"
             ]
           }
         },

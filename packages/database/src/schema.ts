@@ -218,6 +218,13 @@ export const taskCompletionsRelations = relations(
 // Items
 // ============================================================================
 
+export const itemAmountUnitEnum = pgEnum('item_amount_unit', [
+  'count',
+  'minutes',
+  'hours',
+  'days',
+]);
+
 export const itemSourceEnum = pgEnum('item_source', [
   'shop',
   'drop',
@@ -235,7 +242,7 @@ export const items = pgTable('items', {
   description: text('description'),
   icon: varchar('icon', { length: 50 }),
   amount: integer('amount').notNull().default(1),
-  amountUnit: amountUnitEnum('amount_unit').notNull().default('count'),
+  amountUnit: itemAmountUnitEnum('amount_unit').notNull().default('count'),
 });
 
 export const itemsRelations = relations(items, ({ one, many }) => ({

@@ -4,7 +4,6 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import BackpackIcon from '@mui/icons-material/Backpack';
-import Chip from '@mui/material/Chip';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api, type components } from '@life-rpg/api-client';
 import TaskIcon from '@/components/icons/TaskIcon';
@@ -19,6 +18,13 @@ import {
 type InventoryItemResponseDto =
   components['schemas']['InventoryItemResponseDto'];
 type ItemResponseDto = components['schemas']['ItemResponseDto'];
+
+const UNIT_LABEL: Record<string, string> = {
+  count: '',
+  minutes: 'min',
+  hours: 'hr',
+  days: 'day',
+};
 
 interface InventoryItemCardProps extends InventoryItemResponseDto {
   item?: ItemResponseDto;
@@ -114,6 +120,16 @@ export default function InventoryItemCard({
             >
               {itemName}
             </Typography>
+            {item && (
+              <Typography
+                sx={{ fontSize: '0.75rem', color: GAME_COLORS.textSecondary }}
+              >
+                {item.amount}
+                {UNIT_LABEL[item.amountUnit]
+                  ? ` ${UNIT_LABEL[item.amountUnit]}`
+                  : ` ${item.amountUnit}`}
+              </Typography>
+            )}
             <Box
               sx={{
                 display: 'flex',
@@ -122,25 +138,13 @@ export default function InventoryItemCard({
                 mt: 0.25,
               }}
             >
-              <Chip
-                label={source}
-                size="small"
-                sx={{
-                  height: 18,
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  bgcolor: GAME_COLORS.accentSubtle,
-                  color: GAME_COLORS.accent,
-                }}
-              />
               <Typography
                 sx={{
                   fontSize: '0.75rem',
                   color: GAME_COLORS.textMuted,
-                  ml: 0.5,
                 }}
               >
-                {new Date(acquiredAt).toLocaleDateString()}
+                Acquired {new Date(acquiredAt).toLocaleDateString()}
               </Typography>
               {usedAt && (
                 <Typography
@@ -202,7 +206,10 @@ export default function InventoryItemCard({
               mb: 3,
             }}
           >
-            {item.amount} {item.amountUnit}
+            {item.amount}
+            {UNIT_LABEL[item.amountUnit]
+              ? ` ${UNIT_LABEL[item.amountUnit]}`
+              : ` ${item.amountUnit}`}
           </Typography>
         )}
 

@@ -1,6 +1,7 @@
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -27,9 +28,10 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { label: 'Home', icon: <HomeIcon />, to: '/' },
   { label: 'Quests', icon: <TaskAltIcon />, to: '/tasks' },
-  { label: 'Items', icon: <Inventory2Icon />, to: '/items' },
-  { label: 'Shop', icon: <StorefrontIcon />, to: '/shop' },
   { label: 'Inventory', icon: <BackpackIcon />, to: '/inventory' },
+  { label: 'Shop', icon: <StorefrontIcon />, to: '/shop' },
+  'divider' as const,
+  { label: 'Items', icon: <Inventory2Icon />, to: '/items' },
 ];
 
 export default function Sidebar({ onLogout }: SidebarProps) {
@@ -79,7 +81,15 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       <ProfileCard />
 
       <List sx={{ px: 1, mt: 1 }}>
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item, i) => {
+          if (item === 'divider') {
+            return (
+              <Divider
+                key={`divider-${i}`}
+                sx={{ my: 1, borderColor: GAME_COLORS.sidebarActive }}
+              />
+            );
+          }
           const active = isActive(item.to);
           return (
             <ListItemButton

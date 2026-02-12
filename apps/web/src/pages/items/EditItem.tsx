@@ -3,20 +3,27 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { $api, type components } from '@life-rpg/api-client';
 import TaskFormHeader from '@/pages/tasks/TaskFormHeader';
 import TextField from '@/components/mui/TextField';
-import IconPicker from '@/components/icons/IconPicker';
+import TaskIcon from '@/components/icons/TaskIcon';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { GAME_COLORS, GAME_RADII, sxCard } from '@/theme/gameTheme';
 
 type UpdateItemDto = components['schemas']['UpdateItemDto'];
+
+interface LocationState {
+  selectedIcon?: string | null;
+}
 
 export default function EditItem() {
   const { id } = useParams<{ id: string }>();
   const itemId = Number(id);
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state as LocationState | null;
 
   const { data: item, isLoading } = $api.useQuery('get', '/items/{id}', {
     params: { path: { id: itemId } },
@@ -27,6 +34,8 @@ export default function EditItem() {
     handleSubmit,
     control,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<UpdateItemDto>();
 
@@ -41,6 +50,14 @@ export default function EditItem() {
     });
   }, [item, reset]);
 
+  useEffect(() => {
+    if (state?.selectedIcon !== undefined) {
+      setValue('icon', state.selectedIcon);
+    }
+  }, [state, setValue]);
+
+  const iconValue = watch('icon');
+
   const updateItem = $api.useMutation('put', '/items/{id}', {
     onSuccess: () => navigate('/items', { state: { flash: 'Item saved!' } }),
   });
@@ -49,6 +66,15 @@ export default function EditItem() {
     updateItem.mutate({
       params: { path: { id: itemId } },
       body: data,
+    });
+  };
+
+  const handlePickIcon = () => {
+    navigate('/items/pick-icon', {
+      state: {
+        returnTo: `/items/${id}/edit`,
+        currentIcon: iconValue,
+      },
     });
   };
 
@@ -78,21 +104,32 @@ export default function EditItem() {
       >
         <Stack direction="row" alignItems="center" spacing={1}>
           <Box
+            onClick={handlePickIcon}
             sx={{
-              border: `1px solid ${GAME_COLORS.cardBorder}`,
+              width: 44,
+              height: 44,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: `1.5px solid ${GAME_COLORS.cardBorder}`,
               borderRadius: GAME_RADII.button,
+              cursor: 'pointer',
+              flexShrink: 0,
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                borderColor: GAME_COLORS.accent,
+                bgcolor: GAME_COLORS.accentSubtle,
+              },
+              '& .MuiSvgIcon-root': {
+                color: iconValue ? GAME_COLORS.accent : GAME_COLORS.textMuted,
+              },
             }}
           >
-            <Controller
-              name="icon"
-              control={control}
-              render={({ field }) => (
-                <IconPicker
-                  value={field.value ?? null}
-                  onChange={(v) => field.onChange(v)}
-                />
-              )}
-            />
+            {iconValue ? (
+              <TaskIcon name={iconValue} />
+            ) : (
+              <AddPhotoAlternateIcon />
+            )}
           </Box>
           <TextField
             label="Name"
@@ -131,6 +168,8 @@ export default function EditItem() {
               >
                 <MenuItem value="count">Count</MenuItem>
                 <MenuItem value="minutes">Minutes</MenuItem>
+                <MenuItem value="hours">Hours</MenuItem>
+                <MenuItem value="days">Days</MenuItem>
               </TextField>
             )}
           />

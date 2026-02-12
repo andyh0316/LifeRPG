@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import CoinDisplay from '@/components/CoinDisplay';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { $api, type components } from '@life-rpg/api-client';
@@ -161,17 +162,17 @@ export default function ShopListingCard({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box
             sx={{
-              width: 38,
-              height: 38,
+              width: 44,
+              height: 44,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               bgcolor: GAME_COLORS.accentSubtle,
-              borderRadius: '10px',
+              borderRadius: '12px',
               flexShrink: 0,
               '& .MuiSvgIcon-root': {
                 color: GAME_COLORS.accent,
-                fontSize: 20,
+                fontSize: 22,
               },
             }}
           >
@@ -185,7 +186,7 @@ export default function ShopListingCard({
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               sx={{
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: '0.95rem',
                 color: GAME_COLORS.textPrimary,
                 lineHeight: 1.3,
@@ -193,38 +194,31 @@ export default function ShopListingCard({
             >
               {itemName}
             </Typography>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                mt: 0.25,
-              }}
-            >
-              <MonetizationOnIcon
-                sx={{ fontSize: 14, color: GAME_COLORS.accent }}
-              />
+            {item && (
               <Typography
                 sx={{
-                  fontSize: '0.8rem',
                   fontWeight: 600,
-                  color: GAME_COLORS.accent,
+                  fontSize: '0.8rem',
+                  color: GAME_COLORS.textSecondary,
+                  mt: 0.25,
                 }}
               >
-                {coinCost}
+                {item.amount} {item.amountUnit}
               </Typography>
-              {item && (
-                <Typography
-                  sx={{
-                    fontSize: '0.75rem',
-                    color: GAME_COLORS.textMuted,
-                    ml: 0.5,
-                  }}
-                >
-                  · {item.amount} {item.amountUnit}
-                </Typography>
-              )}
-            </Box>
+            )}
+          </Box>
+
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: 1.5,
+              py: 0.5,
+              borderRadius: GAME_RADII.card,
+              bgcolor: GAME_COLORS.coinGoldSubtle,
+              border: `1.5px solid ${GAME_COLORS.coinGold}30`,
+            }}
+          >
+            <CoinDisplay amount={coinCost} size="sm" />
           </Box>
 
           {editing && (
@@ -294,27 +288,8 @@ export default function ShopListingCard({
           </Typography>
         )}
 
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 0.5,
-            mb: 1,
-          }}
-        >
-          <MonetizationOnIcon
-            sx={{ fontSize: 16, color: GAME_COLORS.accent }}
-          />
-          <Typography
-            sx={{
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              color: GAME_COLORS.accent,
-            }}
-          >
-            {coinCost} coins
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+          <CoinDisplay amount={coinCost} size="md" />
         </Box>
 
         {item && (

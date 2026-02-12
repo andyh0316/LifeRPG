@@ -15,6 +15,8 @@ type ItemResponseDto = components['schemas']['ItemResponseDto'];
 const UNIT_LABEL: Record<string, string> = {
   count: '',
   minutes: 'min',
+  hours: 'hr',
+  days: 'day',
 };
 
 interface ItemCardProps extends ItemResponseDto {

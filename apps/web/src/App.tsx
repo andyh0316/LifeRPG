@@ -12,6 +12,7 @@ import EditTask from './pages/tasks/EditTask';
 import Items from './pages/items/Items';
 import CreateItem from './pages/items/CreateItem';
 import EditItem from './pages/items/EditItem';
+import PickIcon from './pages/items/PickIcon';
 import Shop from './pages/shop/Shop';
 import CreateShopListing from './pages/shop/CreateShopListing';
 import EditShopListing from './pages/shop/EditShopListing';
@@ -75,6 +76,7 @@ function App() {
           <Route path="/items" element={<Items />} />
           <Route path="/items/create" element={<CreateItem />} />
           <Route path="/items/:id/edit" element={<EditItem />} />
+          <Route path="/items/pick-icon" element={<PickIcon />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/shop/create" element={<CreateShopListing />} />
           <Route path="/shop/:id/edit" element={<EditShopListing />} />
