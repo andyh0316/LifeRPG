@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import type { Db } from '@life-rpg/database';
-import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemResponseDto } from './dto/item-response.dto';

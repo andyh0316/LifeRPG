@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { users, type Db } from '@life-rpg/database';
 import { eq } from 'drizzle-orm';
 import supertest from 'supertest';
-import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { SessionService } from './session.service';
 

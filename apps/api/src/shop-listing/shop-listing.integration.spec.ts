@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { userCharacter } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
-import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
 import { CreateShopListingDto } from './dto/create-shop-listing.dto';
 import { UpdateShopListingDto } from './dto/update-shop-listing.dto';
 import { ShopListingResponseDto } from './dto/shop-listing-response.dto';
