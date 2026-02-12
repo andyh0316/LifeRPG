@@ -22,6 +22,20 @@
       "when": 1770680870224,
       "tag": "0002_panoramic_post",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770771609517,
+      "tag": "0003_same_gargoyle",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1770931676580,
+      "tag": "0004_whole_ultimo",
+      "breakpoints": true
     }
   ]
 }

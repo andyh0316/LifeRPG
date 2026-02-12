@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { taskCompletions, type Db } from '@life-rpg/database';
-import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
 import { TaskCompletionRepository } from '../task-completion/task-completion.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskResponseDto } from './dto/task-response.dto';

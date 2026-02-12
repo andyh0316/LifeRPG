@@ -292,6 +292,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ItemController_findAll"];
+        put?: never;
+        post: operations["ItemController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ItemController_findOne"];
+        put: operations["ItemController_update"];
+        post?: never;
+        delete: operations["ItemController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/shop-listings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ShopListingController_findAll"];
+        put?: never;
+        post: operations["ShopListingController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/shop-listings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ShopListingController_findOne"];
+        put: operations["ShopListingController_update"];
+        post?: never;
+        delete: operations["ShopListingController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/shop-listings/{id}/buy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ShopListingController_buy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inventory-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["InventoryItemController_findAll"];
+        put?: never;
+        post: operations["InventoryItemController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inventory-items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["InventoryItemController_findOne"];
+        put: operations["InventoryItemController_update"];
+        post?: never;
+        delete: operations["InventoryItemController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -461,6 +573,69 @@ export interface components {
             level: number;
             xpToNext: number | null;
             cumulativeXp: number;
+        };
+        ItemResponseDto: {
+            id: number;
+            userCharacterId: number;
+            name: string;
+            desc?: string | null;
+            icon?: string | null;
+            amount: number;
+            /** @enum {string} */
+            amountUnit: "count" | "minutes";
+        };
+        CreateItemDto: {
+            name: string;
+            desc?: string | null;
+            icon?: string | null;
+            amount?: number;
+            /** @enum {string} */
+            amountUnit?: "count" | "minutes" | "hours" | "days";
+        };
+        UpdateItemDto: {
+            name: string;
+            desc: string | null;
+            icon: string | null;
+            amount: number;
+            /** @enum {string} */
+            amountUnit: "count" | "minutes" | "hours" | "days";
+        };
+        ShopListingResponseDto: {
+            id: number;
+            userCharacterId: number;
+            itemId: number;
+            coinCost: number;
+            sortOrder: number;
+        };
+        CreateShopListingDto: {
+            itemId: number;
+            coinCost: number;
+            sortOrder?: number;
+        };
+        UpdateShopListingDto: {
+            itemId: number;
+            coinCost: number;
+            sortOrder: number;
+        };
+        InventoryItemResponseDto: {
+            id: number;
+            userCharacterId: number;
+            itemId: number;
+            /** @enum {string} */
+            source: "shop" | "drop" | "achievement" | "gift";
+            acquiredAt: string;
+            usedAt?: string | null;
+        };
+        CreateInventoryItemDto: {
+            itemId: number;
+            /** @enum {string} */
+            source?: "shop" | "drop" | "achievement" | "gift";
+        };
+        UpdateInventoryItemDto: {
+            itemId: number;
+            /** @enum {string} */
+            source: "shop" | "drop" | "achievement" | "gift";
+            usedAt: string | null;
         };
     };
     responses: never;
@@ -1007,6 +1182,356 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["XpLevelDto"][];
+                };
+            };
+        };
+    };
+    ItemController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"][];
+                };
+            };
+        };
+    };
+    ItemController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateItemDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"];
+                };
+            };
+        };
+    };
+    ItemController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"];
+                };
+            };
+        };
+    };
+    ItemController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateItemDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"];
+                };
+            };
+        };
+    };
+    ItemController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemResponseDto"];
+                };
+            };
+        };
+    };
+    ShopListingController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopListingResponseDto"][];
+                };
+            };
+        };
+    };
+    ShopListingController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateShopListingDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopListingResponseDto"];
+                };
+            };
+        };
+    };
+    ShopListingController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopListingResponseDto"];
+                };
+            };
+        };
+    };
+    ShopListingController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateShopListingDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopListingResponseDto"];
+                };
+            };
+        };
+    };
+    ShopListingController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopListingResponseDto"];
+                };
+            };
+        };
+    };
+    ShopListingController_buy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryItemResponseDto"];
+                };
+            };
+        };
+    };
+    InventoryItemController_findAll: {
+        parameters: {
+            query?: {
+                usedAt?: "null" | "not_null";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryItemResponseDto"][];
+                };
+            };
+        };
+    };
+    InventoryItemController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateInventoryItemDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryItemResponseDto"];
+                };
+            };
+        };
+    };
+    InventoryItemController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryItemResponseDto"];
+                };
+            };
+        };
+    };
+    InventoryItemController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateInventoryItemDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryItemResponseDto"];
+                };
+            };
+        };
+    };
+    InventoryItemController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryItemResponseDto"];
                 };
             };
         };

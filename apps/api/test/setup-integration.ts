@@ -6,8 +6,8 @@ import { TransactionRollbackError } from 'drizzle-orm';
 import cookieParser from 'cookie-parser';
 import supertest from 'supertest';
 import { eq } from 'drizzle-orm';
-import { AppModule } from '../app.module';
-import { SessionService } from '../auth/session.service';
+import { AppModule } from '../src/app.module';
+import { SessionService } from '../src/auth/session.service';
 
 export type TestAgent = supertest.Agent;
 

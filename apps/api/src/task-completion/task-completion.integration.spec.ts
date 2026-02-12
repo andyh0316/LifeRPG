@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { taskCompletions, userCharacter, type Db } from '@life-rpg/database';
 import { eq } from 'drizzle-orm';
-import { TestAgent, createIntegrationApp } from '../test/setup-integration';
+import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
 import { CreateTaskDto } from '../task/dto/create-task.dto';
 import { TaskResponseDto } from '../task/dto/task-response.dto';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';

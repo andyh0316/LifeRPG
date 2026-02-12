@@ -70,8 +70,9 @@ export const userCharacterRelations = relations(
     }),
     tasks: many(tasks),
     taskCompletions: many(taskCompletions),
-    rewards: many(rewards),
-    rewardRedemptions: many(rewardRedemptions),
+    items: many(items),
+    shopListings: many(shopListings),
+    inventoryItems: many(inventoryItems),
   }),
 );
 
@@ -214,10 +215,24 @@ export const taskCompletionsRelations = relations(
 );
 
 // ============================================================================
-// Rewards
+// Items
 // ============================================================================
 
-export const rewards = pgTable('rewards', {
+export const itemAmountUnitEnum = pgEnum('item_amount_unit', [
+  'count',
+  'minutes',
+  'hours',
+  'days',
+]);
+
+export const itemSourceEnum = pgEnum('item_source', [
+  'shop',
+  'drop',
+  'achievement',
+  'gift',
+]);
+
+export const items = pgTable('items', {
   id: serial('id').primaryKey(),
   ...auditColumns,
   userCharacterId: integer('user_character_id')
@@ -225,43 +240,78 @@ export const rewards = pgTable('rewards', {
     .references(() => userCharacter.id),
   name: varchar('name', { length: 255 }).notNull(),
   description: text('description'),
-  coinCost: integer('coin_cost').notNull(),
   icon: varchar('icon', { length: 50 }),
+  amount: integer('amount').notNull().default(1),
+  amountUnit: itemAmountUnitEnum('amount_unit').notNull().default('count'),
 });
 
-export const rewardsRelations = relations(rewards, ({ one, many }) => ({
+export const itemsRelations = relations(items, ({ one, many }) => ({
   character: one(userCharacter, {
-    fields: [rewards.userCharacterId],
+    fields: [items.userCharacterId],
     references: [userCharacter.id],
   }),
-  redemptions: many(rewardRedemptions),
+  shopListing: one(shopListings, {
+    fields: [items.id],
+    references: [shopListings.itemId],
+  }),
+  inventoryItems: many(inventoryItems),
 }));
 
-export const rewardRedemptions = pgTable('reward_redemptions', {
+// ============================================================================
+// Shop Listings
+// ============================================================================
+
+export const shopListings = pgTable('shop_listings', {
   id: serial('id').primaryKey(),
   ...auditColumns,
   userCharacterId: integer('user_character_id')
     .notNull()
     .references(() => userCharacter.id),
-  rewardId: integer('reward_id')
+  itemId: integer('item_id')
     .notNull()
-    .references(() => rewards.id),
-  coinsSpent: integer('coins_spent').notNull(),
-  redeemedAt: timestamp('redeemed_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
+    .references(() => items.id),
+  coinCost: integer('coin_cost').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
 });
 
-export const rewardRedemptionsRelations = relations(
-  rewardRedemptions,
-  ({ one }) => ({
-    character: one(userCharacter, {
-      fields: [rewardRedemptions.userCharacterId],
-      references: [userCharacter.id],
-    }),
-    reward: one(rewards, {
-      fields: [rewardRedemptions.rewardId],
-      references: [rewards.id],
-    }),
+export const shopListingsRelations = relations(shopListings, ({ one }) => ({
+  character: one(userCharacter, {
+    fields: [shopListings.userCharacterId],
+    references: [userCharacter.id],
   }),
-);
+  item: one(items, {
+    fields: [shopListings.itemId],
+    references: [items.id],
+  }),
+}));
+
+// ============================================================================
+// Inventory Items
+// ============================================================================
+
+export const inventoryItems = pgTable('inventory_items', {
+  id: serial('id').primaryKey(),
+  ...auditColumns,
+  userCharacterId: integer('user_character_id')
+    .notNull()
+    .references(() => userCharacter.id),
+  itemId: integer('item_id')
+    .notNull()
+    .references(() => items.id),
+  source: itemSourceEnum('source').notNull().default('shop'),
+  acquiredAt: timestamp('acquired_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+});
+
+export const inventoryItemsRelations = relations(inventoryItems, ({ one }) => ({
+  character: one(userCharacter, {
+    fields: [inventoryItems.userCharacterId],
+    references: [userCharacter.id],
+  }),
+  item: one(items, {
+    fields: [inventoryItems.itemId],
+    references: [items.id],
+  }),
+}));

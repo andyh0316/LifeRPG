@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
 import StarIcon from '@mui/icons-material/Star';
-import CoinIcon from '../../../components/icons/CoinIcon';
+import CoinDisplay from '../../../components/CoinDisplay';
 import LevelBar from '../../../components/LevelBar';
 import CompletionProgressBar from './CompletionProgressBar';
 import type { Block } from './types';
@@ -81,9 +81,6 @@ export default function CompletionDialog({
           >
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.75,
                 px: 2,
                 py: 1,
                 borderRadius: GAME_RADII.card,
@@ -91,16 +88,7 @@ export default function CompletionDialog({
                 border: `1.5px solid ${GAME_COLORS.coinGold}30`,
               }}
             >
-              <CoinIcon sx={{ fontSize: '1.3rem' }} />
-              <Typography
-                sx={{
-                  fontWeight: 800,
-                  fontSize: '1.2rem',
-                  color: GAME_COLORS.coinGold,
-                }}
-              >
-                {confirmBlock.coinReward.toLocaleString()} G
-              </Typography>
+              <CoinDisplay amount={confirmBlock.coinReward} size="lg" />
             </Box>
             <Box
               sx={{
@@ -132,25 +120,8 @@ export default function CompletionDialog({
       )}
 
       {completed && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 0.75,
-            mb: 2,
-          }}
-        >
-          <CoinIcon sx={{ fontSize: '1.5rem' }} />
-          <Typography
-            sx={{
-              fontWeight: 800,
-              fontSize: '1.5rem',
-              color: GAME_COLORS.coinGold,
-            }}
-          >
-            +{animatedCoins.toLocaleString()} G
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <CoinDisplay amount={animatedCoins} size="lg" prefix="+" />
         </Box>
       )}
 
