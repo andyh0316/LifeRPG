@@ -667,6 +667,496 @@
           "UserCharacter"
         ]
       }
+    },
+    "/items": {
+      "get": {
+        "operationId": "ItemController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ItemResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Item"
+        ]
+      },
+      "post": {
+        "operationId": "ItemController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Item"
+        ]
+      }
+    },
+    "/items/{id}": {
+      "get": {
+        "operationId": "ItemController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Item"
+        ]
+      },
+      "put": {
+        "operationId": "ItemController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Item"
+        ]
+      },
+      "delete": {
+        "operationId": "ItemController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Item"
+        ]
+      }
+    },
+    "/shop-listings": {
+      "get": {
+        "operationId": "ShopListingController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopListingResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      },
+      "post": {
+        "operationId": "ShopListingController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShopListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      }
+    },
+    "/shop-listings/{id}": {
+      "get": {
+        "operationId": "ShopListingController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      },
+      "put": {
+        "operationId": "ShopListingController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShopListingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      },
+      "delete": {
+        "operationId": "ShopListingController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShopListingResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      }
+    },
+    "/shop-listings/{id}/buy": {
+      "post": {
+        "operationId": "ShopListingController_buy",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ShopListing"
+        ]
+      }
+    },
+    "/inventory-items": {
+      "get": {
+        "operationId": "InventoryItemController_findAll",
+        "parameters": [
+          {
+            "name": "usedAt",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "null",
+                "not_null"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InventoryItemResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      },
+      "post": {
+        "operationId": "InventoryItemController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInventoryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      }
+    },
+    "/inventory-items/{id}": {
+      "get": {
+        "operationId": "InventoryItemController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      },
+      "put": {
+        "operationId": "InventoryItemController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInventoryItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      },
+      "delete": {
+        "operationId": "InventoryItemController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItemResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "InventoryItem"
+        ]
+      }
     }
   },
   "info": {
@@ -1303,6 +1793,258 @@
           "level",
           "xpToNext",
           "cumulativeXp"
+        ]
+      },
+      "ItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userCharacterId": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "count",
+              "minutes"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "userCharacterId",
+          "name",
+          "amount",
+          "amountUnit"
+        ]
+      },
+      "CreateItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "count",
+              "minutes",
+              "hours",
+              "days"
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "number"
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "count",
+              "minutes",
+              "hours",
+              "days"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "desc",
+          "icon",
+          "amount",
+          "amountUnit"
+        ]
+      },
+      "ShopListingResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userCharacterId": {
+            "type": "number"
+          },
+          "itemId": {
+            "type": "number"
+          },
+          "coinCost": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "userCharacterId",
+          "itemId",
+          "coinCost",
+          "sortOrder"
+        ]
+      },
+      "CreateShopListingDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "coinCost": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "itemId",
+          "coinCost"
+        ]
+      },
+      "UpdateShopListingDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "coinCost": {
+            "type": "number"
+          },
+          "sortOrder": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "itemId",
+          "coinCost",
+          "sortOrder"
+        ]
+      },
+      "InventoryItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userCharacterId": {
+            "type": "number"
+          },
+          "itemId": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "shop",
+              "drop",
+              "achievement",
+              "gift"
+            ]
+          },
+          "acquiredAt": {
+            "type": "string"
+          },
+          "usedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "userCharacterId",
+          "itemId",
+          "source",
+          "acquiredAt"
+        ]
+      },
+      "CreateInventoryItemDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "shop",
+              "drop",
+              "achievement",
+              "gift"
+            ]
+          }
+        },
+        "required": [
+          "itemId"
+        ]
+      },
+      "UpdateInventoryItemDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "shop",
+              "drop",
+              "achievement",
+              "gift"
+            ]
+          },
+          "usedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "itemId",
+          "source",
+          "usedAt"
         ]
       }
     }

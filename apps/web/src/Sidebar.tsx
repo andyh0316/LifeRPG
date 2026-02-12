@@ -1,13 +1,16 @@
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import HomeIcon from '@mui/icons-material/Home';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import BackpackIcon from '@mui/icons-material/Backpack';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Link, useLocation } from 'react-router-dom';
 import { api } from '@life-rpg/api-client';
@@ -25,7 +28,10 @@ interface SidebarProps {
 const NAV_ITEMS = [
   { label: 'Home', icon: <HomeIcon />, to: '/' },
   { label: 'Quests', icon: <TaskAltIcon />, to: '/tasks' },
-  { label: 'Rewards', icon: <EmojiEventsIcon />, to: '/rewards' },
+  { label: 'Inventory', icon: <BackpackIcon />, to: '/inventory' },
+  { label: 'Shop', icon: <StorefrontIcon />, to: '/shop' },
+  'divider' as const,
+  { label: 'Items', icon: <Inventory2Icon />, to: '/items' },
 ];
 
 export default function Sidebar({ onLogout }: SidebarProps) {
@@ -75,7 +81,15 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       <ProfileCard />
 
       <List sx={{ px: 1, mt: 1 }}>
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item, i) => {
+          if (item === 'divider') {
+            return (
+              <Divider
+                key={`divider-${i}`}
+                sx={{ my: 1, borderColor: GAME_COLORS.sidebarActive }}
+              />
+            );
+          }
           const active = isActive(item.to);
           return (
             <ListItemButton
