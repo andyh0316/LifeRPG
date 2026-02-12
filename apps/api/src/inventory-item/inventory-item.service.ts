@@ -24,9 +24,13 @@ export class InventoryItemService {
     };
   }
 
-  async findAll(userCharacterId: number): Promise<InventoryItemResponseDto[]> {
+  async findAll(
+    userCharacterId: number,
+    options?: { usedAt?: 'null' | 'not_null' },
+  ): Promise<InventoryItemResponseDto[]> {
     const rows = await this.inventoryItemRepository.findAll({
       userCharacterId,
+      usedAt: options?.usedAt,
     });
     return rows.map((row) => this.toDto(row));
   }

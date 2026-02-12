@@ -9,6 +9,7 @@ export default function Inventory() {
   const { data: inventoryItems = [] } = $api.useQuery(
     'get',
     '/inventory-items',
+    { params: { query: { usedAt: 'null' } } },
   );
   const { data: items = [] } = $api.useQuery('get', '/items');
 

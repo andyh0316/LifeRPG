@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, isNull } from 'drizzle-orm';
 import { inventoryItems } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
@@ -10,8 +10,16 @@ export type InventoryItemInsert = typeof inventoryItems.$inferInsert;
 export class InventoryItemRepository {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  async findAll(options?: { userCharacterId?: number }) {
+  async findAll(options?: {
+    userCharacterId?: number;
+    usedAt?: 'null' | 'not_null';
+  }) {
     const conditions = [isNull(inventoryItems.deletedAt)];
+    if (options?.usedAt === 'null') {
+      conditions.push(isNull(inventoryItems.usedAt));
+    } else if (options?.usedAt === 'not_null') {
+      conditions.push(isNotNull(inventoryItems.usedAt));
+    }
     if (options?.userCharacterId != null) {
       conditions.push(
         eq(inventoryItems.userCharacterId, options.userCharacterId),

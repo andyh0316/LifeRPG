@@ -5,10 +5,11 @@ import {
   Post,
   Put,
   Param,
+  Query,
   Body,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiCreatedResponse, ApiQuery } from '@nestjs/swagger';
 import { InventoryItemService } from './inventory-item.service';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
@@ -21,8 +22,12 @@ export class InventoryItemController {
 
   @Get()
   @ApiOkResponse({ type: [InventoryItemResponseDto] })
-  findAll(@CurrentUser() user: AuthUser) {
-    return this.inventoryItemService.findAll(user.userCharacterId);
+  @ApiQuery({ name: 'usedAt', required: false, enum: ['null', 'not_null'] })
+  findAll(
+    @CurrentUser() user: AuthUser,
+    @Query('usedAt') usedAt?: 'null' | 'not_null',
+  ) {
+    return this.inventoryItemService.findAll(user.userCharacterId, { usedAt });
   }
 
   @Get(':id')

@@ -1427,7 +1427,9 @@ export interface operations {
     };
     InventoryItemController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                usedAt?: "null" | "not_null";
+            };
             header?: never;
             path?: never;
             cookie?: never;

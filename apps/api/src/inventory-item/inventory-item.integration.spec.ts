@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import type { Db } from '@life-rpg/database';
+import { items, inventoryItems } from '@life-rpg/database';
 import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { UpdateInventoryItemDto } from './dto/update-inventory-item.dto';
@@ -41,6 +42,27 @@ describe('InventoryItem Integration', () => {
     return res.body;
   }
 
+  async function seedInventory(entries: { name: string; usedAt?: Date }[]) {
+    const ids: number[] = [];
+    for (const entry of entries) {
+      const [item] = await db
+        .insert(items)
+        .values({ userCharacterId: currentUserCharacterId, name: entry.name })
+        .returning();
+      const [inv] = await db
+        .insert(inventoryItems)
+        .values({
+          userCharacterId: currentUserCharacterId,
+          itemId: item.id,
+          source: 'shop',
+          usedAt: entry.usedAt ?? null,
+        })
+        .returning();
+      ids.push(inv.itemId);
+    }
+    return ids;
+  }
+
   it('POST /inventory-items - creates and returns with defaults', async () => {
     // setup
     const item = await createItem();
@@ -61,27 +83,20 @@ describe('InventoryItem Integration', () => {
     expect(inv.usedAt).toBeNull();
   });
 
-  it('GET /inventory-items - returns all for current character', async () => {
+  it('GET /inventory-items?usedAt=null - returns only unused items', async () => {
     // setup
-    const itemA = await createItem('Item A');
-    const itemB = await createItem('Item B');
-    await request
-      .post('/inventory-items')
-      .send({ itemId: itemA.id })
-      .expect(201);
-    await request
-      .post('/inventory-items')
-      .send({ itemId: itemB.id })
-      .expect(201);
+    const ids = await seedInventory([
+      { name: 'Item A' },
+      { name: 'Item B', usedAt: new Date() },
+    ]);
 
     // act
-    const res = await request.get('/inventory-items').expect(200);
+    const res = await request.get('/inventory-items?usedAt=null').expect(200);
 
     // assert
-    const items: InventoryItemResponseDto[] = res.body;
-    expect(items).toHaveLength(2);
-    expect(items[0].itemId).toBe(itemA.id);
-    expect(items[1].itemId).toBe(itemB.id);
+    const result: InventoryItemResponseDto[] = res.body;
+    expect(result).toHaveLength(1);
+    expect(result[0].itemId).toBe(ids[0]);
   });
 
   it('PUT /inventory-items/:id - updates fields including usedAt', async () => {

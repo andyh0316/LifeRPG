@@ -999,7 +999,20 @@
     "/inventory-items": {
       "get": {
         "operationId": "InventoryItemController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "usedAt",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "null",
+                "not_null"
+              ],
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
