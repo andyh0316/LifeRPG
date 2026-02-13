@@ -24,7 +24,7 @@ export default function GoalSection({ register, control }: GoalSectionProps) {
         render={({ field }) => (
           <TextField
             select
-            label="Goal Period"
+            label="Goal Period (optional)"
             size="small"
             sx={{ width: 160 }}
             value={field.value ?? ''}

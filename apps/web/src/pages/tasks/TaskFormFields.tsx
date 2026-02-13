@@ -46,7 +46,12 @@ export default function TaskFormFields({
           fullWidth
         />
       </Stack>
-      <TextField label="Description" multiline rows={3} {...register('desc')} />
+      <TextField
+        label="Description (optional)"
+        multiline
+        rows={3}
+        {...register('desc')}
+      />
     </>
   );
 }

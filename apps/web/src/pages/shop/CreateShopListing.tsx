@@ -135,6 +135,16 @@ export default function CreateShopListing() {
           p: 2.5,
         }}
       >
+        <Stack direction="row" spacing={2}>
+          <TextField
+            label="Coin Cost"
+            type="number"
+            {...register('coinCost', { valueAsNumber: true, min: 0 })}
+            slotProps={{ htmlInput: { min: 0 } }}
+            sx={{ width: 160 }}
+          />
+        </Stack>
+
         <Controller
           name="linkExisting"
           control={control}
@@ -221,13 +231,6 @@ export default function CreateShopListing() {
               />
             </Stack>
 
-            <TextField
-              label="Description"
-              multiline
-              rows={3}
-              {...register('desc')}
-            />
-
             <Stack direction="row" spacing={2}>
               <TextField
                 label="Amount"
@@ -255,24 +258,15 @@ export default function CreateShopListing() {
                 )}
               />
             </Stack>
+
+            <TextField
+              label="Description (optional)"
+              multiline
+              rows={3}
+              {...register('desc')}
+            />
           </>
         )}
-
-        <Stack direction="row" spacing={2}>
-          <TextField
-            label="Coin Cost"
-            type="number"
-            {...register('coinCost', { valueAsNumber: true, min: 0 })}
-            slotProps={{ htmlInput: { min: 0 } }}
-            sx={{ width: 160 }}
-          />
-          <TextField
-            label="Sort Order"
-            type="number"
-            {...register('sortOrder', { valueAsNumber: true })}
-            sx={{ width: 140 }}
-          />
-        </Stack>
       </Box>
     </Box>
   );

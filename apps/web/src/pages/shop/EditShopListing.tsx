@@ -151,11 +151,15 @@ export default function EditShopListing() {
           p: 2.5,
         }}
       >
-        <Typography
-          sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', mt: -0.5 }}
-        >
-          Item
-        </Typography>
+        <Stack direction="row" spacing={2}>
+          <TextField
+            label="Coin Cost"
+            type="number"
+            {...register('coinCost', { valueAsNumber: true, min: 0 })}
+            slotProps={{ htmlInput: { min: 0 } }}
+            sx={{ width: 160 }}
+          />
+        </Stack>
 
         <Stack direction="row" alignItems="center" spacing={1}>
           <Box
@@ -195,13 +199,6 @@ export default function EditShopListing() {
           />
         </Stack>
 
-        <TextField
-          label="Description"
-          multiline
-          rows={3}
-          {...register('itemDesc')}
-        />
-
         <Stack direction="row" spacing={2}>
           <TextField
             label="Amount"
@@ -230,27 +227,12 @@ export default function EditShopListing() {
           />
         </Stack>
 
-        <Typography
-          sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#888', mt: 1 }}
-        >
-          Listing
-        </Typography>
-
-        <Stack direction="row" spacing={2}>
-          <TextField
-            label="Coin Cost"
-            type="number"
-            {...register('coinCost', { valueAsNumber: true, min: 0 })}
-            slotProps={{ htmlInput: { min: 0 } }}
-            sx={{ width: 160 }}
-          />
-          <TextField
-            label="Sort Order"
-            type="number"
-            {...register('sortOrder', { valueAsNumber: true })}
-            sx={{ width: 140 }}
-          />
-        </Stack>
+        <TextField
+          label="Description (optional)"
+          multiline
+          rows={3}
+          {...register('itemDesc')}
+        />
       </Box>
     </Box>
   );

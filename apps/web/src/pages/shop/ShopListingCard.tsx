@@ -270,13 +270,13 @@ export default function ShopListingCard({
             fontWeight: 700,
             fontSize: '1.1rem',
             color: GAME_COLORS.textPrimary,
-            mb: 1,
+            mb: 0.5,
           }}
         >
           {itemName}
         </Typography>
 
-        {item?.desc && (
+        {item && (
           <Typography
             sx={{
               fontSize: '0.85rem',
@@ -284,25 +284,26 @@ export default function ShopListingCard({
               mb: 1,
             }}
           >
-            {item.desc}
+            {item.amount} {item.amountUnit}
           </Typography>
         )}
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
-          <CoinDisplay amount={coinCost} size="md" />
-        </Box>
-
-        {item && (
+        {item?.desc && (
           <Typography
             sx={{
               fontSize: '0.85rem',
               color: GAME_COLORS.textSecondary,
+              whiteSpace: 'pre-line',
               mb: 3,
             }}
           >
-            {item.amount} {item.amountUnit}
+            {item.desc}
           </Typography>
         )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
+          <CoinDisplay amount={coinCost} size="md" />
+        </Box>
 
         {!canAfford && (
           <Typography sx={{ fontSize: '0.8rem', color: '#e53935', mb: 2 }}>
