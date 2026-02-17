@@ -15,6 +15,7 @@ export interface TaskItemProps {
   goalAmount?: number | null;
   goalPeriod?: string | null;
   goalCompletedAmount?: number | null;
+  currentStreak?: number;
   blocks: Block[];
   userCharacterId: number;
   index?: number;

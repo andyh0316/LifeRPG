@@ -18,5 +18,5 @@ Never apply database migrations (e.g. `drizzle-kit migrate`) unless explicitly a
 
 ## Automated Test
 
-- When applicable, use `// setup`, `// act`, `// assert` comments inside the test body to separate sections.
+- When writing unit/integration tests, structure each test case into stages by SETUP ACT ASSERT when applicable. Each stage will have comment "#region STAGE" with "endregion" at the end.
 - Do not add redundant comments before `it` blocks if the `it` description string is sufficient.

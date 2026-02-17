@@ -5,7 +5,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql, and } from 'drizzle-orm';
 import { tasks, taskCompletions, taskBlocks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import { UserCharacterService } from '../user-character/user-character.service';
@@ -67,7 +67,9 @@ export class TaskCompletionService {
       }
 
       const [task] = await tx
-        .select({ userCharacterId: tasks.userCharacterId })
+        .select({
+          userCharacterId: tasks.userCharacterId,
+        })
         .from(tasks)
         .where(eq(tasks.id, block.taskId));
 

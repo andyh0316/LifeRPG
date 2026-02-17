@@ -35,6 +35,9 @@ export class TaskResponseDto {
   @ApiPropertyOptional({ type: Number, nullable: true })
   goalCompletedAmount!: number | null;
 
+  @ApiProperty({ type: Number })
+  currentStreak!: number;
+
   @ApiProperty({ type: [TaskBlockResponseDto] })
   blocks!: TaskBlockResponseDto[];
 }
