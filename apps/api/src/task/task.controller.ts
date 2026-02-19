@@ -12,7 +12,7 @@ import {
   Body,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiCreatedResponse, ApiQuery } from '@nestjs/swagger';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -29,6 +29,7 @@ export class TaskController {
 
   @Get()
   @ApiOkResponse({ type: [TaskResponseDto] })
+  @ApiQuery({ name: 'referenceTime', required: false })
   findAll(
     @CurrentUser() user: AuthUser,
     @ClientTimezone() timezone: string,
