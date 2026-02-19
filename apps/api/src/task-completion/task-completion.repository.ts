@@ -31,6 +31,11 @@ export class TaskCompletionRepository {
             WHEN 'week-long' THEN date_trunc('week', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
             WHEN 'month-long' THEN date_trunc('month', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
           END`,
+          sql`${taskCompletions.completedAt} < CASE ${tasks.goalPeriod}
+            WHEN 'day-long' THEN date_trunc('day', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} + interval '1 day'
+            WHEN 'week-long' THEN date_trunc('week', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} + interval '1 week'
+            WHEN 'month-long' THEN date_trunc('month', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} + interval '1 month'
+          END`,
         ),
       )
       .groupBy(taskCompletions.taskId);

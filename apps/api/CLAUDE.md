@@ -6,3 +6,4 @@
 ## Testing
 
 - In integration tests, type request bodies with the corresponding DTO (e.g., `.send({ ... } as CreateTaskDto)`) and type response bodies with the response DTO (e.g., `const body: TaskResponseDto = res.body`).
+- When applicable, structure and comment each test case into stages by SETUP ACT ASSERT. The comment format will be comment "#region \***\*\*\*\*\*** STAGE \***\*\*\*\*\***" with "endregion" at the end.

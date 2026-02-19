@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { taskCompletions, type Db } from '@life-rpg/database';
+import { taskCompletions, tasks, type Db } from '@life-rpg/database';
 import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
 import { TaskCompletionRepository } from '../task-completion/task-completion.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -466,6 +466,86 @@ describe('Task Integration', () => {
     expect(fetched.goalCompletedAmount).toBe(45);
     expect(fetched.goalAmount).toBe(100);
   });
+
+  // prettier-ignore
+  it('goalCompletedAmount - day-long goal reflects only the referenced day', async () => {
+    // setup
+    const [task] = await db.insert(tasks).values({ userCharacterId: currentUserCharacterId, name: 'placeholder', amountUnit: 'count', goalAmount: 0, goalPeriod: 'day-long' }).returning();
+
+    // testing: utc only first
+    await db.insert(taskCompletions).values([
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 1, completedAt: new Date('2026-01-01T00:00:00Z') },
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 1, completedAt: new Date('2026-01-02T00:00:00Z') },
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 1, completedAt: new Date('2026-01-02T00:00:00Z') },
+    ]);
+
+    // act + assert: each referenceTime shows only that day's completions
+    {
+      const res = await request.get('/tasks').query({ referenceTime: '2026-01-01T00:00:00Z' }).expect(200);
+      expect((res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.goalCompletedAmount).toBe(1);
+    }
+    {
+      const res = await request.get('/tasks').query({ referenceTime: '2026-01-02T00:00:00Z' }).expect(200);
+      expect((res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.goalCompletedAmount).toBe(2);
+    }
+    // none match
+    {
+      const res = await request.get('/tasks').query({ referenceTime: '2026-01-03T00:00:00Z' }).expect(200);
+      expect((res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.goalCompletedAmount).toBeNull();
+    }
+  });
+
+  // it('goalCompletedAmount - week-long goal reflects only the referenced week (Mon–Sun)', async () => {
+  //   // setup
+  //   const createRes = await request
+  //     .post('/tasks')
+  //     .send({
+  //       name: 'Weekly Exercise',
+  //       amountUnit: 'count',
+  //       goalAmount: 0,
+  //       goalPeriod: 'week-long',
+  //       blocks: [{ amount: 0, xpReward: 0, coinReward: 0 }],
+  //     } as CreateTaskDto)
+  //     .expect(201);
+
+  //   const task: TaskResponseDto = createRes.body;
+
+  //   // Week of 2026-01-05 (Mon) – 2026-01-11 (Sun)
+  //   // Week of 2026-01-12 (Mon) – 2026-01-18 (Sun)
+  //   // prettier-ignore
+  //   await db.insert(taskCompletions).values([
+  //     // week 1: Jan 5–11, total = 4
+  //     { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 1, completedAt: new Date('2026-01-05T10:00:00Z') },
+  //     { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 3, completedAt: new Date('2026-01-09T15:00:00Z') },
+  //     // week 2: Jan 12–18, total = 7
+  //     { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 2, completedAt: new Date('2026-01-12T08:00:00Z') },
+  //     { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-16T20:00:00Z') },
+  //   ]);
+
+  //   // act + assert
+  //   // prettier-ignore
+  //   {
+  //     // any day in week 1 should show 4
+  //     {
+  //       const res = await request.get('/tasks').query({ referenceTime: '2026-01-05T12:00:00Z' }).expect(200);
+  //       expect((res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.goalCompletedAmount).toBe(4);
+  //     }
+  //     {
+  //       const res = await request.get('/tasks').query({ referenceTime: '2026-01-11T23:00:00Z' }).expect(200);
+  //       expect((res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.goalCompletedAmount).toBe(4);
+  //     }
+  //     // any day in week 2 should show 7
+  //     {
+  //       const res = await request.get('/tasks').query({ referenceTime: '2026-01-14T12:00:00Z' }).expect(200);
+  //       expect((res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.goalCompletedAmount).toBe(7);
+  //     }
+  //     // week with no completions
+  //     {
+  //       const res = await request.get('/tasks').query({ referenceTime: '2026-01-19T12:00:00Z' }).expect(200);
+  //       expect((res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.goalCompletedAmount).toBeNull();
+  //     }
+  //   }
+  // });
 
   it('goalCompletedAmount - uses client timezone for period boundaries', async () => {
     // A completion at 2026-05-15 03:00 UTC = 2026-05-14 23:00 America/New_York.

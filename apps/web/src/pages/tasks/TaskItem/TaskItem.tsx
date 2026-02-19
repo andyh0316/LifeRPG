@@ -39,6 +39,7 @@ export default function TaskItem({
   blocks,
   userCharacterId,
   index = 0,
+  referenceTime,
 }: TaskItemProps) {
   const {
     attributes,
@@ -117,7 +118,7 @@ export default function TaskItem({
     if (!confirmBlock) return;
     setPreCompletionXp(progress?.daily.current ?? 0);
     completeBlock.mutate({
-      body: { blockId: confirmBlock.id, completedAt: new Date().toISOString() },
+      body: { blockId: confirmBlock.id, completedAt: referenceTime },
     });
   };
 

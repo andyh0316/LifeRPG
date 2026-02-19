@@ -19,4 +19,5 @@ export interface TaskItemProps {
   blocks: Block[];
   userCharacterId: number;
   index?: number;
+  referenceTime: string;
 }
