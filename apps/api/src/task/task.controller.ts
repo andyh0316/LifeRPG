@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Param,
+  Query,
   Body,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -28,8 +29,13 @@ export class TaskController {
 
   @Get()
   @ApiOkResponse({ type: [TaskResponseDto] })
-  findAll(@CurrentUser() user: AuthUser, @ClientTimezone() timezone: string) {
-    return this.taskService.findAll(user.userCharacterId, timezone);
+  findAll(
+    @CurrentUser() user: AuthUser,
+    @ClientTimezone() timezone: string,
+    @Query('referenceTime') referenceTime?: string,
+  ) {
+    const now = referenceTime ? new Date(referenceTime) : new Date();
+    return this.taskService.findAll(user.userCharacterId, timezone, now);
   }
 
   @Get('templates')

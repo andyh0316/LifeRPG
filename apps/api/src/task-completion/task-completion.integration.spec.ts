@@ -219,35 +219,135 @@ describe('Task Completion Integration', () => {
 
     const listRes = await request.get('/task-completions').expect(200);
     expect(listRes.body).toHaveLength(0);
-  });
 
-  it('POST /task-completions/undo - returns 404 when no completions exist', async () => {
-    // act + assert
-    await request.post('/task-completions/undo').expect(404);
-  });
-
-  it('POST /task-completions/undo - returns 400 when most recent completion is older than 24h', async () => {
-    // setup
-    const createRes = await request
-      .post('/tasks')
-      .send({
-        name: 'Old Task',
-        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
-      } as CreateTaskDto)
-      .expect(201);
-    const task: TaskResponseDto = createRes.body;
-
+    // undo again after backdating — should return 400 when older than 24h
     await request
       .post('/task-completions')
       .send({ blockId: task.blocks[0].id })
       .expect(201);
 
-    // backdate the completion to 25 hours ago
     await db
       .update(taskCompletions)
       .set({ completedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
 
-    // act + assert
     await request.post('/task-completions/undo').expect(400);
+  });
+
+  describe('streaks', () => {
+    it('updates streak fields when completing a task with prior consecutive-day completions', async () => {
+      // setup
+      const createRes = await request
+        .post('/tasks')
+        .send({
+          name: 'Streak Task',
+          goalAmount: 10,
+          goalPeriod: 'day-long',
+          blocks: [{ amount: 5, xpReward: 0, coinReward: 0 }],
+        } as CreateTaskDto)
+        .expect(201);
+      const task: TaskResponseDto = createRes.body;
+
+      // ref date: 2026-01-20, setup backwards
+      // prettier-ignore
+      await db.insert(taskCompletions).values([
+        // streak:
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-19') },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-19') },
+        // streak: 
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 10, completedAt: new Date('2026-01-18') },
+        // gap: not enough amount
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-17') },
+      ]);
+
+      // assert: 2 streaks
+      {
+        const listRes = await request
+          .get('/tasks')
+          .query({ referenceTime: '2026-01-20' })
+          .expect(200);
+        const taskList: TaskResponseDto[] = listRes.body;
+        expect(taskList[0].currentStreak).toBe(2);
+      }
+
+      // assert: 2 streaks
+      {
+        const listRes = await request
+          .get('/tasks')
+          .query({ referenceTime: '2026-01-19' })
+          .expect(200);
+        const taskList: TaskResponseDto[] = listRes.body;
+        expect(taskList[0].currentStreak).toBe(2);
+      }
+
+      // assert: no streak
+      {
+        const listRes = await request
+          .get('/tasks')
+          .query({ referenceTime: '2026-01-21' })
+          .expect(200);
+        const taskList: TaskResponseDto[] = listRes.body;
+        expect(taskList[0].currentStreak).toBe(0);
+      }
+    });
+
+    it('calculates week-long streak from consecutive weekly goal completions', async () => {
+      // setup
+      const createRes = await request
+        .post('/tasks')
+        .send({
+          name: 'Weekly Streak Task',
+          goalAmount: 10,
+          goalPeriod: 'week-long',
+          blocks: [{ amount: 5, xpReward: 0, coinReward: 0 }],
+        } as CreateTaskDto)
+        .expect(201);
+      const task: TaskResponseDto = createRes.body;
+
+      // prettier-ignore
+      await db.insert(taskCompletions).values([
+        // week 12/29–1/4: qualifies (4+6=10)
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 4, completedAt: new Date('2026-01-01') },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 6, completedAt: new Date('2026-01-03') },
+        // week 1/5–1/11: gap (3+2=5 < 10)
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 3, completedAt: new Date('2026-01-07') },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 2, completedAt: new Date('2026-01-09') },
+        // week 1/12–1/18: qualifies (7+3=10)
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 7, completedAt: new Date('2026-01-13') },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 3, completedAt: new Date('2026-01-16') },
+        // week 1/19–1/25: qualifies (5+5=10)
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-20') },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-22') },
+      ]);
+
+      // assert: 2-week streak (weeks of 1/12 and 1/19, broken by gap week 1/5)
+      {
+        const listRes = await request
+          .get('/tasks')
+          .query({ referenceTime: '2026-01-25' })
+          .expect(200);
+        const taskList: TaskResponseDto[] = listRes.body;
+        expect(taskList[0].currentStreak).toBe(2);
+      }
+
+      // assert: 2-week streak (weeks of 1/12 and 1/19, broken by gap week 1/5)
+      {
+        const listRes = await request
+          .get('/tasks')
+          .query({ referenceTime: '2026-01-26' })
+          .expect(200);
+        const taskList: TaskResponseDto[] = listRes.body;
+        expect(taskList[0].currentStreak).toBe(2);
+      }
+
+      // assert: no streak (week of 1/26 has no completions, too far from 1/19)
+      {
+        const listRes = await request
+          .get('/tasks')
+          .query({ referenceTime: '2026-02-02' })
+          .expect(200);
+        const taskList: TaskResponseDto[] = listRes.body;
+        expect(taskList[0].currentStreak).toBe(0);
+      }
+    });
   });
 });

@@ -35,6 +35,7 @@ export default function TaskItem({
   goalAmount,
   goalPeriod,
   goalCompletedAmount,
+  currentStreak,
   blocks,
   userCharacterId,
   index = 0,
@@ -212,6 +213,14 @@ export default function TaskItem({
             >
               {goalCompletedAmount ?? 0} / {goalAmount} {amountUnit}{' '}
               {PERIOD_LABEL[goalPeriod]}
+              {currentStreak != null && currentStreak >= 2 && (
+                <Typography
+                  component="span"
+                  sx={{ fontSize: '0.8rem', color: '#ef6c00', ml: 1 }}
+                >
+                  🔥 {currentStreak}
+                </Typography>
+              )}
             </Typography>
           )}
         </Box>

@@ -103,6 +103,11 @@ export default function ItemCard({
           >
             {name}
           </Typography>
+          <Typography
+            sx={{ fontSize: '0.75rem', color: GAME_COLORS.textSecondary }}
+          >
+            {amountDisplay ?? `1 ${amountUnit}`}
+          </Typography>
           {desc && (
             <Typography
               sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
@@ -110,11 +115,6 @@ export default function ItemCard({
               {desc}
             </Typography>
           )}
-          <Typography
-            sx={{ fontSize: '0.75rem', color: GAME_COLORS.textSecondary }}
-          >
-            {amountDisplay ?? `1 ${amountUnit}`}
-          </Typography>
         </Box>
 
         <IconButton

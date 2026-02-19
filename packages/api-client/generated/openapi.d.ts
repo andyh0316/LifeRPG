@@ -454,6 +454,7 @@ export interface components {
             /** @enum {string|null} */
             goalPeriod?: "day-long" | "week-long" | "month-long" | null;
             goalCompletedAmount?: number | null;
+            currentStreak: number;
             blocks: components["schemas"]["TaskBlockResponseDto"][];
         };
         CreateTaskBlockDto: {
@@ -835,7 +836,9 @@ export interface operations {
     };
     TaskController_findAll: {
         parameters: {
-            query?: never;
+            query: {
+                referenceTime: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
