@@ -116,7 +116,9 @@ export default function TaskItem({
   const handleConfirm = () => {
     if (!confirmBlock) return;
     setPreCompletionXp(progress?.daily.current ?? 0);
-    completeBlock.mutate({ body: { blockId: confirmBlock.id } });
+    completeBlock.mutate({
+      body: { blockId: confirmBlock.id, completedAt: new Date().toISOString() },
+    });
   };
 
   const handleCloseDialog = () => {

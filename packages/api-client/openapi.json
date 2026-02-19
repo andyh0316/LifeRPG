@@ -1579,10 +1579,16 @@
         "properties": {
           "blockId": {
             "type": "number"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "Client-local completion timestamp (ISO 8601)",
+            "example": "2026-02-18T10:00:00+08:00"
           }
         },
         "required": [
-          "blockId"
+          "blockId",
+          "completedAt"
         ]
       },
       "WeeklyTrackerTaskDto": {

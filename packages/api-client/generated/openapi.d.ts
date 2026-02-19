@@ -518,6 +518,11 @@ export interface components {
         };
         CompleteTaskDto: {
             blockId: number;
+            /**
+             * @description Client-local completion timestamp (ISO 8601)
+             * @example 2026-02-18T10:00:00+08:00
+             */
+            completedAt: string;
         };
         WeeklyTrackerTaskDto: {
             id: number;

@@ -49,11 +49,12 @@ describe('Task Completion Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;
+    const completedAt = '2026-02-18T10:00:00.000Z';
 
     // act
     const res = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({ blockId: task.blocks[0].id, completedAt })
       .expect(201);
 
     // assert
@@ -63,7 +64,7 @@ describe('Task Completion Integration', () => {
     expect(completion.userCharacterId).toBe(currentUserCharacterId);
     expect(completion.xpEarned).toBe(15);
     expect(completion.coinsEarned).toBe(10);
-    expect(completion.completedAt).toBeDefined();
+    expect(completion.completedAt).toBe(completedAt);
   });
 
   it('POST /task-completions - each block returns its own rewards', async () => {
@@ -84,11 +85,17 @@ describe('Task Completion Integration', () => {
     // act
     const res1 = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: '2026-02-18T10:00:00.000Z',
+      })
       .expect(201);
     const res2 = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[1].id })
+      .send({
+        blockId: task.blocks[1].id,
+        completedAt: '2026-02-18T10:05:00.000Z',
+      })
       .expect(201);
 
     // assert
@@ -163,11 +170,17 @@ describe('Task Completion Integration', () => {
     const task: TaskResponseDto = createRes.body;
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: '2026-02-18T10:00:00.000Z',
+      })
       .expect(201);
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[1].id })
+      .send({
+        blockId: task.blocks[1].id,
+        completedAt: '2026-02-18T10:05:00.000Z',
+      })
       .expect(201);
 
     // act
@@ -198,7 +211,10 @@ describe('Task Completion Integration', () => {
 
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: new Date().toISOString(),
+      })
       .expect(201);
 
     // act
@@ -223,7 +239,10 @@ describe('Task Completion Integration', () => {
     // undo again after backdating — should return 400 when older than 24h
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: new Date().toISOString(),
+      })
       .expect(201);
 
     await db

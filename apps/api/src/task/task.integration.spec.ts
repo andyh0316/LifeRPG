@@ -445,11 +445,17 @@ describe('Task Integration', () => {
     // act — complete both blocks
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: new Date().toISOString(),
+      })
       .expect(201);
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[1].id })
+      .send({
+        blockId: task.blocks[1].id,
+        completedAt: new Date().toISOString(),
+      })
       .expect(201);
 
     const res = await request.get('/tasks').expect(200);

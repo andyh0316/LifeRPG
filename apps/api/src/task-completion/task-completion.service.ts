@@ -50,6 +50,7 @@ export class TaskCompletionService {
   async complete(
     blockId: number,
     userCharacterId: number,
+    completedAt: Date,
   ): Promise<TaskCompletionResponseDto> {
     return this.db.transaction(async (tx) => {
       const [block] = await tx
@@ -86,6 +87,7 @@ export class TaskCompletionService {
           userCharacterId,
           xpEarned: block.xpReward,
           coinsEarned: block.coinReward,
+          completedAt,
         })
         .returning(completionSelect);
 
