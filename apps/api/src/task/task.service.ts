@@ -38,8 +38,8 @@ export class TaskService {
       sortOrder: row.sortOrder,
       amountUnit: row.amountUnit,
       goalAmount: row.goalAmount ?? null,
-      goalPeriod: row.goalPeriod ?? null,
-      goalCompletedAmount: goalCompletedAmount ?? null,
+      goalPeriod: row.goalPeriod ?? 'day-long',
+      goalCompletedAmount: goalCompletedAmount ?? 0,
       currentStreak,
       blocks: blockRows.map(
         (o): TaskBlockResponseDto => ({
@@ -188,12 +188,10 @@ export class TaskService {
     timezone: string,
     forDate: string,
   ): Promise<Map<number, number>> {
-    const taskIdsWithGoals = rows
-      .filter((r) => r.goalPeriod != null)
-      .map((r) => r.id);
+    const taskIds = rows.map((r) => r.id);
 
     return this.taskCompletionRepository.sumAmountsByTaskIds(
-      taskIdsWithGoals,
+      taskIds,
       timezone,
       forDate,
     );

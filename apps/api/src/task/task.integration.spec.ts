@@ -79,7 +79,7 @@ describe('Task Integration', () => {
     expect(task.amountUnit).toBe('minutes');
     expect(task.goalAmount).toBe(600);
     expect(task.goalPeriod).toBe('week-long');
-    expect(task.goalCompletedAmount).toBeNull();
+    expect(task.goalCompletedAmount).toBe(0);
     expect(task.blocks).toHaveLength(3);
     expect(task.blocks[0]).toMatchObject({
       amount: 15,
@@ -416,7 +416,7 @@ describe('Task Integration', () => {
       const find = (res: { body: unknown }) => (res.body as TaskResponseDto[]).find((t) => t.id === setupTask.id)!;
       {
         const res = await request.get('/tasks').set('x-timezone', 'America/Los_Angeles').query({ forDate: '2026-01-01' }).expect(200);
-        expect(find(res).goalCompletedAmount).toBeNull();
+        expect(find(res).goalCompletedAmount).toBe(0);
       }
       {
         const res = await request.get('/tasks').set('x-timezone', 'America/Los_Angeles').query({ forDate: '2026-01-02' }).expect(200);
@@ -428,7 +428,7 @@ describe('Task Integration', () => {
       }
       {
         const res = await request.get('/tasks').set('x-timezone', 'America/Los_Angeles').query({ forDate: '2026-01-03' }).expect(200);
-        expect(find(res).goalCompletedAmount).toBeNull();
+        expect(find(res).goalCompletedAmount).toBe(0);
       }
     });
 
@@ -450,7 +450,7 @@ describe('Task Integration', () => {
       const find = (res: { body: unknown }) => (res.body as TaskResponseDto[]).find((t) => t.id === setupTask.id)!;
       {
         const res = await request.get('/tasks').set('x-timezone', 'America/Los_Angeles').query({ forDate: '2026-01-04' }).expect(200);
-        expect(find(res).goalCompletedAmount).toBeNull();
+        expect(find(res).goalCompletedAmount).toBe(0);
       }
       {
         const res = await request.get('/tasks').set('x-timezone', 'America/Los_Angeles').query({ forDate: '2026-01-05' }).expect(200);
@@ -462,7 +462,7 @@ describe('Task Integration', () => {
       }
       {
         const res = await request.get('/tasks').set('x-timezone', 'America/Los_Angeles').query({ forDate: '2026-01-12' }).expect(200);
-        expect(find(res).goalCompletedAmount).toBeNull();
+        expect(find(res).goalCompletedAmount).toBe(0);
       }
       // UTC
     });
@@ -512,26 +512,26 @@ describe('Task Integration', () => {
     // prettier-ignore
     it('calculates week-long streak from weekly completions', async () => {
       // weeks start Monday: W1=12/29, W2=1/5, W3=1/12, W4=1/19
-      // goalAmount=3: W1 qualifies (3), W2 gap (2), W3 qualifies (3), W4 qualifies (4)
+      // goalAmount=3: W1 meets (3), W2 meets (3), W3 misses (2), W4 misses (1)
 
       // #region ----- SETUP -----
       const task = await createTestTask(request, { name: 'Weekly Streak Task', goalAmount: 3, goalPeriod: 'week-long', blocks: [{ amount: 1, xpReward: 0, coinReward: 0 }] });
 
       // prettier-ignore
       await db.insert(taskCompletions).values([
-        // W1 (12/29–1/4): 1+1+1=3 → qualifies
+        // W1 (12/29–1/4): 1+1+1=3 → meets goal
         { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2025-12-30'), amount: 1, xpEarned: 0, coinsEarned: 0 },
         { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-01'), amount: 1, xpEarned: 0, coinsEarned: 0 },
         { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-03'), amount: 1, xpEarned: 0, coinsEarned: 0 },
-        // W2 (1/5–1/11): 1+1=2 → gap
+        // W2 (1/5–1/11): 1+1+1=3 → meets goal
         { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-06'), amount: 1, xpEarned: 0, coinsEarned: 0 },
-        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-09'), amount: 1, xpEarned: 0, coinsEarned: 0 },
-        // W3 (1/12–1/18): 2+1=3 → qualifies
-        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-13'), amount: 2, xpEarned: 0, coinsEarned: 0 },
-        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-16'), amount: 1, xpEarned: 0, coinsEarned: 0 },
-        // W4 (1/19–1/25): 2+2=4 → qualifies
-        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-20'), amount: 2, xpEarned: 0, coinsEarned: 0 },
-        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-22'), amount: 2, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-08'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-10'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // W3 (1/12–1/18): 1+1=2 → misses goal
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-13'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-15'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // W4 (1/19–1/25): 1=1 → misses goal
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-20'), amount: 1, xpEarned: 0, coinsEarned: 0 },
       ]);
       // #endregion
 
@@ -540,20 +540,14 @@ describe('Task Integration', () => {
         const res = await request.get('/tasks').query({ forDate }).expect(200);
         return (res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.currentStreak;
       };
-      // W1 (after goal met on 1/3): first qualifying week → streak 1
+      // W1: first qualifying week → streak 1
       expect(await getStreak('2026-01-03')).toBe(1);
-      // W2: gap, but W1 is previous week → streak 1 (grace period)
-      expect(await getStreak('2026-01-08')).toBe(1);
-      // W2 end: gap confirmed, W1 no longer previous → streak 0
-      expect(await getStreak('2026-01-13')).toBe(0);
-      // W3 (after goal met on 1/16): qualifies, W2 broke chain → streak 1
-      expect(await getStreak('2026-01-16')).toBe(1);
-      // W4 (after goal met on 1/22): consecutive with W3 → streak 2
-      expect(await getStreak('2026-01-22')).toBe(2);
-      // W5: W4 is previous week → streak 2 (grace period)
-      expect(await getStreak('2026-01-27')).toBe(2);
-      // W6: W4 no longer previous → streak 0
-      expect(await getStreak('2026-02-03')).toBe(0);
+      // W2: consecutive with W1 → streak 2
+      expect(await getStreak('2026-01-10')).toBe(2);
+      // W3: goal not met, but W2 is previous week → streak 2 (grace period)
+      expect(await getStreak('2026-01-15')).toBe(2);
+      // W4: W3 passed unmet, streak broken → 0
+      expect(await getStreak('2026-01-22')).toBe(0);
       // #endregion
     });
   });

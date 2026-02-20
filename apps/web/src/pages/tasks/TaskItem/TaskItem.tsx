@@ -220,22 +220,21 @@ export default function TaskItem({
               {desc}
             </Typography>
           )}
-          {goalAmount != null && goalPeriod && (
-            <Typography
-              sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
-            >
-              {goalCompletedAmount ?? 0} / {goalAmount} {amountUnit}{' '}
-              {PERIOD_LABEL[goalPeriod]}
-              {currentStreak != null && currentStreak >= 2 && (
-                <Typography
-                  component="span"
-                  sx={{ fontSize: '0.8rem', color: '#ef6c00', ml: 1 }}
-                >
-                  🔥 {currentStreak}
-                </Typography>
-              )}
-            </Typography>
-          )}
+          <Typography
+            sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
+          >
+            {goalCompletedAmount ?? 0}
+            {goalAmount != null && ` / ${goalAmount}`} {amountUnit}{' '}
+            {goalPeriod && PERIOD_LABEL[goalPeriod]}
+            {currentStreak != null && currentStreak >= 2 && (
+              <Typography
+                component="span"
+                sx={{ fontSize: '0.8rem', color: '#ef6c00', ml: 1 }}
+              >
+                🔥 {currentStreak}
+              </Typography>
+            )}
+          </Typography>
         </Box>
 
         <IconButton
