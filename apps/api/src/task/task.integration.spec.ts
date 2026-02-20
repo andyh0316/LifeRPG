@@ -467,4 +467,94 @@ describe('Task Integration', () => {
       // UTC
     });
   });
+
+  describe('GET /tasks - calculate streaks', () => {
+    // prettier-ignore
+    it('calculates day-long streak from daily completions', async () => {
+      // setup:
+      // create a task: goalPeriod = day-long, goalAmount = 2
+      // create completions with all amounts = 1
+
+      // #region ----- SETUP -----
+      const task = await createTestTask(request, { name: 'Daily Streak Task', goalAmount: 2, goalPeriod: 'day-long', blocks: [{ amount: 1, xpReward: 0, coinReward: 0 }] });
+
+      // prettier-ignore
+      await db.insert(taskCompletions).values([
+        // 1/1: 1+1=2 → meets goal
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-01'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-01'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // 1/2: 1+1=2 → meets goal
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-02'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-02'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // 1/3: 1 < 2 → misses goal
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-03'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // 1/4: 1 < 2 → misses goal
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-04'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+      ]);
+      // #endregion
+
+      // #region ----- ASSERT -----
+      const getStreak = async (forDate: string) => {
+        const res = await request.get('/tasks').query({ forDate }).expect(200);
+        return (res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.currentStreak;
+      };
+      // 1/1: goal met (1+1=2), first day → streak 1
+      expect(await getStreak('2026-01-01')).toBe(1);
+      // 1/2: goal met, consecutive → streak 2
+      expect(await getStreak('2026-01-02')).toBe(2);
+      // 1/3: goal not met, but 1/2 is previous day → streak 2 (grace period)
+      expect(await getStreak('2026-01-03')).toBe(2);
+      // 1/4: 1/3 passed unmet, streak broken → 0
+      expect(await getStreak('2026-01-04')).toBe(0);
+      // #endregion
+    });
+
+    // prettier-ignore
+    it('calculates week-long streak from weekly completions', async () => {
+      // weeks start Monday: W1=12/29, W2=1/5, W3=1/12, W4=1/19
+      // goalAmount=3: W1 qualifies (3), W2 gap (2), W3 qualifies (3), W4 qualifies (4)
+
+      // #region ----- SETUP -----
+      const task = await createTestTask(request, { name: 'Weekly Streak Task', goalAmount: 3, goalPeriod: 'week-long', blocks: [{ amount: 1, xpReward: 0, coinReward: 0 }] });
+
+      // prettier-ignore
+      await db.insert(taskCompletions).values([
+        // W1 (12/29–1/4): 1+1+1=3 → qualifies
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2025-12-30'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-01'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-03'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // W2 (1/5–1/11): 1+1=2 → gap
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-06'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-09'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // W3 (1/12–1/18): 2+1=3 → qualifies
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-13'), amount: 2, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-16'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+        // W4 (1/19–1/25): 2+2=4 → qualifies
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-20'), amount: 2, xpEarned: 0, coinsEarned: 0 },
+        { userCharacterId: currentUserCharacterId, taskId: task.id, completedAt: new Date('2026-01-22'), amount: 2, xpEarned: 0, coinsEarned: 0 },
+      ]);
+      // #endregion
+
+      // #region ----- ASSERT -----
+      const getStreak = async (forDate: string) => {
+        const res = await request.get('/tasks').query({ forDate }).expect(200);
+        return (res.body as TaskResponseDto[]).find((t) => t.id === task.id)!.currentStreak;
+      };
+      // W1 (after goal met on 1/3): first qualifying week → streak 1
+      expect(await getStreak('2026-01-03')).toBe(1);
+      // W2: gap, but W1 is previous week → streak 1 (grace period)
+      expect(await getStreak('2026-01-08')).toBe(1);
+      // W2 end: gap confirmed, W1 no longer previous → streak 0
+      expect(await getStreak('2026-01-13')).toBe(0);
+      // W3 (after goal met on 1/16): qualifies, W2 broke chain → streak 1
+      expect(await getStreak('2026-01-16')).toBe(1);
+      // W4 (after goal met on 1/22): consecutive with W3 → streak 2
+      expect(await getStreak('2026-01-22')).toBe(2);
+      // W5: W4 is previous week → streak 2 (grace period)
+      expect(await getStreak('2026-01-27')).toBe(2);
+      // W6: W4 no longer previous → streak 0
+      expect(await getStreak('2026-02-03')).toBe(0);
+      // #endregion
+    });
+  });
 });

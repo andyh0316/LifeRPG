@@ -98,9 +98,10 @@ export class TaskService {
       const dailyAmounts = dailyAmountsMap.get(row.id) ?? [];
       const period = row.goalPeriod ?? 'day-long';
 
-      // Sum daily amounts per period (day/week/month)
+      // Sum daily amounts per period (day/week/month), excluding future data
       const periodTotals = new Map<string, number>();
       for (const d of dailyAmounts) {
+        if (d.day > todayStr) continue;
         const p = this.periodStart(d.day, period);
         periodTotals.set(p, (periodTotals.get(p) ?? 0) + d.total);
       }
