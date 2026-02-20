@@ -39,7 +39,7 @@ export default function TaskItem({
   blocks,
   userCharacterId,
   index = 0,
-  referenceTime,
+  forDate,
 }: TaskItemProps) {
   const {
     attributes,
@@ -117,8 +117,18 @@ export default function TaskItem({
   const handleConfirm = () => {
     if (!confirmBlock) return;
     setPreCompletionXp(progress?.daily.current ?? 0);
+    const [y, m, d] = forDate.split('-').map(Number);
+    const now = new Date();
+    const completedAt = new Date(
+      y,
+      m - 1,
+      d,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+    ).toISOString();
     completeBlock.mutate({
-      body: { blockId: confirmBlock.id, completedAt: referenceTime },
+      body: { blockId: confirmBlock.id, completedAt },
     });
   };
 

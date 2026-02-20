@@ -221,7 +221,7 @@
         "operationId": "TaskController_findAll",
         "parameters": [
           {
-            "name": "referenceTime",
+            "name": "forDate",
             "required": false,
             "in": "query",
             "schema": {

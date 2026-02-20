@@ -18,6 +18,11 @@ export default async function globalSetup() {
 
   const db = createDb(dbUrl);
 
+  const testUser = await seedTestUser(db);
+  await seedTestCharacter(db, testUser.id);
+}
+
+async function seedTestUser(db: ReturnType<typeof createDb>) {
   await db
     .insert(users)
     .values(TEST_USER)
@@ -28,16 +33,21 @@ export default async function globalSetup() {
     .from(users)
     .where(eq(users.email, TEST_USER.email));
 
+  return testUser;
+}
+
+async function seedTestCharacter(
+  db: ReturnType<typeof createDb>,
+  userId: number,
+) {
   const [existingChar] = await db
     .select({ id: userCharacter.id })
     .from(userCharacter)
-    .where(eq(userCharacter.userId, testUser.id))
+    .where(eq(userCharacter.userId, userId))
     .orderBy(asc(userCharacter.id))
     .limit(1);
 
   if (!existingChar) {
-    await db
-      .insert(userCharacter)
-      .values({ userId: testUser.id, name: 'Test Character' });
+    await db.insert(userCharacter).values({ userId, name: 'Test Character' });
   }
 }

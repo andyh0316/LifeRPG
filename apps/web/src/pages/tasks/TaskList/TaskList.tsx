@@ -41,22 +41,22 @@ import {
 import TaskItem from '../TaskItem';
 
 interface TaskListProps {
-  referenceTime: string;
+  forDate: string;
   dayOffset: number;
   onDayOffsetChange: (offset: number) => void;
 }
 
-function formatDateLabel(dayOffset: number, referenceTime: string): string {
+function formatDateLabel(dayOffset: number, forDate: string): string {
   if (dayOffset === 0) return 'Today';
   if (dayOffset === 1) return 'Yesterday';
-  return new Date(referenceTime).toLocaleDateString(undefined, {
+  return new Date(forDate + 'T00:00:00').toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
   });
 }
 
 export default function TaskList({
-  referenceTime,
+  forDate,
   dayOffset,
   onDayOffsetChange,
 }: TaskListProps) {
@@ -65,7 +65,7 @@ export default function TaskList({
   const queryClient = useQueryClient();
   const toast = useToast();
   const { data: tasks = [] } = $api.useQuery('get', '/tasks', {
-    params: { query: { referenceTime } },
+    params: { query: { forDate } },
   });
 
   const [goalsOpen, setGoalsOpen] = useState(false);
@@ -163,7 +163,7 @@ export default function TaskList({
             }}
             onClick={() => !isToday && onDayOffsetChange(0)}
           >
-            {formatDateLabel(dayOffset, referenceTime)}
+            {formatDateLabel(dayOffset, forDate)}
           </Typography>
           <IconButton
             size="small"
@@ -222,7 +222,7 @@ export default function TaskList({
                 key={task.id}
                 {...task}
                 index={index}
-                referenceTime={referenceTime}
+                forDate={forDate}
               />
             ))}
           </List>

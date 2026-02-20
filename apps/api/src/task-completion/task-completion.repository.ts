@@ -10,12 +10,12 @@ export class TaskCompletionRepository {
   async sumAmountsByTaskIds(
     taskIds: number[],
     timezone: string = 'UTC',
-    referenceTime: Date = new Date(),
+    forDate: string = new Date().toLocaleDateString('en-CA'),
   ): Promise<Map<number, number>> {
     if (taskIds.length === 0) return new Map();
 
     const tz = sql`${timezone}`;
-    const ref = sql`${referenceTime.toISOString()}::timestamptz`;
+    const ref = sql`(${forDate}::date)::timestamp AT TIME ZONE ${tz}`;
     const rows = await this.db
       .select({
         taskId: taskCompletions.taskId,
@@ -27,14 +27,14 @@ export class TaskCompletionRepository {
         and(
           inArray(taskCompletions.taskId, taskIds),
           sql`${taskCompletions.completedAt} >= CASE ${tasks.goalPeriod}
-            WHEN 'day-long' THEN date_trunc('day', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
-            WHEN 'week-long' THEN date_trunc('week', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
-            WHEN 'month-long' THEN date_trunc('month', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz}
+            WHEN 'day-long' THEN ${ref}
+            WHEN 'week-long' THEN date_trunc('week', ${forDate}::date)::timestamp AT TIME ZONE ${tz}
+            WHEN 'month-long' THEN date_trunc('month', ${forDate}::date)::timestamp AT TIME ZONE ${tz}
           END`,
           sql`${taskCompletions.completedAt} < CASE ${tasks.goalPeriod}
-            WHEN 'day-long' THEN date_trunc('day', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} + interval '1 day'
-            WHEN 'week-long' THEN date_trunc('week', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} + interval '1 week'
-            WHEN 'month-long' THEN date_trunc('month', ${ref} AT TIME ZONE ${tz}) AT TIME ZONE ${tz} + interval '1 month'
+            WHEN 'day-long' THEN ${ref} + interval '1 day'
+            WHEN 'week-long' THEN date_trunc('week', ${forDate}::date)::timestamp AT TIME ZONE ${tz} + interval '1 week'
+            WHEN 'month-long' THEN date_trunc('month', ${forDate}::date)::timestamp AT TIME ZONE ${tz} + interval '1 month'
           END`,
         ),
       )

@@ -56,7 +56,9 @@ export class TaskService {
   async findAll(
     userCharacterId: number,
     timezone: string = 'UTC',
-    referenceTime: Date = new Date(),
+    forDate: string = new Date().toLocaleDateString('en-CA', {
+      timeZone: timezone,
+    }),
   ): Promise<TaskResponseDto[]> {
     const rows = await this.taskRepository.findAll({
       userCharacterId,
@@ -64,8 +66,8 @@ export class TaskService {
     });
 
     const [goalProgressMap, streakMap] = await Promise.all([
-      this.getGoalProgress(rows, timezone, referenceTime),
-      this.getCurrentStreaks(rows, timezone, referenceTime),
+      this.getGoalProgress(rows, timezone, forDate),
+      this.getCurrentStreaks(rows, timezone, forDate),
     ]);
 
     return rows.map((row) =>
@@ -81,7 +83,7 @@ export class TaskService {
   private async getCurrentStreaks(
     rows: TaskRow[],
     timezone: string,
-    referenceTime: Date,
+    forDate: string,
   ): Promise<Map<number, number>> {
     const taskIds = rows.map((r) => r.id);
     const dailyAmountsMap =
@@ -90,9 +92,7 @@ export class TaskService {
         timezone,
       );
 
-    const todayStr = referenceTime.toLocaleDateString('en-CA', {
-      timeZone: timezone,
-    });
+    const todayStr = forDate;
     const map = new Map<number, number>();
     for (const row of rows) {
       const dailyAmounts = dailyAmountsMap.get(row.id) ?? [];
@@ -185,16 +185,16 @@ export class TaskService {
   private async getGoalProgress(
     rows: (TaskRow & { blocks: TaskBlockRow[] })[],
     timezone: string,
-    referenceTime: Date,
+    forDate: string,
   ): Promise<Map<number, number>> {
     const taskIdsWithGoals = rows
-      .filter((r) => r.goalAmount != null && r.goalPeriod != null)
+      .filter((r) => r.goalPeriod != null)
       .map((r) => r.id);
 
     return this.taskCompletionRepository.sumAmountsByTaskIds(
       taskIdsWithGoals,
       timezone,
-      referenceTime,
+      forDate,
     );
   }
 

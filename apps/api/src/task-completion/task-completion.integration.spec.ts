@@ -294,7 +294,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-20' })
+          .query({ forDate: '2026-01-20' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -304,7 +304,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-19' })
+          .query({ forDate: '2026-01-19' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -314,7 +314,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-21' })
+          .query({ forDate: '2026-01-21' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(0);
@@ -357,7 +357,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-25' })
+          .query({ forDate: '2026-01-25' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -367,7 +367,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-26' })
+          .query({ forDate: '2026-01-26' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -377,7 +377,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-02-02' })
+          .query({ forDate: '2026-02-02' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(0);

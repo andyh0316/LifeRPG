@@ -150,7 +150,7 @@ describe('User Character Integration', () => {
     //  - yearly=50
 
     // #region ----- SETUP -----
-    const referenceTime = new Date('2026-05-15T12:00:00Z');
+    const forDate = '2026-05-15';
 
     const taskRes = await request
       .post('/tasks')
@@ -211,7 +211,7 @@ describe('User Character Integration', () => {
     const service = app.get(UserCharacterService);
     const body = await service.getGoalsProgress(
       currentUserCharacterId,
-      referenceTime,
+      forDate,
     );
     // #endregion
 
@@ -230,7 +230,7 @@ describe('User Character Integration', () => {
     // With America/New_York: falls on May 14 -> does NOT count in daily XP for May 15.
 
     // #region ----- SETUP -----
-    const referenceTime = new Date('2026-05-15T12:00:00Z');
+    const forDate = '2026-05-15';
 
     const taskRes = await request
       .post('/tasks')
@@ -256,12 +256,12 @@ describe('User Character Integration', () => {
     const service = app.get(UserCharacterService);
     const utcResult = await service.getGoalsProgress(
       currentUserCharacterId,
-      referenceTime,
+      forDate,
       'UTC',
     );
     const nyResult = await service.getGoalsProgress(
       currentUserCharacterId,
-      referenceTime,
+      forDate,
       'America/New_York',
     );
     // #endregion

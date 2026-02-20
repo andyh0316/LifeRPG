@@ -5,23 +5,23 @@ import { $api } from '@life-rpg/api-client';
 import TaskList from './TaskList';
 import CompletionOverview from './CompletionOverview';
 
-function computeReferenceTime(baseNow: Date, dayOffset: number): string {
+function computeForDate(baseNow: Date, dayOffset: number): string {
   const d = new Date(baseNow);
   d.setDate(d.getDate() - dayOffset);
-  return d.toISOString();
+  return d.toLocaleDateString('en-CA');
 }
 
 /** Displays the full list of available tasks with their rewards. */
 export default function Tasks() {
   const [baseNow] = useState(() => new Date());
   const [dayOffset, setDayOffset] = useState(0);
-  const referenceTime = useMemo(
-    () => computeReferenceTime(baseNow, dayOffset),
+  const forDate = useMemo(
+    () => computeForDate(baseNow, dayOffset),
     [baseNow, dayOffset],
   );
 
   const { isLoading } = $api.useQuery('get', '/tasks', {
-    params: { query: { referenceTime } },
+    params: { query: { forDate } },
   });
 
   if (isLoading) {
@@ -33,7 +33,7 @@ export default function Tasks() {
       {/* Left panel – Tasks */}
       <Box sx={{ flex: 1, overflowY: 'auto', maxWidth: 600 }}>
         <TaskList
-          referenceTime={referenceTime}
+          forDate={forDate}
           dayOffset={dayOffset}
           onDayOffsetChange={setDayOffset}
         />

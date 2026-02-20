@@ -842,7 +842,7 @@ export interface operations {
     TaskController_findAll: {
         parameters: {
             query?: {
-                referenceTime?: string;
+                forDate?: string;
             };
             header?: never;
             path?: never;
