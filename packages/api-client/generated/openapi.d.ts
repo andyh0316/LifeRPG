@@ -196,22 +196,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/task-completions/weekly-tracker": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["TaskCompletionController_getWeeklyTracker"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/user-character/summary": {
         parameters: {
             query?: never;
@@ -523,16 +507,6 @@ export interface components {
              * @example 2026-02-18T10:00:00+08:00
              */
             completedAt: string;
-        };
-        WeeklyTrackerTaskDto: {
-            id: number;
-            name: string;
-            icon?: string | null;
-            /** @enum {string} */
-            amountUnit: "count" | "minutes";
-            sortOrder: number;
-            /** @description Mon–Sun totals (7 elements) */
-            dailyTotals: number[];
         };
         CharacterSummaryItemDto: {
             id: number;
@@ -1047,27 +1021,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskCompletionResponseDto"];
-                };
-            };
-        };
-    };
-    TaskCompletionController_getWeeklyTracker: {
-        parameters: {
-            query: {
-                weekStart: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WeeklyTrackerTaskDto"][];
                 };
             };
         };
