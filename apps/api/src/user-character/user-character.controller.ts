@@ -1,5 +1,5 @@
-import { Controller, Get, Patch, Body, Req } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get, Patch, Body, Req, Query } from '@nestjs/common';
+import { ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { SessionService } from '../auth/session.service';
 import { UserCharacterService } from './user-character.service';
@@ -66,13 +66,17 @@ export class UserCharacterController {
 
   @Get('goals/progress')
   @ApiOkResponse({ type: GoalsProgressResponseDto })
+  @ApiQuery({ name: 'forDate', required: false })
   getGoalsProgress(
     @CurrentUser() user: AuthUser,
     @ClientTimezone() timezone: string,
+    @Query('forDate') forDate?: string,
   ) {
+    const date =
+      forDate ?? new Date().toLocaleDateString('en-CA', { timeZone: timezone });
     return this.userCharacterService.getGoalsProgress(
       user.userCharacterId,
-      undefined,
+      date,
       timezone,
     );
   }

@@ -46,10 +46,9 @@ interface TaskListProps {
   onDayOffsetChange: (offset: number) => void;
 }
 
-function formatDateLabel(dayOffset: number, forDate: string): string {
-  if (dayOffset === 0) return 'Today';
-  if (dayOffset === 1) return 'Yesterday';
+function formatDateLabel(forDate: string): string {
   return new Date(forDate + 'T00:00:00').toLocaleDateString(undefined, {
+    weekday: 'short',
     month: 'short',
     day: 'numeric',
   });
@@ -163,7 +162,7 @@ export default function TaskList({
             }}
             onClick={() => !isToday && onDayOffsetChange(0)}
           >
-            {formatDateLabel(dayOffset, forDate)}
+            {formatDateLabel(forDate)}
           </Typography>
           <IconButton
             size="small"
@@ -205,7 +204,7 @@ export default function TaskList({
         </Button>
       </Box>
 
-      <GoalsProgress />
+      <GoalsProgress forDate={forDate} />
 
       <DndContext
         sensors={sensors}

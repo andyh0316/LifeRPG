@@ -635,7 +635,16 @@
     "/user-character/goals/progress": {
       "get": {
         "operationId": "UserCharacterController_getGoalsProgress",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "forDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",

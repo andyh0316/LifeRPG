@@ -1158,7 +1158,9 @@ export interface operations {
     };
     UserCharacterController_getGoalsProgress: {
         parameters: {
-            query?: never;
+            query?: {
+                forDate?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
