@@ -221,7 +221,7 @@
         "operationId": "TaskController_findAll",
         "parameters": [
           {
-            "name": "referenceTime",
+            "name": "forDate",
             "required": false,
             "in": "query",
             "schema": {
@@ -635,7 +635,16 @@
     "/user-character/goals/progress": {
       "get": {
         "operationId": "UserCharacterController_getGoalsProgress",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "forDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -1579,10 +1588,16 @@
         "properties": {
           "blockId": {
             "type": "number"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "Client-local completion timestamp (ISO 8601)",
+            "example": "2026-02-18T10:00:00+08:00"
           }
         },
         "required": [
-          "blockId"
+          "blockId",
+          "completedAt"
         ]
       },
       "WeeklyTrackerTaskDto": {

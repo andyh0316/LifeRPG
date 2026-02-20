@@ -23,6 +23,7 @@ export class TaskCompletionController {
     return this.taskCompletionService.complete(
       body.blockId,
       user.userCharacterId,
+      new Date(body.completedAt),
     );
   }
 

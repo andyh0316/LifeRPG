@@ -1,9 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import { taskCompletions, type Db } from '@life-rpg/database';
 import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
+import { createTestTask } from '../../test/factories';
 import { GoalsResponseDto } from './dto/goals-response.dto';
-import { CreateTaskDto } from '../task/dto/create-task.dto';
-import { TaskResponseDto } from '../task/dto/task-response.dto';
 import { UserCharacterService } from './user-character.service';
 
 describe('User Character Integration', () => {
@@ -130,6 +129,7 @@ describe('User Character Integration', () => {
     // #endregion
   });
 
+  // prettier-ignore
   it('getGoalsProgress - aggregates XP by time-period boundaries', async () => {
     // Tests that progress XP is correctly totalled for each period:
     // today, this week, this month, this quarter, this year.
@@ -150,60 +150,17 @@ describe('User Character Integration', () => {
     //  - yearly=50
 
     // #region ----- SETUP -----
-    const referenceTime = new Date('2026-05-15T12:00:00Z');
+    const forDate = '2026-05-15';
 
-    const taskRes = await request
-      .post('/tasks')
-      .send({
-        name: 'Boundary Test Task',
-        blocks: [{ amount: 1, xpReward: 1, coinReward: 0 }],
-      } as CreateTaskDto)
-      .expect(201);
-    const task: TaskResponseDto = taskRes.body;
+    const task = await createTestTask(request);
 
     await db.insert(taskCompletions).values([
-      {
-        userCharacterId: currentUserCharacterId,
-        taskId: task.id,
-        xpEarned: 10,
-        coinsEarned: 0,
-        completedAt: new Date('2026-05-15T00:00:00Z'),
-      }, // day start
-      {
-        userCharacterId: currentUserCharacterId,
-        taskId: task.id,
-        xpEarned: 10,
-        coinsEarned: 0,
-        completedAt: new Date('2026-05-11T00:00:00Z'),
-      }, // week start (Mon)
-      {
-        userCharacterId: currentUserCharacterId,
-        taskId: task.id,
-        xpEarned: 10,
-        coinsEarned: 0,
-        completedAt: new Date('2026-05-01T00:00:00Z'),
-      }, // month start
-      {
-        userCharacterId: currentUserCharacterId,
-        taskId: task.id,
-        xpEarned: 10,
-        coinsEarned: 0,
-        completedAt: new Date('2026-04-01T00:00:00Z'),
-      }, // quarter start
-      {
-        userCharacterId: currentUserCharacterId,
-        taskId: task.id,
-        xpEarned: 10,
-        coinsEarned: 0,
-        completedAt: new Date('2026-01-01T00:00:00Z'),
-      }, // year start
-      {
-        userCharacterId: currentUserCharacterId,
-        taskId: task.id,
-        xpEarned: 10,
-        coinsEarned: 0,
-        completedAt: new Date('2025-01-01T00:00:00Z'),
-      }, // last year (excluded)
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 10, coinsEarned: 0, completedAt: new Date('2026-05-15T00:00:00Z') }, // Thu - day start
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 10, coinsEarned: 0, completedAt: new Date('2026-05-11T00:00:00Z') }, // Mon - week start
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 10, coinsEarned: 0, completedAt: new Date('2026-05-01T00:00:00Z') }, // 5/1 month start
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 10, coinsEarned: 0, completedAt: new Date('2026-04-01T00:00:00Z') }, // 4/1 - quarter start
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 10, coinsEarned: 0, completedAt: new Date('2026-01-01T00:00:00Z') }, // 1/1 - year start
+      { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 10, coinsEarned: 0, completedAt: new Date('2025-01-01T00:00:00Z') }, // last year (excluded)
     ]);
     // #endregion
 
@@ -211,7 +168,7 @@ describe('User Character Integration', () => {
     const service = app.get(UserCharacterService);
     const body = await service.getGoalsProgress(
       currentUserCharacterId,
-      referenceTime,
+      forDate,
     );
     // #endregion
 
@@ -224,46 +181,25 @@ describe('User Character Integration', () => {
     // #endregion
   });
 
+  // prettier-ignore
   it('getGoalsProgress - uses client timezone for period boundaries', async () => {
     // A completion at 2026-05-15 03:00 UTC = 2026-05-14 23:00 America/New_York.
     // With UTC: falls on May 15 -> counts in daily XP for May 15.
     // With America/New_York: falls on May 14 -> does NOT count in daily XP for May 15.
 
     // #region ----- SETUP -----
-    const referenceTime = new Date('2026-05-15T12:00:00Z');
+    const forDate = '2026-05-15';
 
-    const taskRes = await request
-      .post('/tasks')
-      .send({
-        name: 'TZ Test Task',
-        blocks: [{ amount: 1, xpReward: 1, coinReward: 0 }],
-      } as CreateTaskDto)
-      .expect(201);
-    const task: TaskResponseDto = taskRes.body;
+    const task = await createTestTask(request);
 
-    await db.insert(taskCompletions).values([
-      {
-        userCharacterId: currentUserCharacterId,
-        taskId: task.id,
-        xpEarned: 25,
-        coinsEarned: 0,
-        completedAt: new Date('2026-05-15T03:00:00Z'),
-      },
-    ]);
+    // prettier-ignore
+    await db.insert(taskCompletions).values({ userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 25, coinsEarned: 0, completedAt: new Date('2026-05-15T03:00:00Z') });
     // #endregion
 
     // #region ----- ACT -----
     const service = app.get(UserCharacterService);
-    const utcResult = await service.getGoalsProgress(
-      currentUserCharacterId,
-      referenceTime,
-      'UTC',
-    );
-    const nyResult = await service.getGoalsProgress(
-      currentUserCharacterId,
-      referenceTime,
-      'America/New_York',
-    );
+    const utcResult = await service.getGoalsProgress(currentUserCharacterId, forDate, 'UTC');
+    const nyResult = await service.getGoalsProgress(currentUserCharacterId, forDate, 'America/New_York');
     // #endregion
 
     // #region ----- ASSERT -----

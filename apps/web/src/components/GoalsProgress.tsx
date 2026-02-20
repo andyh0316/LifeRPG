@@ -94,10 +94,11 @@ function GoalBar({
   );
 }
 
-export default function GoalsProgress() {
+export default function GoalsProgress({ forDate }: { forDate?: string }) {
   const { data: progress } = $api.useQuery(
     'get',
     '/user-character/goals/progress',
+    { params: { query: { forDate } } },
   );
 
   if (!progress) return null;

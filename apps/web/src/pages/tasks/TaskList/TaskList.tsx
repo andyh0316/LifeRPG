@@ -5,6 +5,8 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import AddIcon from '@mui/icons-material/Add';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import UndoIcon from '@mui/icons-material/Undo';
 import List from '@mui/material/List';
@@ -30,6 +32,7 @@ import GoalsEditDialog from '@/components/GoalsEditDialog';
 import GoalsProgress from '@/components/GoalsProgress';
 import { useToast } from '@/components/toast';
 import {
+  GAME_COLORS,
   GAME_SHADOWS,
   sxPageTitle,
   sxAccentButton,
@@ -37,12 +40,32 @@ import {
 } from '@/theme/gameTheme';
 import TaskItem from '../TaskItem';
 
-export default function TaskList() {
+interface TaskListProps {
+  forDate: string;
+  dayOffset: number;
+  onDayOffsetChange: (offset: number) => void;
+}
+
+function formatDateLabel(forDate: string): string {
+  return new Date(forDate + 'T00:00:00').toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+export default function TaskList({
+  forDate,
+  dayOffset,
+  onDayOffsetChange,
+}: TaskListProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { data: tasks = [] } = $api.useQuery('get', '/tasks');
+  const { data: tasks = [] } = $api.useQuery('get', '/tasks', {
+    params: { query: { forDate } },
+  });
 
   const [goalsOpen, setGoalsOpen] = useState(false);
 
@@ -113,10 +136,42 @@ export default function TaskList() {
     }
   }, [location.state, toast]);
 
+  const isToday = dayOffset === 0;
+
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Typography sx={{ ...sxPageTitle, flex: 1 }}>Quests</Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <IconButton
+            size="small"
+            onClick={() => onDayOffsetChange(dayOffset + 1)}
+          >
+            <ChevronLeftIcon fontSize="small" />
+          </IconButton>
+          <Typography
+            sx={{
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              color: isToday ? GAME_COLORS.textSecondary : GAME_COLORS.accent,
+              cursor: isToday ? 'default' : 'pointer',
+              userSelect: 'none',
+              minWidth: 70,
+              textAlign: 'center',
+            }}
+            onClick={() => !isToday && onDayOffsetChange(0)}
+          >
+            {formatDateLabel(forDate)}
+          </Typography>
+          <IconButton
+            size="small"
+            disabled={isToday}
+            onClick={() => onDayOffsetChange(dayOffset - 1)}
+          >
+            <ChevronRightIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
         <Tooltip title="Undo last completion">
           <IconButton
@@ -149,7 +204,7 @@ export default function TaskList() {
         </Button>
       </Box>
 
-      <GoalsProgress />
+      <GoalsProgress forDate={forDate} />
 
       <DndContext
         sensors={sensors}
@@ -162,7 +217,12 @@ export default function TaskList() {
         >
           <List disablePadding>
             {tasks.map((task, index) => (
-              <TaskItem key={task.id} {...task} index={index} />
+              <TaskItem
+                key={task.id}
+                {...task}
+                index={index}
+                forDate={forDate}
+              />
             ))}
           </List>
         </SortableContext>

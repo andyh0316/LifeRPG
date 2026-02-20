@@ -29,14 +29,15 @@ export class TaskController {
 
   @Get()
   @ApiOkResponse({ type: [TaskResponseDto] })
-  @ApiQuery({ name: 'referenceTime', required: false })
+  @ApiQuery({ name: 'forDate', required: false })
   findAll(
     @CurrentUser() user: AuthUser,
     @ClientTimezone() timezone: string,
-    @Query('referenceTime') referenceTime?: string,
+    @Query('forDate') forDate?: string,
   ) {
-    const now = referenceTime ? new Date(referenceTime) : new Date();
-    return this.taskService.findAll(user.userCharacterId, timezone, now);
+    const date =
+      forDate ?? new Date().toLocaleDateString('en-CA', { timeZone: timezone });
+    return this.taskService.findAll(user.userCharacterId, timezone, date);
   }
 
   @Get('templates')

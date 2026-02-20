@@ -49,12 +49,12 @@ describe('Task Completion Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;
-    // #endregion
+    const completedAt = '2026-02-18T10:00:00.000Z';
 
     // #region ----- ACT -----
     const res = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({ blockId: task.blocks[0].id, completedAt })
       .expect(201);
     // #endregion
 
@@ -65,8 +65,7 @@ describe('Task Completion Integration', () => {
     expect(completion.userCharacterId).toBe(currentUserCharacterId);
     expect(completion.xpEarned).toBe(15);
     expect(completion.coinsEarned).toBe(10);
-    expect(completion.completedAt).toBeDefined();
-    // #endregion
+    expect(completion.completedAt).toBe(completedAt);
   });
 
   it('POST /task-completions - each block returns its own rewards', async () => {
@@ -88,11 +87,17 @@ describe('Task Completion Integration', () => {
     // #region ----- ACT -----
     const res1 = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: '2026-02-18T10:00:00.000Z',
+      })
       .expect(201);
     const res2 = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[1].id })
+      .send({
+        blockId: task.blocks[1].id,
+        completedAt: '2026-02-18T10:05:00.000Z',
+      })
       .expect(201);
     // #endregion
 
@@ -169,11 +174,17 @@ describe('Task Completion Integration', () => {
     const task: TaskResponseDto = createRes.body;
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: '2026-02-18T10:00:00.000Z',
+      })
       .expect(201);
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[1].id })
+      .send({
+        blockId: task.blocks[1].id,
+        completedAt: '2026-02-18T10:05:00.000Z',
+      })
       .expect(201);
     // #endregion
 
@@ -207,7 +218,10 @@ describe('Task Completion Integration', () => {
 
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: new Date().toISOString(),
+      })
       .expect(201);
     // #endregion
 
@@ -234,7 +248,10 @@ describe('Task Completion Integration', () => {
     // undo again after backdating — should return 400 when older than 24h
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: new Date().toISOString(),
+      })
       .expect(201);
 
     await db
@@ -277,7 +294,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-20' })
+          .query({ forDate: '2026-01-20' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -287,7 +304,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-19' })
+          .query({ forDate: '2026-01-19' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -297,7 +314,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-21' })
+          .query({ forDate: '2026-01-21' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(0);
@@ -340,7 +357,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-25' })
+          .query({ forDate: '2026-01-25' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -350,7 +367,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-01-26' })
+          .query({ forDate: '2026-01-26' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(2);
@@ -360,7 +377,7 @@ describe('Task Completion Integration', () => {
       {
         const listRes = await request
           .get('/tasks')
-          .query({ referenceTime: '2026-02-02' })
+          .query({ forDate: '2026-02-02' })
           .expect(200);
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(0);
