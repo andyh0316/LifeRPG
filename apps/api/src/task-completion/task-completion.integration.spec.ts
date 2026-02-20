@@ -1,7 +1,18 @@
+// prettier-ignore
 import { INestApplication } from '@nestjs/common';
-import { taskCompletions, userCharacter, type Db } from '@life-rpg/database';
+import {
+  tasks,
+  taskCompletions,
+  userCharacter,
+  type Db,
+} from '@life-rpg/database';
 import { eq } from 'drizzle-orm';
 import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
+import {
+  createTestTask,
+  createTestUser,
+  createTestCharacter,
+} from '../../test/factories';
 import { CreateTaskDto } from '../task/dto/create-task.dto';
 import { TaskResponseDto } from '../task/dto/task-response.dto';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
@@ -200,65 +211,97 @@ describe('Task Completion Integration', () => {
     // #endregion
   });
 
-  it('POST /task-completions/undo - deletes most recent completion and reverses rewards', async () => {
-    // #region ----- SETUP -----
-    const createRes = await request
-      .post('/tasks')
-      .send({
-        name: 'Undo Test',
-        blocks: [{ amount: 1, xpReward: 20, coinReward: 10 }],
-      } as CreateTaskDto)
-      .expect(201);
-    const task: TaskResponseDto = createRes.body;
+  describe('undo', () => {
+    // prettier-ignore
+    it('deletes most recent completion and reverses rewards', async () => {
+      // #region ----- SETUP -----
+      const task = await createTestTask(request, { name: 'Undo Test', blocks: [{ amount: 1, xpReward: 20, coinReward: 10 }] });
 
-    const [charBefore] = await db
-      .select({ xp: userCharacter.xp, coins: userCharacter.coins })
-      .from(userCharacter)
-      .where(eq(userCharacter.id, currentUserCharacterId));
+      const [charBefore] = await db
+        .select({ xp: userCharacter.xp, coins: userCharacter.coins })
+        .from(userCharacter)
+        .where(eq(userCharacter.id, currentUserCharacterId));
 
-    await request
-      .post('/task-completions')
-      .send({
-        blockId: task.blocks[0].id,
-        completedAt: new Date().toISOString(),
-      })
-      .expect(201);
-    // #endregion
+      await request
+        .post('/task-completions')
+        .send({ blockId: task.blocks[0].id, completedAt: new Date().toISOString() })
+        .expect(201);
+      // #endregion
 
-    // #region ----- ACT -----
-    const res = await request.post('/task-completions/undo').expect(200);
-    // #endregion
+      // #region ----- ACT -----
+      const res = await request.post('/task-completions/undo').expect(200);
+      // #endregion
 
-    // #region ----- ASSERT -----
-    const undone: TaskCompletionResponseDto = res.body;
-    expect(undone.taskId).toBe(task.id);
-    expect(undone.xpEarned).toBe(20);
-    expect(undone.coinsEarned).toBe(10);
+      // #region ----- ASSERT -----
+      const undone: TaskCompletionResponseDto = res.body;
+      expect(undone.taskId).toBe(task.id);
+      expect(undone.xpEarned).toBe(20);
+      expect(undone.coinsEarned).toBe(10);
 
-    const [charAfter] = await db
-      .select({ xp: userCharacter.xp, coins: userCharacter.coins })
-      .from(userCharacter)
-      .where(eq(userCharacter.id, currentUserCharacterId));
-    expect(charAfter.xp).toBe(charBefore.xp);
-    expect(charAfter.coins).toBe(charBefore.coins);
+      const [charAfter] = await db
+        .select({ xp: userCharacter.xp, coins: userCharacter.coins })
+        .from(userCharacter)
+        .where(eq(userCharacter.id, currentUserCharacterId));
+      expect(charAfter.xp).toBe(charBefore.xp);
+      expect(charAfter.coins).toBe(charBefore.coins);
 
-    const listRes = await request.get('/task-completions').expect(200);
-    expect(listRes.body).toHaveLength(0);
+      const listRes = await request.get('/task-completions').expect(200);
+      expect(listRes.body).toHaveLength(0);
 
-    // undo again after backdating — should return 400 when older than 24h
-    await request
-      .post('/task-completions')
-      .send({
-        blockId: task.blocks[0].id,
-        completedAt: new Date().toISOString(),
-      })
-      .expect(201);
+      // undo again after backdating — should return 400 when older than 24h
+      await db.insert(taskCompletions).values({ userCharacterId: currentUserCharacterId, taskId: task.id, amount: 1, xpEarned: 20, coinsEarned: 10, completedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
 
-    await db
-      .update(taskCompletions)
-      .set({ completedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
+      await request.post('/task-completions/undo').expect(400);
+      // #endregion
+    });
 
-    await request.post('/task-completions/undo').expect(400);
-    // #endregion
+    // prettier-ignore
+    it('undoes by highest ID, not by completedAt', async () => {
+      // #region ----- SETUP -----
+      const task = await createTestTask(request, { name: 'Undo Order', blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }] });
+
+      const completionA = await request
+        .post('/task-completions')
+        .send({ blockId: task.blocks[0].id, completedAt: new Date().toISOString() })
+        .expect(201);
+
+      const completionB = await request
+        .post('/task-completions')
+        .send({ blockId: task.blocks[0].id, completedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString() })
+        .expect(201);
+      // #endregion
+
+      // #region ----- ACT -----
+      const res = await request.post('/task-completions/undo').expect(200);
+      // #endregion
+
+      // #region ----- ASSERT -----
+      const undone: TaskCompletionResponseDto = res.body;
+      expect(undone.id).toBe(completionB.body.id);
+
+      const listRes = await request.get('/task-completions').expect(200);
+      expect(listRes.body).toHaveLength(1);
+      expect(listRes.body[0].id).toBe(completionA.body.id);
+      // #endregion
+    });
+
+    // prettier-ignore
+    it('only undoes current user\'s completions', async () => {
+      // #region ----- SETUP -----
+      const otherUser = await createTestUser(db, { email: 'other-undo@test.com', firstName: 'Other' });
+      const otherChar = await createTestCharacter(db, otherUser.id);
+      const [otherTask] = await db.insert(tasks).values({ userCharacterId: otherChar.id, name: 'Other Task' }).returning();
+      await db.insert(taskCompletions).values({ userCharacterId: otherChar.id, taskId: otherTask.id, amount: 1, xpEarned: 10, coinsEarned: 5, completedAt: new Date() });
+      // #endregion
+
+      // #region ----- ACT -----
+      await request.post('/task-completions/undo').expect(404);
+      // #endregion
+
+      // #region ----- ASSERT -----
+      const remaining = await db.select().from(taskCompletions).where(eq(taskCompletions.userCharacterId, otherChar.id));
+      expect(remaining).toHaveLength(1);
+      // #endregion
+    });
   });
 });

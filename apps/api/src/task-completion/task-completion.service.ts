@@ -108,7 +108,7 @@ export class TaskCompletionService {
       .select(completionSelect)
       .from(taskCompletions)
       .where(eq(taskCompletions.userCharacterId, userCharacterId))
-      .orderBy(desc(taskCompletions.completedAt))
+      .orderBy(desc(taskCompletions.id))
       .limit(1);
 
     if (!latest) {

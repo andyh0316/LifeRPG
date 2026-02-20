@@ -1,3 +1,4 @@
+import { users, userCharacter, type Db } from '@life-rpg/database';
 import type { TestAgent } from './setup-integration';
 import type { CreateTaskDto } from '../src/task/dto/create-task.dto';
 import type { TaskResponseDto } from '../src/task/dto/task-response.dto';
@@ -16,4 +17,27 @@ export async function createTestTask(
     .send({ ...DEFAULT_TASK, ...overrides })
     .expect(201);
   return res.body;
+}
+
+export async function createTestUser(
+  db: Db,
+  overrides?: { email?: string; firstName?: string; lastName?: string },
+) {
+  const [row] = await db
+    .insert(users)
+    .values({ email: 'other@test.com', firstName: 'Other', ...overrides })
+    .returning();
+  return row;
+}
+
+export async function createTestCharacter(
+  db: Db,
+  userId: number,
+  overrides?: { name?: string },
+) {
+  const [row] = await db
+    .insert(userCharacter)
+    .values({ userId, name: '', ...overrides })
+    .returning();
+  return row;
 }

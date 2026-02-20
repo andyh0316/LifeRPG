@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
@@ -23,7 +26,7 @@ import {
 import GoalsEditDialog from '@/components/GoalsEditDialog';
 import GoalsProgress from '@/components/GoalsProgress';
 import { useToast } from '@/components/toast';
-import { sxPageTitle } from '@/theme/gameTheme';
+import { GAME_COLORS, sxPageTitle } from '@/theme/gameTheme';
 import TaskItem from '../TaskItem';
 import TaskListMenu from './TaskListMenu';
 
@@ -121,10 +124,13 @@ export default function TaskList({
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Typography sx={{ ...sxPageTitle, flex: 1 }}>Quests</Typography>
 
-        <TaskListMenu
+        <DateNav
           forDate={forDate}
           dayOffset={dayOffset}
           onDayOffsetChange={onDayOffsetChange}
+        />
+
+        <TaskListMenu
           onUndo={() => undoCompletion.mutate({})}
           undoPending={undoCompletion.isPending}
           onNewQuest={() => navigate('/tasks/create')}
@@ -159,5 +165,54 @@ export default function TaskList({
 
       <GoalsEditDialog open={goalsOpen} onClose={() => setGoalsOpen(false)} />
     </>
+  );
+}
+
+function formatDateLabel(forDate: string): string {
+  return new Date(forDate + 'T00:00:00').toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function DateNav({
+  forDate,
+  dayOffset,
+  onDayOffsetChange,
+}: {
+  forDate: string;
+  dayOffset: number;
+  onDayOffsetChange: (offset: number) => void;
+}) {
+  const isToday = dayOffset === 0;
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <IconButton size="small" onClick={() => onDayOffsetChange(dayOffset + 1)}>
+        <ChevronLeftIcon fontSize="small" />
+      </IconButton>
+      <Typography
+        sx={{
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          color: isToday ? GAME_COLORS.textSecondary : GAME_COLORS.accent,
+          cursor: isToday ? 'default' : 'pointer',
+          userSelect: 'none',
+          minWidth: 100,
+          textAlign: 'center',
+        }}
+        onClick={() => !isToday && onDayOffsetChange(0)}
+      >
+        {formatDateLabel(forDate)}
+      </Typography>
+      <IconButton
+        size="small"
+        disabled={isToday}
+        onClick={() => onDayOffsetChange(dayOffset - 1)}
+      >
+        <ChevronRightIcon fontSize="small" />
+      </IconButton>
+    </Box>
   );
 }
