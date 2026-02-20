@@ -13,7 +13,6 @@
     "db:reset": "docker compose down -v && docker compose up -d && docker compose exec db sh -c 'until pg_isready -U haitianhong; do sleep 0.2; done' && pnpm db:migrate",
     "test-db:migrate": "pnpm --filter @life-rpg/database test-db:migrate",
     "test-db:reset": "docker compose rm -sfv db-test && docker volume rm -f liferpg_pgdata-test && docker compose up -d db-test && docker compose exec db-test sh -c 'until pg_isready -U haitianhong; do sleep 0.2; done' && pnpm test-db:migrate",
-    "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:web\"",
     "dev:test": "concurrently \"pnpm dev:api:test\" \"pnpm dev:web\"",
     "dev:api": "pnpm --filter @life-rpg/api start:dev",
     "dev:api:test": ". apps/api/.env && DATABASE_URL=$TEST_DATABASE_URL pnpm dev:api",

@@ -148,6 +148,7 @@ export default function TaskList({
               <TaskItem
                 key={task.id}
                 {...task}
+                goalCompletedAmount={task.goalCompletedAmount ?? 0}
                 index={index}
                 forDate={forDate}
               />
