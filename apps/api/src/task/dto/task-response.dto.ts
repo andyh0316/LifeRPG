@@ -32,8 +32,8 @@ export class TaskResponseDto {
   })
   goalPeriod!: string | null;
 
-  @ApiPropertyOptional({ type: Number, nullable: true })
-  goalCompletedAmount!: number | null;
+  @ApiProperty({ type: Number })
+  goalCompletedAmount!: number;
 
   @ApiProperty({ type: Number })
   currentStreak!: number;

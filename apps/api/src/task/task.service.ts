@@ -38,8 +38,8 @@ export class TaskService {
       sortOrder: row.sortOrder,
       amountUnit: row.amountUnit,
       goalAmount: row.goalAmount ?? null,
-      goalPeriod: row.goalPeriod ?? null,
-      goalCompletedAmount: goalCompletedAmount ?? null,
+      goalPeriod: row.goalPeriod ?? 'day-long',
+      goalCompletedAmount: goalCompletedAmount ?? 0,
       currentStreak,
       blocks: blockRows.map(
         (o): TaskBlockResponseDto => ({
@@ -98,9 +98,10 @@ export class TaskService {
       const dailyAmounts = dailyAmountsMap.get(row.id) ?? [];
       const period = row.goalPeriod ?? 'day-long';
 
-      // Sum daily amounts per period (day/week/month)
+      // Sum daily amounts per period (day/week/month), excluding future data
       const periodTotals = new Map<string, number>();
       for (const d of dailyAmounts) {
+        if (d.day > todayStr) continue;
         const p = this.periodStart(d.day, period);
         periodTotals.set(p, (periodTotals.get(p) ?? 0) + d.total);
       }
@@ -187,12 +188,10 @@ export class TaskService {
     timezone: string,
     forDate: string,
   ): Promise<Map<number, number>> {
-    const taskIdsWithGoals = rows
-      .filter((r) => r.goalPeriod != null)
-      .map((r) => r.id);
+    const taskIds = rows.map((r) => r.id);
 
     return this.taskCompletionRepository.sumAmountsByTaskIds(
-      taskIdsWithGoals,
+      taskIds,
       timezone,
       forDate,
     );

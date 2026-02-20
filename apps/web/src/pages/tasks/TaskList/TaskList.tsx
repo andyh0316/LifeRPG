@@ -1,17 +1,9 @@
 import { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import AddIcon from '@mui/icons-material/Add';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import TrackChangesIcon from '@mui/icons-material/TrackChanges';
-import UndoIcon from '@mui/icons-material/Undo';
 import List from '@mui/material/List';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import {
   DndContext,
@@ -31,27 +23,14 @@ import {
 import GoalsEditDialog from '@/components/GoalsEditDialog';
 import GoalsProgress from '@/components/GoalsProgress';
 import { useToast } from '@/components/toast';
-import {
-  GAME_COLORS,
-  GAME_SHADOWS,
-  sxPageTitle,
-  sxAccentButton,
-  sxOutlinedButton,
-} from '@/theme/gameTheme';
+import { sxPageTitle } from '@/theme/gameTheme';
 import TaskItem from '../TaskItem';
+import TaskListMenu from './TaskListMenu';
 
 interface TaskListProps {
   forDate: string;
   dayOffset: number;
   onDayOffsetChange: (offset: number) => void;
-}
-
-function formatDateLabel(forDate: string): string {
-  return new Date(forDate + 'T00:00:00').toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
 }
 
 export default function TaskList({
@@ -65,6 +44,7 @@ export default function TaskList({
   const toast = useToast();
   const { data: tasks = [] } = $api.useQuery('get', '/tasks', {
     params: { query: { forDate } },
+    placeholderData: keepPreviousData,
   });
 
   const [goalsOpen, setGoalsOpen] = useState(false);
@@ -136,72 +116,20 @@ export default function TaskList({
     }
   }, [location.state, toast]);
 
-  const isToday = dayOffset === 0;
-
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Typography sx={{ ...sxPageTitle, flex: 1 }}>Quests</Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <IconButton
-            size="small"
-            onClick={() => onDayOffsetChange(dayOffset + 1)}
-          >
-            <ChevronLeftIcon fontSize="small" />
-          </IconButton>
-          <Typography
-            sx={{
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              color: isToday ? GAME_COLORS.textSecondary : GAME_COLORS.accent,
-              cursor: isToday ? 'default' : 'pointer',
-              userSelect: 'none',
-              minWidth: 70,
-              textAlign: 'center',
-            }}
-            onClick={() => !isToday && onDayOffsetChange(0)}
-          >
-            {formatDateLabel(forDate)}
-          </Typography>
-          <IconButton
-            size="small"
-            disabled={isToday}
-            onClick={() => onDayOffsetChange(dayOffset - 1)}
-          >
-            <ChevronRightIcon fontSize="small" />
-          </IconButton>
-        </Box>
-
-        <Tooltip title="Undo last completion">
-          <IconButton
-            size="small"
-            disabled={undoCompletion.isPending}
-            onClick={() => undoCompletion.mutate({})}
-          >
-            <UndoIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/tasks/create')}
-          sx={{ ...sxAccentButton, boxShadow: GAME_SHADOWS.button }}
-        >
-          New Quest
-        </Button>
-
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<TrackChangesIcon />}
-          onClick={() => setGoalsOpen(true)}
-          sx={sxOutlinedButton}
-        >
-          Goals
-        </Button>
+        <TaskListMenu
+          forDate={forDate}
+          dayOffset={dayOffset}
+          onDayOffsetChange={onDayOffsetChange}
+          onUndo={() => undoCompletion.mutate({})}
+          undoPending={undoCompletion.isPending}
+          onNewQuest={() => navigate('/tasks/create')}
+          onGoals={() => setGoalsOpen(true)}
+        />
       </Box>
 
       <GoalsProgress forDate={forDate} />
@@ -220,6 +148,7 @@ export default function TaskList({
               <TaskItem
                 key={task.id}
                 {...task}
+                goalCompletedAmount={task.goalCompletedAmount ?? 0}
                 index={index}
                 forDate={forDate}
               />

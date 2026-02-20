@@ -13,10 +13,10 @@
     "db:reset": "docker compose down -v && docker compose up -d && docker compose exec db sh -c 'until pg_isready -U haitianhong; do sleep 0.2; done' && pnpm db:migrate",
     "test-db:migrate": "pnpm --filter @life-rpg/database test-db:migrate",
     "test-db:reset": "docker compose rm -sfv db-test && docker volume rm -f liferpg_pgdata-test && docker compose up -d db-test && docker compose exec db-test sh -c 'until pg_isready -U haitianhong; do sleep 0.2; done' && pnpm test-db:migrate",
-    "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:web\"",
     "dev:test": "concurrently \"pnpm dev:api:test\" \"pnpm dev:web\"",
-    "dev:api": "pnpm --filter @life-rpg/api start:dev",
+    "dev:api": "concurrently \"pnpm --filter @life-rpg/api start:dev\" \"pnpm watch:api-client\"",
     "dev:api:test": ". apps/api/.env && DATABASE_URL=$TEST_DATABASE_URL pnpm dev:api",
+    "watch:api-client": "chokidar \"apps/api/src/**/*.ts\" -c \"pnpm generate:api-client\" --debounce 3000 --initial=false",
     "build": "pnpm -r run build",
     "build:api": "pnpm --filter @life-rpg/api build",
     "dev:web": "pnpm --filter @life-rpg/web dev",
@@ -31,6 +31,7 @@
   "devDependencies": {
     "@life-rpg/api-client": "workspace:*",
     "@playwright/test": "^1.58.1",
+    "chokidar-cli": "^3.0.0",
     "concurrently": "^9.2.1",
     "prettier": "^3.8.1"
   }

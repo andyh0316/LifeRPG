@@ -26,12 +26,12 @@ export class TaskCompletionRepository {
       .where(
         and(
           inArray(taskCompletions.taskId, taskIds),
-          sql`${taskCompletions.completedAt} >= CASE ${tasks.goalPeriod}
+          sql`${taskCompletions.completedAt} >= CASE COALESCE(${tasks.goalPeriod}, 'day-long')
             WHEN 'day-long' THEN ${ref}
             WHEN 'week-long' THEN date_trunc('week', ${forDate}::date)::timestamp AT TIME ZONE ${tz}
             WHEN 'month-long' THEN date_trunc('month', ${forDate}::date)::timestamp AT TIME ZONE ${tz}
           END`,
-          sql`${taskCompletions.completedAt} < CASE ${tasks.goalPeriod}
+          sql`${taskCompletions.completedAt} < CASE COALESCE(${tasks.goalPeriod}, 'day-long')
             WHEN 'day-long' THEN ${ref} + interval '1 day'
             WHEN 'week-long' THEN date_trunc('week', ${forDate}::date)::timestamp AT TIME ZONE ${tz} + interval '1 week'
             WHEN 'month-long' THEN date_trunc('month', ${forDate}::date)::timestamp AT TIME ZONE ${tz} + interval '1 month'

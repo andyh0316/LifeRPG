@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { $api } from '@life-rpg/api-client';
 import TaskList from './TaskList';
 import CompletionOverview from './CompletionOverview';
 
@@ -19,14 +17,6 @@ export default function Tasks() {
     () => computeForDate(baseNow, dayOffset),
     [baseNow, dayOffset],
   );
-
-  const { isLoading } = $api.useQuery('get', '/tasks', {
-    params: { query: { forDate } },
-  });
-
-  if (isLoading) {
-    return <Typography>Loading…</Typography>;
-  }
 
   return (
     <Box sx={{ display: 'flex', gap: 3, height: 'calc(100vh - 48px)' }}>
