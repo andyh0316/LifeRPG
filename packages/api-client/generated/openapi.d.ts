@@ -453,7 +453,7 @@ export interface components {
             goalAmount?: number | null;
             /** @enum {string|null} */
             goalPeriod?: "day-long" | "week-long" | "month-long" | null;
-            goalCompletedAmount?: number | null;
+            goalCompletedAmount: number;
             currentStreak: number;
             blocks: components["schemas"]["TaskBlockResponseDto"][];
         };

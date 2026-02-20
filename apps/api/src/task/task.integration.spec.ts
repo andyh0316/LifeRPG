@@ -410,7 +410,7 @@ describe('Task Integration', () => {
       await db.insert(taskCompletions).values({ userCharacterId: currentUserCharacterId, taskId: setupTask.id, amount: 1, completedAt: new Date('2026-01-02T13:00:00Z'), xpEarned: 0, coinsEarned: 0 });
       // completedAt (Los Angeles): 2026-01-02T23:59:59 (end of 1/2)
       await db.insert(taskCompletions).values({ userCharacterId: currentUserCharacterId, taskId: setupTask.id, amount: 1, completedAt: new Date('2026-01-03T07:59:59Z'), xpEarned: 0, coinsEarned: 0 });
-      // #endregion
+      // #endregion 
 
       // #region ----- ACT + ASSERT -----
       const find = (res: { body: unknown }) => (res.body as TaskResponseDto[]).find((t) => t.id === setupTask.id)!;

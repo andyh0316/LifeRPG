@@ -1348,8 +1348,7 @@
             "nullable": true
           },
           "goalCompletedAmount": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
           },
           "currentStreak": {
             "type": "number"
@@ -1367,6 +1366,7 @@
           "name",
           "sortOrder",
           "amountUnit",
+          "goalCompletedAmount",
           "currentStreak",
           "blocks"
         ]
