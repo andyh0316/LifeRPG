@@ -64,43 +64,49 @@ describe('InventoryItem Integration', () => {
   }
 
   it('POST /inventory-items - creates and returns with defaults', async () => {
-    // setup
+    // #region ----- SETUP -----
     const item = await createItem();
     const input: CreateInventoryItemDto = {
       itemId: item.id,
       source: 'shop',
     };
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.post('/inventory-items').send(input).expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const inv: InventoryItemResponseDto = res.body;
     expect(inv.id).toBeDefined();
     expect(inv.itemId).toBe(item.id);
     expect(inv.source).toBe('shop');
     expect(inv.acquiredAt).toBeDefined();
     expect(inv.usedAt).toBeNull();
+    // #endregion
   });
 
   it('GET /inventory-items?usedAt=null - returns only unused items', async () => {
-    // setup
+    // #region ----- SETUP -----
     const ids = await seedInventory([
       { name: 'Item A' },
       { name: 'Item B', usedAt: new Date() },
     ]);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/inventory-items?usedAt=null').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const result: InventoryItemResponseDto[] = res.body;
     expect(result).toHaveLength(1);
     expect(result[0].itemId).toBe(ids[0]);
+    // #endregion
   });
 
   it('PUT /inventory-items/:id - updates fields including usedAt', async () => {
-    // setup
+    // #region ----- SETUP -----
     const item = await createItem();
     const createRes = await request
       .post('/inventory-items')
@@ -114,38 +120,44 @@ describe('InventoryItem Integration', () => {
       source: 'gift',
       usedAt,
     };
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request
       .put(`/inventory-items/${created.id}`)
       .send(updateInput)
       .expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const inv: InventoryItemResponseDto = res.body;
     expect(inv.id).toBe(created.id);
     expect(inv.source).toBe('gift');
     expect(inv.usedAt).toBeDefined();
+    // #endregion
   });
 
   it('DELETE /inventory-items/:id - soft-deletes and excludes from listing', async () => {
-    // setup
+    // #region ----- SETUP -----
     const item = await createItem();
     const createRes = await request
       .post('/inventory-items')
       .send({ itemId: item.id })
       .expect(201);
     const created: InventoryItemResponseDto = createRes.body;
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const deleteRes = await request
       .delete(`/inventory-items/${created.id}`)
       .expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     expect(deleteRes.body.id).toBe(created.id);
     const listRes = await request.get('/inventory-items').expect(200);
     const items: InventoryItemResponseDto[] = listRes.body;
     expect(items.find((i) => i.id === created.id)).toBeUndefined();
+    // #endregion
   });
 });

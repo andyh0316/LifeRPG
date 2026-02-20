@@ -38,21 +38,24 @@ describe('User Character Integration', () => {
   });
 
   it('GET /user-character/goals - returns null when no goals exist', async () => {
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/user-character/goals').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     expect(res.body).toEqual({});
+    // #endregion
   });
 
   it('PATCH /user-character/goals - creates goals when none exist', async () => {
-    // act
+    // #region ----- ACT -----
     const res = await request
       .patch('/user-character/goals')
       .send({ dailyXpTarget: 100 })
       .expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const body: GoalsResponseDto = res.body;
     expect(body.id).toBeDefined();
     expect(body.userCharacterId).toBe(currentUserCharacterId);
@@ -61,60 +64,70 @@ describe('User Character Integration', () => {
     expect(body.monthlyXpTarget).toBeNull();
     expect(body.quarterlyXpTarget).toBeNull();
     expect(body.yearlyXpTarget).toBeNull();
+    // #endregion
   });
 
   it('GET /user-character/goals - returns current goals after PATCH', async () => {
-    // setup
+    // #region ----- SETUP -----
     await request
       .patch('/user-character/goals')
       .send({ dailyXpTarget: 100 })
       .expect(200);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/user-character/goals').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const body: GoalsResponseDto = res.body;
     expect(body.userCharacterId).toBe(currentUserCharacterId);
     expect(body.dailyXpTarget).toBe(100);
+    // #endregion
   });
 
   it('PATCH /user-character/goals - updates only sent fields, preserves others', async () => {
-    // setup
+    // #region ----- SETUP -----
     await request
       .patch('/user-character/goals')
       .send({ dailyXpTarget: 100 })
       .expect(200);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request
       .patch('/user-character/goals')
       .send({ weeklyXpTarget: 500 })
       .expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const body: GoalsResponseDto = res.body;
     expect(body.dailyXpTarget).toBe(100);
     expect(body.weeklyXpTarget).toBe(500);
+    // #endregion
   });
 
   it('PATCH /user-character/goals - can set a target to null to clear it', async () => {
-    // setup
+    // #region ----- SETUP -----
     await request
       .patch('/user-character/goals')
       .send({ dailyXpTarget: 100, weeklyXpTarget: 500 })
       .expect(200);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request
       .patch('/user-character/goals')
       .send({ dailyXpTarget: null })
       .expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const body: GoalsResponseDto = res.body;
     expect(body.dailyXpTarget).toBeNull();
     expect(body.weeklyXpTarget).toBe(500);
+    // #endregion
   });
 
   it('getGoalsProgress - aggregates XP by time-period boundaries', async () => {
@@ -136,7 +149,7 @@ describe('User Character Integration', () => {
     //  - quarterly=40
     //  - yearly=50
 
-    // #region setup
+    // #region ----- SETUP -----
     const referenceTime = new Date('2026-05-15T12:00:00Z');
 
     const taskRes = await request
@@ -192,24 +205,23 @@ describe('User Character Integration', () => {
         completedAt: new Date('2025-01-01T00:00:00Z'),
       }, // last year (excluded)
     ]);
+    // #endregion
 
-    // #endregion setup
-
-    // #region act
+    // #region ----- ACT -----
     const service = app.get(UserCharacterService);
     const body = await service.getGoalsProgress(
       currentUserCharacterId,
       referenceTime,
     );
-    // #endregion act
+    // #endregion
 
-    // #region assert
+    // #region ----- ASSERT -----
     expect(body.daily.current).toBe(10);
     expect(body.weekly.current).toBe(20);
     expect(body.monthly.current).toBe(30);
     expect(body.quarterly.current).toBe(40);
     expect(body.yearly.current).toBe(50);
-    // #endregion assert
+    // #endregion
   });
 
   it('getGoalsProgress - uses client timezone for period boundaries', async () => {
@@ -217,7 +229,7 @@ describe('User Character Integration', () => {
     // With UTC: falls on May 15 -> counts in daily XP for May 15.
     // With America/New_York: falls on May 14 -> does NOT count in daily XP for May 15.
 
-    // setup
+    // #region ----- SETUP -----
     const referenceTime = new Date('2026-05-15T12:00:00Z');
 
     const taskRes = await request
@@ -238,8 +250,9 @@ describe('User Character Integration', () => {
         completedAt: new Date('2026-05-15T03:00:00Z'),
       },
     ]);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const service = app.get(UserCharacterService);
     const utcResult = await service.getGoalsProgress(
       currentUserCharacterId,
@@ -251,12 +264,14 @@ describe('User Character Integration', () => {
       referenceTime,
       'America/New_York',
     );
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     expect(utcResult.daily.current).toBe(25);
     expect(nyResult.daily.current).toBe(0);
     // Both should include it in weekly total (same week regardless of tz)
     expect(utcResult.weekly.current).toBe(25);
     expect(nyResult.weekly.current).toBe(25);
+    // #endregion
   });
 });

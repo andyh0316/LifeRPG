@@ -38,7 +38,7 @@ describe('Task Completion Integration', () => {
   });
 
   it('POST /task-completions - completes a block and returns earned rewards', async () => {
-    // setup
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -49,14 +49,16 @@ describe('Task Completion Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request
       .post('/task-completions')
       .send({ blockId: task.blocks[0].id })
       .expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const completion: TaskCompletionResponseDto = res.body;
     expect(completion.id).toBeDefined();
     expect(completion.taskId).toBe(task.id);
@@ -64,10 +66,11 @@ describe('Task Completion Integration', () => {
     expect(completion.xpEarned).toBe(15);
     expect(completion.coinsEarned).toBe(10);
     expect(completion.completedAt).toBeDefined();
+    // #endregion
   });
 
   it('POST /task-completions - each block returns its own rewards', async () => {
-    // setup
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -80,8 +83,9 @@ describe('Task Completion Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res1 = await request
       .post('/task-completions')
       .send({ blockId: task.blocks[0].id })
@@ -90,8 +94,9 @@ describe('Task Completion Integration', () => {
       .post('/task-completions')
       .send({ blockId: task.blocks[1].id })
       .expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const c1: TaskCompletionResponseDto = res1.body;
     expect(c1.xpEarned).toBe(10);
     expect(c1.coinsEarned).toBe(5);
@@ -99,6 +104,7 @@ describe('Task Completion Integration', () => {
     const c2: TaskCompletionResponseDto = res2.body;
     expect(c2.xpEarned).toBe(25);
     expect(c2.coinsEarned).toBe(12);
+    // #endregion
   });
 
   // it('GET /task-completions/weekly-tracker - returns daily totals per task', async () => {
@@ -149,7 +155,7 @@ describe('Task Completion Integration', () => {
   // });
 
   it('GET /task-completions - returns completions for the current user', async () => {
-    // setup
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -169,19 +175,22 @@ describe('Task Completion Integration', () => {
       .post('/task-completions')
       .send({ blockId: task.blocks[1].id })
       .expect(201);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/task-completions').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const completions: TaskCompletionResponseDto[] = res.body;
     expect(completions).toHaveLength(2);
     expect(completions[0].userCharacterId).toBe(currentUserCharacterId);
     expect(completions[1].userCharacterId).toBe(currentUserCharacterId);
+    // #endregion
   });
 
   it('POST /task-completions/undo - deletes most recent completion and reverses rewards', async () => {
-    // setup
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -200,11 +209,13 @@ describe('Task Completion Integration', () => {
       .post('/task-completions')
       .send({ blockId: task.blocks[0].id })
       .expect(201);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.post('/task-completions/undo').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const undone: TaskCompletionResponseDto = res.body;
     expect(undone.taskId).toBe(task.id);
     expect(undone.xpEarned).toBe(20);
@@ -231,11 +242,12 @@ describe('Task Completion Integration', () => {
       .set({ completedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
 
     await request.post('/task-completions/undo').expect(400);
+    // #endregion
   });
 
   describe('streaks', () => {
     it('updates streak fields when completing a task with prior consecutive-day completions', async () => {
-      // setup
+      // #region ----- SETUP -----
       const createRes = await request
         .post('/tasks')
         .send({
@@ -253,12 +265,14 @@ describe('Task Completion Integration', () => {
         // streak:
         { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-19') },
         { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-19') },
-        // streak: 
+        // streak:
         { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 10, completedAt: new Date('2026-01-18') },
         // gap: not enough amount
         { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-17') },
       ]);
+      // #endregion
 
+      // #region ----- ASSERT -----
       // assert: 2 streaks
       {
         const listRes = await request
@@ -288,10 +302,11 @@ describe('Task Completion Integration', () => {
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(0);
       }
+      // #endregion
     });
 
     it('calculates week-long streak from consecutive weekly goal completions', async () => {
-      // setup
+      // #region ----- SETUP -----
       const createRes = await request
         .post('/tasks')
         .send({
@@ -318,7 +333,9 @@ describe('Task Completion Integration', () => {
         { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-20') },
         { userCharacterId: currentUserCharacterId, taskId: task.id, xpEarned: 0, coinsEarned: 0, amount: 5, completedAt: new Date('2026-01-22') },
       ]);
+      // #endregion
 
+      // #region ----- ASSERT -----
       // assert: 2-week streak (weeks of 1/12 and 1/19, broken by gap week 1/5)
       {
         const listRes = await request
@@ -348,6 +365,7 @@ describe('Task Completion Integration', () => {
         const taskList: TaskResponseDto[] = listRes.body;
         expect(taskList[0].currentStreak).toBe(0);
       }
+      // #endregion
     });
   });
 });

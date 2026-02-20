@@ -38,6 +38,7 @@ describe('Task Integration', () => {
   });
 
   it('POST /tasks - rejects task without blocks', async () => {
+    // #region ----- ACT -----
     await request
       .post('/tasks')
       .send({
@@ -46,10 +47,11 @@ describe('Task Integration', () => {
         icon: 'muscle',
       } as CreateTaskDto)
       .expect(400);
+    // #endregion
   });
 
   it('POST /tasks - creates a task with blocks', async () => {
-    // setup
+    // #region ----- SETUP -----
     const input: CreateTaskDto = {
       name: 'Meditate',
       desc: 'Daily meditation',
@@ -63,11 +65,13 @@ describe('Task Integration', () => {
         { amount: 60, xpReward: 50, coinReward: 25 },
       ],
     };
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.post('/tasks').send(input).expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const task: TaskResponseDto = res.body;
     expect(task.id).toBeDefined();
     expect(task.name).toBe(input.name);
@@ -91,9 +95,11 @@ describe('Task Integration', () => {
       xpReward: 50,
       coinReward: 25,
     });
+    // #endregion
   });
 
   it('POST /tasks - rejects empty blocks array', async () => {
+    // #region ----- ACT -----
     await request
       .post('/tasks')
       .send({
@@ -101,10 +107,11 @@ describe('Task Integration', () => {
         blocks: [],
       } as CreateTaskDto)
       .expect(400);
+    // #endregion
   });
 
   it('PUT /tasks/:id - rejects empty blocks array', async () => {
-    // setup
+    // #region ----- SETUP -----
     const setupRes = await request
       .post('/tasks')
       .send({
@@ -112,8 +119,9 @@ describe('Task Integration', () => {
         blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
       } as CreateTaskDto)
       .expect(201);
+    // #endregion
 
-    // act & assert
+    // #region ----- ACT -----
     await request
       .put(`/tasks/${setupRes.body.id}`)
       .send({
@@ -126,10 +134,11 @@ describe('Task Integration', () => {
         blocks: [],
       } as unknown as UpdateTaskDto)
       .expect(400);
+    // #endregion
   });
 
   it('PUT /tasks/:id - replaces task fields and blocks', async () => {
-    // setup — create task with 3 blocks
+    // #region ----- SETUP -----
     const setupRes = await request
       .post('/tasks')
       .send({
@@ -173,14 +182,16 @@ describe('Task Integration', () => {
         { amount: 90, xpReward: 80, coinReward: 40 },
       ],
     };
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request
       .put(`/tasks/${setupTask.id}`)
       .send(updateInput)
       .expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const updatedTask: TaskResponseDto = res.body;
     expect(updatedTask.id).toBe(setupTask.id);
     expect(updatedTask.name).toBe(updateInput.name);
@@ -218,10 +229,11 @@ describe('Task Integration', () => {
     // goal fields updated
     expect(updatedTask.goalAmount).toBe(300);
     expect(updatedTask.goalPeriod).toBe('month-long');
+    // #endregion
   });
 
   it('PUT /tasks/:id - preserves natural input order for blocks', async () => {
-    // setup — create task with 1 block
+    // #region ----- SETUP -----
     const setupRes = await request
       .post('/tasks')
       .send({
@@ -230,8 +242,9 @@ describe('Task Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const setupTask: TaskResponseDto = setupRes.body;
+    // #endregion
 
-    // act — send [new, existing, new]
+    // #region ----- ACT -----
     const res = await request
       .put(`/tasks/${setupTask.id}`)
       .send({
@@ -253,8 +266,9 @@ describe('Task Integration', () => {
         ],
       } as UpdateTaskDto)
       .expect(200);
+    // #endregion
 
-    // assert — blocks returned in input order
+    // #region ----- ASSERT -----
     const updatedTask: TaskResponseDto = res.body;
     expect(updatedTask.blocks).toHaveLength(3);
     expect(updatedTask.blocks[0]).toMatchObject({
@@ -276,10 +290,11 @@ describe('Task Integration', () => {
       xpReward: 200,
       coinReward: 100,
     });
+    // #endregion
   });
 
   it('GET /tasks/:id - returns a task by id', async () => {
-    // setup
+    // #region ----- SETUP -----
     const input: CreateTaskDto = {
       name: 'Stretching',
       desc: 'Morning stretching routine',
@@ -288,11 +303,13 @@ describe('Task Integration', () => {
     };
     const createRes = await request.post('/tasks').send(input).expect(201);
     const createdTask: TaskResponseDto = createRes.body;
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.get(`/tasks/${createdTask.id}`).expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const fetchedTask: TaskResponseDto = res.body;
     expect(fetchedTask.id).toBe(createdTask.id);
     expect(fetchedTask.userCharacterId).toBe(currentUserCharacterId);
@@ -300,10 +317,11 @@ describe('Task Integration', () => {
     expect(fetchedTask.desc).toBe(input.desc);
     expect(fetchedTask.icon).toBe(input.icon);
     expect(fetchedTask.blocks).toHaveLength(1);
+    // #endregion
   });
 
   it('DELETE /tasks/:id - soft-deletes a task', async () => {
-    // setup
+    // #region ----- SETUP -----
     const setupRes = await request
       .post('/tasks')
       .send({
@@ -312,18 +330,21 @@ describe('Task Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const created: TaskResponseDto = setupRes.body;
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.delete(`/tasks/${created.id}`).expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const deleted: TaskResponseDto = res.body;
     expect(deleted.id).toBe(created.id);
     expect(deleted.name).toBe('To Delete');
+    // #endregion
   });
 
   it('DELETE /tasks/:id - soft-deleted task excluded from GET /tasks', async () => {
-    // setup
+    // #region ----- SETUP -----
     const setupRes = await request
       .post('/tasks')
       .send({
@@ -333,18 +354,21 @@ describe('Task Integration', () => {
       .expect(201);
     const created: TaskResponseDto = setupRes.body;
     await request.delete(`/tasks/${created.id}`).expect(200);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/tasks').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const tasks: TaskResponseDto[] = res.body;
     const found = tasks.find((t) => t.id === created.id);
     expect(found).toBeUndefined();
+    // #endregion
   });
 
   it('PATCH /tasks/reorder - persists new task order', async () => {
-    // setup
+    // #region ----- SETUP -----
     const taskA = await request
       .post('/tasks')
       .send({
@@ -361,23 +385,26 @@ describe('Task Integration', () => {
       .expect(201);
     const idA: number = taskA.body.id;
     const idB: number = taskB.body.id;
+    // #endregion
 
-    // act — reverse order: B before A
+    // #region ----- ACT -----
     await request
       .patch('/tasks/reorder')
       .send({ ids: [idB, idA] })
       .expect(204);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const res = await request.get('/tasks').expect(200);
     const tasks: TaskResponseDto[] = res.body;
     const indexA = tasks.findIndex((t) => t.id === idA);
     const indexB = tasks.findIndex((t) => t.id === idB);
     expect(indexB).toBeLessThan(indexA);
+    // #endregion
   });
 
   it('GET /tasks - returns all tasks with blocks', async () => {
-    // setup
+    // #region ----- SETUP -----
     const input: CreateTaskDto = {
       name: 'Journaling',
       desc: 'Write in journal',
@@ -389,20 +416,23 @@ describe('Task Integration', () => {
     };
     const createRes = await request.post('/tasks').send(input).expect(201);
     const createdTask: TaskResponseDto = createRes.body;
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/tasks').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const tasks: TaskResponseDto[] = res.body;
     expect(tasks).toHaveLength(1);
     expect(tasks[0].id).toBe(createdTask.id);
     expect(tasks[0].name).toBe(input.name);
     expect(tasks[0].blocks).toHaveLength(2);
+    // #endregion
   });
 
   it('POST /tasks - auto-assigns sequential sortOrder per user', async () => {
-    // act
+    // #region ----- ACT -----
     const res1 = await request
       .post('/tasks')
       .send({
@@ -417,16 +447,18 @@ describe('Task Integration', () => {
         blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
       } as CreateTaskDto)
       .expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const task1: TaskResponseDto = res1.body;
     const task2: TaskResponseDto = res2.body;
     expect(task1.sortOrder).toBe(0);
     expect(task2.sortOrder).toBe(1);
+    // #endregion
   });
 
   it('GET /tasks - returns goalCompletedAmount from completions', async () => {
-    // setup — create task with goal and two blocks
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -441,8 +473,9 @@ describe('Task Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;
+    // #endregion
 
-    // act — complete both blocks
+    // #region ----- ACT -----
     await request
       .post('/task-completions')
       .send({ blockId: task.blocks[0].id })
@@ -453,12 +486,14 @@ describe('Task Integration', () => {
       .expect(201);
 
     const res = await request.get('/tasks').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const tasks: TaskResponseDto[] = res.body;
     const fetched = tasks.find((t) => t.id === task.id)!;
     expect(fetched.goalCompletedAmount).toBe(45);
     expect(fetched.goalAmount).toBe(100);
+    // #endregion
   });
 
   it('goalCompletedAmount - uses client timezone for period boundaries', async () => {
@@ -467,7 +502,7 @@ describe('Task Integration', () => {
     // With UTC: completion is on May 15 -> counts in daily total.
     // With America/New_York: completion is on May 14 -> does NOT count.
 
-    // setup
+    // #region ----- SETUP -----
     const referenceTime = new Date('2026-05-15T12:00:00Z');
 
     const createRes = await request
@@ -490,8 +525,9 @@ describe('Task Integration', () => {
       coinsEarned: 5,
       completedAt: new Date('2026-05-15T03:00:00Z'),
     });
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const repo = app.get(TaskCompletionRepository);
     const utcResult = await repo.sumAmountsByTaskIds(
       [task.id],
@@ -503,9 +539,11 @@ describe('Task Integration', () => {
       'America/New_York',
       referenceTime,
     );
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     expect(utcResult.get(task.id)).toBe(30);
     expect(nyResult.get(task.id)).toBeUndefined();
+    // #endregion
   });
 });
