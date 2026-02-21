@@ -1141,6 +1141,44 @@
           "InventoryItem"
         ]
       }
+    },
+    "/task-log": {
+      "get": {
+        "operationId": "TaskLogController_getTaskLog",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskLogResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "TaskLog"
+        ]
+      }
     }
   },
   "info": {
@@ -2000,6 +2038,80 @@
           "itemId",
           "source",
           "usedAt"
+        ]
+      },
+      "TaskLogTaskDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "number"
+          },
+          "taskName": {
+            "type": "string"
+          },
+          "taskIcon": {
+            "type": "string",
+            "nullable": true
+          },
+          "goalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "count",
+              "minutes"
+            ]
+          }
+        },
+        "required": [
+          "taskId",
+          "taskName",
+          "amountUnit"
+        ]
+      },
+      "TaskLogDayEntryDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "completions": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "completions"
+        ]
+      },
+      "TaskLogResponseDto": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskLogTaskDto"
+            }
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskLogDayEntryDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "tasks",
+          "days"
         ]
       }
     }
