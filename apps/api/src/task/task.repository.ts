@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql, type SQL } from 'drizzle-orm';
 import { taskBlocks, tasks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
@@ -14,6 +14,8 @@ export class TaskRepository {
     userCharacterId?: number;
     includeBlocks?: boolean;
     includeCompletions?: boolean;
+    columns?: Partial<Record<keyof TaskRow, boolean>>;
+    orderBy?: SQL[];
   }) {
     const conditions = [isNull(tasks.deletedAt)];
     if (options?.userCharacterId != null) {
@@ -21,8 +23,9 @@ export class TaskRepository {
     }
 
     const rows = await this.db.query.tasks.findMany({
+      ...(options?.columns && { columns: options.columns }),
       where: and(...conditions),
-      orderBy: [asc(tasks.sortOrder), asc(tasks.id)],
+      orderBy: options?.orderBy ?? [asc(tasks.sortOrder), asc(tasks.id)],
       with: {
         ...(options?.includeBlocks && {
           blocks: { orderBy: asc(taskBlocks.sortOrder) },

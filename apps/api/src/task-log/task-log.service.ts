@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { TaskLogRepository } from './task-log.repository';
+import { TaskRepository } from '../task/task.repository';
+import { TaskCompletionRepository } from '../task-completion/task-completion.repository';
 import type {
   TaskLogResponseDto,
   TaskLogDayEntryDto,
@@ -8,7 +9,10 @@ import type {
 
 @Injectable()
 export class TaskLogService {
-  constructor(private readonly taskLogRepository: TaskLogRepository) {}
+  constructor(
+    private readonly taskRepository: TaskRepository,
+    private readonly taskCompletionRepository: TaskCompletionRepository,
+  ) {}
 
   async getTaskLog(
     userCharacterId: number,
@@ -21,14 +25,24 @@ export class TaskLogService {
       : todayInTimezone(timezone);
     const startDate = subtractDays(endDate, pageSize - 1);
 
-    const activeTasks =
-      await this.taskLogRepository.getActiveTasks(userCharacterId);
+    const activeTasks = await this.taskRepository.findAll({
+      userCharacterId,
+      columns: {
+        id: true,
+        name: true,
+        icon: true,
+        goalAmount: true,
+        goalPeriod: true,
+        amountUnit: true,
+      },
+    });
 
     const tasks: TaskLogTaskDto[] = activeTasks.map((t) => ({
       taskId: t.id,
       taskName: t.name,
       taskIcon: t.icon,
       goalAmount: t.goalAmount,
+      goalPeriod: t.goalPeriod ?? null,
       amountUnit: t.amountUnit,
     }));
 
@@ -41,12 +55,13 @@ export class TaskLogService {
     }
 
     const taskIds = activeTasks.map((t) => t.id);
-    const completionMap = await this.taskLogRepository.getCompletionsByDay(
-      taskIds,
-      startDate,
-      endDate,
-      timezone,
-    );
+    const completionMap =
+      await this.taskCompletionRepository.getCompletionsByDay(
+        taskIds,
+        startDate,
+        endDate,
+        timezone,
+      );
 
     const days: TaskLogDayEntryDto[] = [];
     let d = endDate;

@@ -1,32 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
-import { tasks, taskCompletions } from '@life-rpg/database';
+import { and, inArray, isNull, sql } from 'drizzle-orm';
+import { taskCompletions } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 
 @Injectable()
 export class TaskLogRepository {
   constructor(@Inject('DATABASE') private db: Db) {}
 
-  async getActiveTasks(userCharacterId: number) {
-    return this.db
-      .select({
-        id: tasks.id,
-        name: tasks.name,
-        icon: tasks.icon,
-        goalAmount: tasks.goalAmount,
-        amountUnit: tasks.amountUnit,
-        sortOrder: tasks.sortOrder,
-      })
-      .from(tasks)
-      .where(
-        and(
-          eq(tasks.userCharacterId, userCharacterId),
-          isNull(tasks.deletedAt),
-        ),
-      )
-      .orderBy(tasks.sortOrder, tasks.id);
-  }
-
+  // Returns a Map keyed by "taskId:YYYY-MM-DD" with summed  completion amounts per day
   async getCompletionsByDay(
     taskIds: number[],
     startDate: string,
@@ -35,9 +16,11 @@ export class TaskLogRepository {
   ): Promise<Map<string, number>> {
     if (taskIds.length === 0) return new Map();
 
+    // Extract the date portion of completedAt in the caller's timezone
     const tz = sql`${timezone}`;
     const day = sql<string>`to_char((${taskCompletions.completedAt} AT TIME ZONE ${tz})::date, 'YYYY-MM-DD')`;
 
+    // Sum amounts grouped by task and day within the date range
     const rows = await this.db
       .select({
         taskId: taskCompletions.taskId,
@@ -55,6 +38,7 @@ export class TaskLogRepository {
       )
       .groupBy(taskCompletions.taskId, sql`2`);
 
+    // Convert rows to a lookup map
     const map = new Map<string, number>();
     for (const row of rows) {
       map.set(`${row.taskId}:${row.day}`, Number(row.total));

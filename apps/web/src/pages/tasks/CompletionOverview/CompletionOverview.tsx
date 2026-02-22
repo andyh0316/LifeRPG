@@ -19,7 +19,7 @@ import TaskIcon from '@/components/icons/TaskIcon';
 type TaskLogTask = components['schemas']['TaskLogTaskDto'];
 type TaskLogDay = components['schemas']['TaskLogDayEntryDto'];
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 30;
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function formatDate(dateStr: string): string {
