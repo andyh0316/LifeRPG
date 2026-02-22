@@ -2,10 +2,9 @@ import 'dotenv/config';
 import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { createDb, users, userCharacter, type Db } from '@life-rpg/database';
-import { TransactionRollbackError } from 'drizzle-orm';
+import { asc, eq, TransactionRollbackError } from 'drizzle-orm';
 import cookieParser from 'cookie-parser';
 import supertest from 'supertest';
-import { eq } from 'drizzle-orm';
 import { AppModule } from '../src/app.module';
 import { SessionService } from '../src/auth/session.service';
 
@@ -93,28 +92,18 @@ export async function createIntegrationApp(): Promise<{
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.init();
 
-  // Seed a test user (idempotent — skips if email already exists)
-  await realDb
-    .insert(users)
-    .values(TEST_USER)
-    .onConflictDoNothing({ target: users.email });
-
-  // Look up the test user and create a session directly
+  // Look up the test user and character (seeded by globalSetup)
   const [testUser] = await realDb
     .select({ id: users.id })
     .from(users)
     .where(eq(users.email, TEST_USER.email));
 
-  // Ensure a character exists for the test user (required by session validation)
-  await realDb
-    .insert(userCharacter)
-    .values({ userId: testUser.id, name: 'Test Character' })
-    .onConflictDoNothing();
-
   const [character] = await realDb
     .select({ id: userCharacter.id })
     .from(userCharacter)
-    .where(eq(userCharacter.userId, testUser.id));
+    .where(eq(userCharacter.userId, testUser.id))
+    .orderBy(asc(userCharacter.id))
+    .limit(1);
 
   const sessionService = app.get(SessionService);
   const { raw } = await sessionService.createSession(testUser);

@@ -180,13 +180,13 @@ export default function InventoryItemCard({
             fontWeight: 700,
             fontSize: '1.1rem',
             color: GAME_COLORS.textPrimary,
-            mb: 1,
+            mb: 0.5,
           }}
         >
           {itemName}
         </Typography>
 
-        {item?.desc && (
+        {item && (
           <Typography
             sx={{
               fontSize: '0.85rem',
@@ -194,22 +194,23 @@ export default function InventoryItemCard({
               mb: 1,
             }}
           >
-            {item.desc}
-          </Typography>
-        )}
-
-        {item && (
-          <Typography
-            sx={{
-              fontSize: '0.85rem',
-              color: GAME_COLORS.textSecondary,
-              mb: 3,
-            }}
-          >
             {item.amount}
             {UNIT_LABEL[item.amountUnit]
               ? ` ${UNIT_LABEL[item.amountUnit]}`
               : ` ${item.amountUnit}`}
+          </Typography>
+        )}
+
+        {item?.desc && (
+          <Typography
+            sx={{
+              fontSize: '0.85rem',
+              color: GAME_COLORS.textSecondary,
+              whiteSpace: 'pre-line',
+              mb: 3,
+            }}
+          >
+            {item.desc}
           </Typography>
         )}
 

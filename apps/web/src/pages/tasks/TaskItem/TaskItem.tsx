@@ -35,9 +35,11 @@ export default function TaskItem({
   goalAmount,
   goalPeriod,
   goalCompletedAmount,
+  currentStreak,
   blocks,
   userCharacterId,
   index = 0,
+  forDate,
 }: TaskItemProps) {
   const {
     attributes,
@@ -115,7 +117,19 @@ export default function TaskItem({
   const handleConfirm = () => {
     if (!confirmBlock) return;
     setPreCompletionXp(progress?.daily.current ?? 0);
-    completeBlock.mutate({ body: { blockId: confirmBlock.id } });
+    const [y, m, d] = forDate.split('-').map(Number);
+    const now = new Date();
+    const completedAt = new Date(
+      y,
+      m - 1,
+      d,
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds(),
+    ).toISOString();
+    completeBlock.mutate({
+      body: { blockId: confirmBlock.id, completedAt },
+    });
   };
 
   const handleCloseDialog = () => {
@@ -206,14 +220,21 @@ export default function TaskItem({
               {desc}
             </Typography>
           )}
-          {goalAmount != null && goalPeriod && (
-            <Typography
-              sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
-            >
-              {goalCompletedAmount ?? 0} / {goalAmount} {amountUnit}{' '}
-              {PERIOD_LABEL[goalPeriod]}
-            </Typography>
-          )}
+          <Typography
+            sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
+          >
+            {goalCompletedAmount ?? 0}
+            {goalAmount != null && ` / ${goalAmount}`} {amountUnit}{' '}
+            {goalPeriod && PERIOD_LABEL[goalPeriod]}
+            {currentStreak != null && currentStreak >= 2 && (
+              <Typography
+                component="span"
+                sx={{ fontSize: '0.8rem', color: '#ef6c00', ml: 1 }}
+              >
+                🔥 {currentStreak}
+              </Typography>
+            )}
+          </Typography>
         </Box>
 
         <IconButton

@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import AddIcon from '@mui/icons-material/Add';
-import TrackChangesIcon from '@mui/icons-material/TrackChanges';
-import UndoIcon from '@mui/icons-material/Undo';
 import List from '@mui/material/List';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
 import {
   DndContext,
@@ -29,20 +26,29 @@ import {
 import GoalsEditDialog from '@/components/GoalsEditDialog';
 import GoalsProgress from '@/components/GoalsProgress';
 import { useToast } from '@/components/toast';
-import {
-  GAME_SHADOWS,
-  sxPageTitle,
-  sxAccentButton,
-  sxOutlinedButton,
-} from '@/theme/gameTheme';
+import { GAME_COLORS, sxPageTitle } from '@/theme/gameTheme';
 import TaskItem from '../TaskItem';
+import TaskListMenu from './TaskListMenu';
 
-export default function TaskList() {
+interface TaskListProps {
+  forDate: string;
+  dayOffset: number;
+  onDayOffsetChange: (offset: number) => void;
+}
+
+export default function TaskList({
+  forDate,
+  dayOffset,
+  onDayOffsetChange,
+}: TaskListProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { data: tasks = [] } = $api.useQuery('get', '/tasks');
+  const { data: tasks = [] } = $api.useQuery('get', '/tasks', {
+    params: { query: { forDate } },
+    placeholderData: keepPreviousData,
+  });
 
   const [goalsOpen, setGoalsOpen] = useState(false);
 
@@ -118,38 +124,21 @@ export default function TaskList() {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Typography sx={{ ...sxPageTitle, flex: 1 }}>Quests</Typography>
 
-        <Tooltip title="Undo last completion">
-          <IconButton
-            size="small"
-            disabled={undoCompletion.isPending}
-            onClick={() => undoCompletion.mutate({})}
-          >
-            <UndoIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <DateNav
+          forDate={forDate}
+          dayOffset={dayOffset}
+          onDayOffsetChange={onDayOffsetChange}
+        />
 
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/tasks/create')}
-          sx={{ ...sxAccentButton, boxShadow: GAME_SHADOWS.button }}
-        >
-          New Quest
-        </Button>
-
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<TrackChangesIcon />}
-          onClick={() => setGoalsOpen(true)}
-          sx={sxOutlinedButton}
-        >
-          Goals
-        </Button>
+        <TaskListMenu
+          onUndo={() => undoCompletion.mutate({})}
+          undoPending={undoCompletion.isPending}
+          onNewQuest={() => navigate('/tasks/create')}
+          onGoals={() => setGoalsOpen(true)}
+        />
       </Box>
 
-      <GoalsProgress />
+      <GoalsProgress forDate={forDate} />
 
       <DndContext
         sensors={sensors}
@@ -162,7 +151,13 @@ export default function TaskList() {
         >
           <List disablePadding>
             {tasks.map((task, index) => (
-              <TaskItem key={task.id} {...task} index={index} />
+              <TaskItem
+                key={task.id}
+                {...task}
+                goalCompletedAmount={task.goalCompletedAmount ?? 0}
+                index={index}
+                forDate={forDate}
+              />
             ))}
           </List>
         </SortableContext>
@@ -170,5 +165,54 @@ export default function TaskList() {
 
       <GoalsEditDialog open={goalsOpen} onClose={() => setGoalsOpen(false)} />
     </>
+  );
+}
+
+function formatDateLabel(forDate: string): string {
+  return new Date(forDate + 'T00:00:00').toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function DateNav({
+  forDate,
+  dayOffset,
+  onDayOffsetChange,
+}: {
+  forDate: string;
+  dayOffset: number;
+  onDayOffsetChange: (offset: number) => void;
+}) {
+  const isToday = dayOffset === 0;
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <IconButton size="small" onClick={() => onDayOffsetChange(dayOffset + 1)}>
+        <ChevronLeftIcon fontSize="small" />
+      </IconButton>
+      <Typography
+        sx={{
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          color: isToday ? GAME_COLORS.textSecondary : GAME_COLORS.accent,
+          cursor: isToday ? 'default' : 'pointer',
+          userSelect: 'none',
+          minWidth: 100,
+          textAlign: 'center',
+        }}
+        onClick={() => !isToday && onDayOffsetChange(0)}
+      >
+        {formatDateLabel(forDate)}
+      </Typography>
+      <IconButton
+        size="small"
+        disabled={isToday}
+        onClick={() => onDayOffsetChange(dayOffset - 1)}
+      >
+        <ChevronRightIcon fontSize="small" />
+      </IconButton>
+    </Box>
   );
 }

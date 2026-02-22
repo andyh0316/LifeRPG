@@ -1,7 +1,18 @@
+// prettier-ignore
 import { INestApplication } from '@nestjs/common';
-import { taskCompletions, userCharacter, type Db } from '@life-rpg/database';
+import {
+  tasks,
+  taskCompletions,
+  userCharacter,
+  type Db,
+} from '@life-rpg/database';
 import { eq } from 'drizzle-orm';
 import { TestAgent, createIntegrationApp } from '../../test/setup-integration';
+import {
+  createTestTask,
+  createTestUser,
+  createTestCharacter,
+} from '../../test/factories';
 import { CreateTaskDto } from '../task/dto/create-task.dto';
 import { TaskResponseDto } from '../task/dto/task-response.dto';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
@@ -38,7 +49,7 @@ describe('Task Completion Integration', () => {
   });
 
   it('POST /task-completions - completes a block and returns earned rewards', async () => {
-    // setup
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -49,25 +60,27 @@ describe('Task Completion Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;
+    const completedAt = '2026-02-18T10:00:00.000Z';
 
-    // act
+    // #region ----- ACT -----
     const res = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({ blockId: task.blocks[0].id, completedAt })
       .expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const completion: TaskCompletionResponseDto = res.body;
     expect(completion.id).toBeDefined();
     expect(completion.taskId).toBe(task.id);
     expect(completion.userCharacterId).toBe(currentUserCharacterId);
     expect(completion.xpEarned).toBe(15);
     expect(completion.coinsEarned).toBe(10);
-    expect(completion.completedAt).toBeDefined();
+    expect(completion.completedAt).toBe(completedAt);
   });
 
   it('POST /task-completions - each block returns its own rewards', async () => {
-    // setup
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -80,18 +93,26 @@ describe('Task Completion Integration', () => {
       } as CreateTaskDto)
       .expect(201);
     const task: TaskResponseDto = createRes.body;
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res1 = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: '2026-02-18T10:00:00.000Z',
+      })
       .expect(201);
     const res2 = await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[1].id })
+      .send({
+        blockId: task.blocks[1].id,
+        completedAt: '2026-02-18T10:05:00.000Z',
+      })
       .expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const c1: TaskCompletionResponseDto = res1.body;
     expect(c1.xpEarned).toBe(10);
     expect(c1.coinsEarned).toBe(5);
@@ -99,57 +120,11 @@ describe('Task Completion Integration', () => {
     const c2: TaskCompletionResponseDto = res2.body;
     expect(c2.xpEarned).toBe(25);
     expect(c2.coinsEarned).toBe(12);
+    // #endregion
   });
 
-  // it('GET /task-completions/weekly-tracker - returns daily totals per task', async () => {
-  //   // setup
-  //   const taskRes = await request
-  //     .post('/tasks')
-  //     .send({
-  //       name: 'Meditate',
-  //       icon: '🧘',
-  //       amountUnit: 'minutes',
-  //       blocks: [
-  //         { amount: 15, xpReward: 10, coinReward: 5 },
-  //         { amount: 30, xpReward: 20, coinReward: 10 },
-  //       ],
-  //     } as CreateTaskDto)
-  //     .expect(201);
-  //   const task: TaskResponseDto = taskRes.body;
-
-  //   // complete the 15-min block twice and the 30-min block once (today)
-  //   await request
-  //     .post('/task-completions')
-  //     .send({ blockId: task.blocks[0].id })
-  //     .expect(201);
-  //   await request
-  //     .post('/task-completions')
-  //     .send({ blockId: task.blocks[0].id })
-  //     .expect(201);
-  //   await request
-  //     .post('/task-completions')
-  //     .send({ blockId: task.blocks[1].id })
-  //     .expect(201);
-
-  //   // act
-  //   const today = new Date();
-  //   const monday = new Date(today);
-  //   monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-  //   const weekStart = monday.toISOString().slice(0, 10);
-
-  //   const res = await request
-  //     .get('/task-completions/weekly-tracker')
-  //     .query({ weekStart })
-  //     .expect(200);
-
-  //   // assert
-  //   const body: WeeklyTrackerTaskDto[] = res.body;
-  //   expect(Array.isArray(body)).toBe(true);
-  //   // TODO: assert dailyTotals once the endpoint is implemented
-  // });
-
   it('GET /task-completions - returns completions for the current user', async () => {
-    // setup
+    // #region ----- SETUP -----
     const createRes = await request
       .post('/tasks')
       .send({
@@ -163,91 +138,123 @@ describe('Task Completion Integration', () => {
     const task: TaskResponseDto = createRes.body;
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
+      .send({
+        blockId: task.blocks[0].id,
+        completedAt: '2026-02-18T10:00:00.000Z',
+      })
       .expect(201);
     await request
       .post('/task-completions')
-      .send({ blockId: task.blocks[1].id })
+      .send({
+        blockId: task.blocks[1].id,
+        completedAt: '2026-02-18T10:05:00.000Z',
+      })
       .expect(201);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/task-completions').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const completions: TaskCompletionResponseDto[] = res.body;
     expect(completions).toHaveLength(2);
     expect(completions[0].userCharacterId).toBe(currentUserCharacterId);
     expect(completions[1].userCharacterId).toBe(currentUserCharacterId);
+    // #endregion
   });
 
-  it('POST /task-completions/undo - deletes most recent completion and reverses rewards', async () => {
-    // setup
-    const createRes = await request
-      .post('/tasks')
-      .send({
-        name: 'Undo Test',
-        blocks: [{ amount: 1, xpReward: 20, coinReward: 10 }],
-      } as CreateTaskDto)
-      .expect(201);
-    const task: TaskResponseDto = createRes.body;
+  describe('undo', () => {
+    // prettier-ignore
+    it('deletes most recent completion and reverses rewards', async () => {
+      // #region ----- SETUP -----
+      const task = await createTestTask(request, { name: 'Undo Test', blocks: [{ amount: 1, xpReward: 20, coinReward: 10 }] });
 
-    const [charBefore] = await db
-      .select({ xp: userCharacter.xp, coins: userCharacter.coins })
-      .from(userCharacter)
-      .where(eq(userCharacter.id, currentUserCharacterId));
+      const [charBefore] = await db
+        .select({ xp: userCharacter.xp, coins: userCharacter.coins })
+        .from(userCharacter)
+        .where(eq(userCharacter.id, currentUserCharacterId));
 
-    await request
-      .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
-      .expect(201);
+      await request
+        .post('/task-completions')
+        .send({ blockId: task.blocks[0].id, completedAt: new Date().toISOString() })
+        .expect(201);
+      // #endregion
 
-    // act
-    const res = await request.post('/task-completions/undo').expect(200);
+      // #region ----- ACT -----
+      const res = await request.post('/task-completions/undo').expect(200);
+      // #endregion
 
-    // assert
-    const undone: TaskCompletionResponseDto = res.body;
-    expect(undone.taskId).toBe(task.id);
-    expect(undone.xpEarned).toBe(20);
-    expect(undone.coinsEarned).toBe(10);
+      // #region ----- ASSERT -----
+      const undone: TaskCompletionResponseDto = res.body;
+      expect(undone.taskId).toBe(task.id);
+      expect(undone.xpEarned).toBe(20);
+      expect(undone.coinsEarned).toBe(10);
 
-    const [charAfter] = await db
-      .select({ xp: userCharacter.xp, coins: userCharacter.coins })
-      .from(userCharacter)
-      .where(eq(userCharacter.id, currentUserCharacterId));
-    expect(charAfter.xp).toBe(charBefore.xp);
-    expect(charAfter.coins).toBe(charBefore.coins);
+      const [charAfter] = await db
+        .select({ xp: userCharacter.xp, coins: userCharacter.coins })
+        .from(userCharacter)
+        .where(eq(userCharacter.id, currentUserCharacterId));
+      expect(charAfter.xp).toBe(charBefore.xp);
+      expect(charAfter.coins).toBe(charBefore.coins);
 
-    const listRes = await request.get('/task-completions').expect(200);
-    expect(listRes.body).toHaveLength(0);
-  });
+      const listRes = await request.get('/task-completions').expect(200);
+      expect(listRes.body).toHaveLength(0);
 
-  it('POST /task-completions/undo - returns 404 when no completions exist', async () => {
-    // act + assert
-    await request.post('/task-completions/undo').expect(404);
-  });
+      // undo again after backdating — should return 400 when older than 24h
+      await db.insert(taskCompletions).values({ userCharacterId: currentUserCharacterId, taskId: task.id, amount: 1, xpEarned: 20, coinsEarned: 10, completedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
 
-  it('POST /task-completions/undo - returns 400 when most recent completion is older than 24h', async () => {
-    // setup
-    const createRes = await request
-      .post('/tasks')
-      .send({
-        name: 'Old Task',
-        blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }],
-      } as CreateTaskDto)
-      .expect(201);
-    const task: TaskResponseDto = createRes.body;
+      await request.post('/task-completions/undo').expect(400);
+      // #endregion
+    });
 
-    await request
-      .post('/task-completions')
-      .send({ blockId: task.blocks[0].id })
-      .expect(201);
+    // prettier-ignore
+    it('undoes by highest ID, not by completedAt', async () => {
+      // #region ----- SETUP -----
+      const task = await createTestTask(request, { name: 'Undo Order', blocks: [{ amount: 1, xpReward: 10, coinReward: 5 }] });
 
-    // backdate the completion to 25 hours ago
-    await db
-      .update(taskCompletions)
-      .set({ completedAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
+      const completionA = await request
+        .post('/task-completions')
+        .send({ blockId: task.blocks[0].id, completedAt: new Date().toISOString() })
+        .expect(201);
 
-    // act + assert
-    await request.post('/task-completions/undo').expect(400);
+      const completionB = await request
+        .post('/task-completions')
+        .send({ blockId: task.blocks[0].id, completedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString() })
+        .expect(201);
+      // #endregion
+
+      // #region ----- ACT -----
+      const res = await request.post('/task-completions/undo').expect(200);
+      // #endregion
+
+      // #region ----- ASSERT -----
+      const undone: TaskCompletionResponseDto = res.body;
+      expect(undone.id).toBe(completionB.body.id);
+
+      const listRes = await request.get('/task-completions').expect(200);
+      expect(listRes.body).toHaveLength(1);
+      expect(listRes.body[0].id).toBe(completionA.body.id);
+      // #endregion
+    });
+
+    // prettier-ignore
+    it('only undoes current user\'s completions', async () => {
+      // #region ----- SETUP -----
+      const otherUser = await createTestUser(db, { email: 'other-undo@test.com', firstName: 'Other' });
+      const otherChar = await createTestCharacter(db, otherUser.id);
+      const [otherTask] = await db.insert(tasks).values({ userCharacterId: otherChar.id, name: 'Other Task' }).returning();
+      await db.insert(taskCompletions).values({ userCharacterId: otherChar.id, taskId: otherTask.id, amount: 1, xpEarned: 10, coinsEarned: 5, completedAt: new Date() });
+      // #endregion
+
+      // #region ----- ACT -----
+      await request.post('/task-completions/undo').expect(404);
+      // #endregion
+
+      // #region ----- ASSERT -----
+      const remaining = await db.select().from(taskCompletions).where(eq(taskCompletions.userCharacterId, otherChar.id));
+      expect(remaining).toHaveLength(1);
+      // #endregion
+    });
   });
 });

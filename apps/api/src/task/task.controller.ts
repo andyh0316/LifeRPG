@@ -8,10 +8,11 @@ import {
   Post,
   Put,
   Param,
+  Query,
   Body,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiCreatedResponse, ApiQuery } from '@nestjs/swagger';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -28,8 +29,15 @@ export class TaskController {
 
   @Get()
   @ApiOkResponse({ type: [TaskResponseDto] })
-  findAll(@CurrentUser() user: AuthUser, @ClientTimezone() timezone: string) {
-    return this.taskService.findAll(user.userCharacterId, timezone);
+  @ApiQuery({ name: 'forDate', required: false })
+  findAll(
+    @CurrentUser() user: AuthUser,
+    @ClientTimezone() timezone: string,
+    @Query('forDate') forDate?: string,
+  ) {
+    const date =
+      forDate ?? new Date().toLocaleDateString('en-CA', { timeZone: timezone });
+    return this.taskService.findAll(user.userCharacterId, timezone, date);
   }
 
   @Get('templates')

@@ -10,7 +10,6 @@ import { tasks, taskCompletions, taskBlocks } from '@life-rpg/database';
 import type { Db } from '@life-rpg/database';
 import { UserCharacterService } from '../user-character/user-character.service';
 import { TaskCompletionResponseDto } from './dto/task-completion-response.dto';
-import { WeeklyTrackerTaskDto } from './dto/weekly-tracker-response.dto';
 
 const completionSelect = {
   id: taskCompletions.id,
@@ -36,20 +35,10 @@ export class TaskCompletionService {
       .orderBy(desc(taskCompletions.completedAt));
   }
 
-  // Marks a task block as completed for a user. Looks up the block's rewards,
-  // records a completion entry, and credits the user's XP and coins—all
-  // within a single transaction so rewards stay consistent.
-  async getWeeklyTracker(
-    _userCharacterId: number,
-    _weekStart: string,
-  ): Promise<WeeklyTrackerTaskDto[]> {
-    // TODO: query completions grouped by task + day, build dailyTotals
-    return [];
-  }
-
   async complete(
     blockId: number,
     userCharacterId: number,
+    completedAt: Date,
   ): Promise<TaskCompletionResponseDto> {
     return this.db.transaction(async (tx) => {
       const [block] = await tx
@@ -67,7 +56,9 @@ export class TaskCompletionService {
       }
 
       const [task] = await tx
-        .select({ userCharacterId: tasks.userCharacterId })
+        .select({
+          userCharacterId: tasks.userCharacterId,
+        })
         .from(tasks)
         .where(eq(tasks.id, block.taskId));
 
@@ -84,6 +75,7 @@ export class TaskCompletionService {
           userCharacterId,
           xpEarned: block.xpReward,
           coinsEarned: block.coinReward,
+          completedAt,
         })
         .returning(completionSelect);
 
@@ -104,7 +96,7 @@ export class TaskCompletionService {
       .select(completionSelect)
       .from(taskCompletions)
       .where(eq(taskCompletions.userCharacterId, userCharacterId))
-      .orderBy(desc(taskCompletions.completedAt))
+      .orderBy(desc(taskCompletions.id))
       .limit(1);
 
     if (!latest) {

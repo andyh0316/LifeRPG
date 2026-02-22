@@ -33,10 +33,11 @@ describe('Auth Integration', () => {
   });
 
   it('GET /auth/me - returns the authenticated user', async () => {
-    // act
+    // #region ----- ACT -----
     const res = await request.get('/auth/me').expect(200);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const me: AuthUserDto = res.body;
     expect(me).toEqual(
       expect.objectContaining({
@@ -44,18 +45,21 @@ describe('Auth Integration', () => {
         email: 'test@test.com',
       }),
     );
+    // #endregion
   });
 
   it('GET /auth/me - returns 401 without cookies', async () => {
-    // setup
+    // #region ----- SETUP -----
     const unauthenticatedRequest = supertest(app.getHttpServer());
+    // #endregion
 
-    // act & assert
+    // #region ----- ACT -----
     await unauthenticatedRequest.get('/auth/me').expect(401);
+    // #endregion
   });
 
   it('POST /auth/logout - clears cookie and revokes session', async () => {
-    // setup
+    // #region ----- SETUP -----
     await db
       .insert(users)
       .values({ email: 'logout@test.com', firstName: 'Logout' })
@@ -68,11 +72,13 @@ describe('Auth Integration', () => {
     const { raw } = await sessionService.createSession(user);
     const agent = supertest.agent(app.getHttpServer());
     agent.set('Cookie', `session_token=${raw}`);
+    // #endregion
 
-    // act
+    // #region ----- ACT -----
     const res = await agent.post('/auth/logout').expect(201);
+    // #endregion
 
-    // assert
+    // #region ----- ASSERT -----
     const cookies = res.headers['set-cookie'] as unknown as string[];
     expect(
       cookies.some(
@@ -81,5 +87,6 @@ describe('Auth Integration', () => {
       ),
     ).toBe(true);
     await agent.get('/auth/me').expect(401);
+    // #endregion
   });
 });

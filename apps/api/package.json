@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "nest build",
+    "build": "pnpm generate:spec && pnpm --filter @life-rpg/api-client generate:types && nest build",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "pnpm generate:spec && pnpm --filter @life-rpg/api-client generate:types && nest start --watch",
     "start:prod": "node dist/main",
     "generate:spec": "npx ts-node scripts/generate-spec.ts",
     "pretest": "cd ../.. && pnpm --filter @life-rpg/database build && pnpm test-db:reset",

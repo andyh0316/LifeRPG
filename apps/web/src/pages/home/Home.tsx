@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import { $api } from '@life-rpg/api-client';
 import { formatCountdown } from '../../utils/formatCountdown';
 import { GAME_COLORS, sxPageTitle, sxCard } from '@/theme/gameTheme';
+import CompletionOverview from '../tasks/CompletionOverview';
 
 export default function Home() {
   const { data: users = [] } = $api.useQuery('get', '/users');
@@ -18,10 +19,20 @@ export default function Home() {
   }, [tokenExpiresAt]);
 
   return (
-    <Box sx={{ maxWidth: 600 }}>
+    <Box>
       <Typography sx={{ ...sxPageTitle, mb: 2 }}>Home</Typography>
 
-      <Box sx={{ ...sxCard, p: 2, fontFamily: 'monospace', fontSize: 14 }}>
+      <CompletionOverview />
+
+      <Box
+        sx={{
+          ...sxCard,
+          p: 2,
+          mt: 3,
+          fontFamily: 'monospace',
+          fontSize: 14,
+        }}
+      >
         <Typography
           sx={{
             fontWeight: 600,

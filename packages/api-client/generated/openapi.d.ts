@@ -196,22 +196,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/task-completions/weekly-tracker": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["TaskCompletionController_getWeeklyTracker"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/user-character/summary": {
         parameters: {
             query?: never;
@@ -404,6 +388,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/task-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["TaskLogController_getTaskLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -453,7 +453,8 @@ export interface components {
             goalAmount?: number | null;
             /** @enum {string|null} */
             goalPeriod?: "day-long" | "week-long" | "month-long" | null;
-            goalCompletedAmount?: number | null;
+            goalCompletedAmount: number;
+            currentStreak: number;
             blocks: components["schemas"]["TaskBlockResponseDto"][];
         };
         CreateTaskBlockDto: {
@@ -517,16 +518,11 @@ export interface components {
         };
         CompleteTaskDto: {
             blockId: number;
-        };
-        WeeklyTrackerTaskDto: {
-            id: number;
-            name: string;
-            icon?: string | null;
-            /** @enum {string} */
-            amountUnit: "count" | "minutes";
-            sortOrder: number;
-            /** @description Mon–Sun totals (7 elements) */
-            dailyTotals: number[];
+            /**
+             * @description Client-local completion timestamp (ISO 8601)
+             * @example 2026-02-18T10:00:00+08:00
+             */
+            completedAt: string;
         };
         CharacterSummaryItemDto: {
             id: number;
@@ -636,6 +632,25 @@ export interface components {
             /** @enum {string} */
             source: "shop" | "drop" | "achievement" | "gift";
             usedAt: string | null;
+        };
+        TaskLogTaskDto: {
+            taskId: number;
+            taskName: string;
+            taskIcon?: string | null;
+            goalAmount?: number | null;
+            /** @enum {string|null} */
+            goalPeriod?: "day-long" | "week-long" | "month-long" | null;
+            /** @enum {string} */
+            amountUnit: "count" | "minutes";
+        };
+        TaskLogDayEntryDto: {
+            date: string;
+            completions: number[];
+        };
+        TaskLogResponseDto: {
+            tasks: components["schemas"]["TaskLogTaskDto"][];
+            days: components["schemas"]["TaskLogDayEntryDto"][];
+            nextCursor?: string | null;
         };
     };
     responses: never;
@@ -835,7 +850,9 @@ export interface operations {
     };
     TaskController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                forDate?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1043,27 +1060,6 @@ export interface operations {
             };
         };
     };
-    TaskCompletionController_getWeeklyTracker: {
-        parameters: {
-            query: {
-                weekStart: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WeeklyTrackerTaskDto"][];
-                };
-            };
-        };
-    };
     UserCharacterController_getSummary: {
         parameters: {
             query?: never;
@@ -1150,7 +1146,9 @@ export interface operations {
     };
     UserCharacterController_getGoalsProgress: {
         parameters: {
-            query?: never;
+            query?: {
+                forDate?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1532,6 +1530,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InventoryItemResponseDto"];
+                };
+            };
+        };
+    };
+    TaskLogController_getTaskLog: {
+        parameters: {
+            query?: {
+                pageSize?: number;
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskLogResponseDto"];
                 };
             };
         };

@@ -219,7 +219,16 @@
     "/tasks": {
       "get": {
         "operationId": "TaskController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "forDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -487,40 +496,6 @@
         ]
       }
     },
-    "/task-completions/weekly-tracker": {
-      "get": {
-        "operationId": "TaskCompletionController_getWeeklyTracker",
-        "parameters": [
-          {
-            "name": "weekStart",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "example": "2025-02-03",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/WeeklyTrackerTaskDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "TaskCompletion"
-        ]
-      }
-    },
     "/user-character/summary": {
       "get": {
         "operationId": "UserCharacterController_getSummary",
@@ -626,7 +601,16 @@
     "/user-character/goals/progress": {
       "get": {
         "operationId": "UserCharacterController_getGoalsProgress",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "forDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -1157,6 +1141,44 @@
           "InventoryItem"
         ]
       }
+    },
+    "/task-log": {
+      "get": {
+        "operationId": "TaskLogController_getTaskLog",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskLogResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "TaskLog"
+        ]
+      }
     }
   },
   "info": {
@@ -1330,8 +1352,10 @@
             "nullable": true
           },
           "goalCompletedAmount": {
-            "type": "number",
-            "nullable": true
+            "type": "number"
+          },
+          "currentStreak": {
+            "type": "number"
           },
           "blocks": {
             "type": "array",
@@ -1346,6 +1370,8 @@
           "name",
           "sortOrder",
           "amountUnit",
+          "goalCompletedAmount",
+          "currentStreak",
           "blocks"
         ]
       },
@@ -1566,49 +1592,16 @@
         "properties": {
           "blockId": {
             "type": "number"
+          },
+          "completedAt": {
+            "type": "string",
+            "description": "Client-local completion timestamp (ISO 8601)",
+            "example": "2026-02-18T10:00:00+08:00"
           }
         },
         "required": [
-          "blockId"
-        ]
-      },
-      "WeeklyTrackerTaskDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "name": {
-            "type": "string"
-          },
-          "icon": {
-            "type": "string",
-            "nullable": true
-          },
-          "amountUnit": {
-            "type": "string",
-            "enum": [
-              "count",
-              "minutes"
-            ]
-          },
-          "sortOrder": {
-            "type": "number"
-          },
-          "dailyTotals": {
-            "description": "Mon–Sun totals (7 elements)",
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "amountUnit",
-          "sortOrder",
-          "dailyTotals"
+          "blockId",
+          "completedAt"
         ]
       },
       "CharacterSummaryItemDto": {
@@ -2045,6 +2038,89 @@
           "itemId",
           "source",
           "usedAt"
+        ]
+      },
+      "TaskLogTaskDto": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "number"
+          },
+          "taskName": {
+            "type": "string"
+          },
+          "taskIcon": {
+            "type": "string",
+            "nullable": true
+          },
+          "goalAmount": {
+            "type": "number",
+            "nullable": true
+          },
+          "goalPeriod": {
+            "type": "string",
+            "enum": [
+              "day-long",
+              "week-long",
+              "month-long"
+            ],
+            "nullable": true
+          },
+          "amountUnit": {
+            "type": "string",
+            "enum": [
+              "count",
+              "minutes"
+            ]
+          }
+        },
+        "required": [
+          "taskId",
+          "taskName",
+          "amountUnit"
+        ]
+      },
+      "TaskLogDayEntryDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "completions": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "completions"
+        ]
+      },
+      "TaskLogResponseDto": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskLogTaskDto"
+            }
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskLogDayEntryDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "tasks",
+          "days"
         ]
       }
     }
