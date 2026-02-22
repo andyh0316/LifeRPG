@@ -7,6 +7,7 @@ import { UserCharacterModule } from './user-character/user-character.module';
 import { ItemModule } from './item/item.module';
 import { ShopListingModule } from './shop-listing/shop-listing.module';
 import { InventoryItemModule } from './inventory-item/inventory-item.module';
+import { TaskLogModule } from './task-log/task-log.module';
 import { AuthModule } from './auth/auth.module';
 import { SessionGuard } from './auth/session.guard';
 
@@ -20,6 +21,7 @@ import { SessionGuard } from './auth/session.guard';
     ItemModule,
     ShopListingModule,
     InventoryItemModule,
+    TaskLogModule,
   ],
   providers: [
     {

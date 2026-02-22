@@ -20,5 +20,6 @@ import { TaskBlockRepository } from './task-block.repository';
     TaskBlockRepository,
     TaskService,
   ],
+  exports: [TaskRepository],
 })
 export class TaskModule {}
