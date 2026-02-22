@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -27,6 +27,140 @@ function formatDate(dateStr: string): string {
   return `${dateStr} (${DAYS[d.getDay()]})`;
 }
 
+// Returns ISO week key (YYYY-WW) for grouping days into Mon–Sun weeks
+function getIsoWeekKey(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay();
+  // Adjust to Monday-based: Mon=0 … Sun=6
+  const mondayOffset = (day + 6) % 7;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - mondayOffset);
+  // ISO week number: Thursday of that week determines the year/week
+  const thursday = new Date(monday);
+  thursday.setDate(monday.getDate() + 3);
+  const jan1 = new Date(thursday.getFullYear(), 0, 1);
+  const weekNum = Math.ceil(
+    ((thursday.getTime() - jan1.getTime()) / 86400000 + 1) / 7,
+  );
+  return `${thursday.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+}
+
+interface WeekGroup {
+  weekKey: string;
+  startIndex: number; // index in the days array where this week starts
+  count: number; // number of days in this group
+  totals: number[]; // per-task weekly totals (same order as tasks array)
+}
+
+function buildWeekGroups(days: TaskLogDay[], taskCount: number): WeekGroup[] {
+  if (days.length === 0) return [];
+
+  const groups: WeekGroup[] = [];
+  let currentKey = getIsoWeekKey(days[0].date);
+  let startIndex = 0;
+  let totals = new Array<number>(taskCount).fill(0);
+
+  for (let i = 0; i < days.length; i++) {
+    const key = getIsoWeekKey(days[i].date);
+    if (key !== currentKey) {
+      groups.push({
+        weekKey: currentKey,
+        startIndex,
+        count: i - startIndex,
+        totals,
+      });
+      currentKey = key;
+      startIndex = i;
+      totals = new Array<number>(taskCount).fill(0);
+    }
+    for (let t = 0; t < taskCount; t++) {
+      totals[t] += days[i].completions[t] ?? 0;
+    }
+  }
+  groups.push({
+    weekKey: currentKey,
+    startIndex,
+    count: days.length - startIndex,
+    totals,
+  });
+
+  return groups;
+}
+
+// Maps each day index to its week group index
+function buildDayToWeekMap(groups: WeekGroup[]): number[] {
+  const map: number[] = [];
+  for (let g = 0; g < groups.length; g++) {
+    for (let d = 0; d < groups[g].count; d++) {
+      map.push(g);
+    }
+  }
+  return map;
+}
+
+function ProgressBar({
+  total,
+  goal,
+  direction,
+  label,
+}: {
+  total: number;
+  goal: number;
+  direction: 'horizontal' | 'vertical';
+  label: string;
+}) {
+  const pct = goal > 0 ? Math.min(total / goal, 1) : 0;
+  const met = goal > 0 && total >= goal;
+  const isHorizontal = direction === 'horizontal';
+
+  return (
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        bgcolor: GAME_COLORS.progressTrack,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Fill */}
+      <Box
+        sx={{
+          position: 'absolute',
+          ...(isHorizontal
+            ? { left: 0, top: 0, height: '100%', width: `${pct * 100}%` }
+            : { bottom: 0, left: 0, width: '100%', height: `${pct * 100}%` }),
+          bgcolor: met ? 'rgba(34,197,94,0.35)' : 'rgba(34,197,94,0.18)',
+          transition: isHorizontal ? 'width 0.3s ease' : 'height 0.3s ease',
+        }}
+      />
+      {/* Label */}
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: met ? 800 : 600,
+            fontSize: '0.7rem',
+            color: met ? '#15803d' : GAME_COLORS.textSecondary,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
 export default function CompletionOverview() {
   const [extraDays, setExtraDays] = useState<TaskLogDay[]>([]);
   const [cursor, setCursor] = useState<string | null | undefined>(undefined);
@@ -40,6 +174,12 @@ export default function CompletionOverview() {
   const tasks: TaskLogTask[] = data?.tasks ?? [];
   const days: TaskLogDay[] = [...(data?.days ?? []), ...extraDays];
   const nextCursor = extraDays.length > 0 ? cursor : data?.nextCursor;
+
+  const weekGroups = useMemo(
+    () => buildWeekGroups(days, tasks.length),
+    [days, tasks.length],
+  );
+  const dayToWeek = useMemo(() => buildDayToWeekMap(weekGroups), [weekGroups]);
 
   const handleLoadMore = useCallback(async () => {
     if (!nextCursor) return;
@@ -80,7 +220,15 @@ export default function CompletionOverview() {
       ) : (
         <>
           <TableContainer sx={{ mt: 2 }}>
-            <Table size="small">
+            <Table
+              size="small"
+              sx={{
+                borderCollapse: 'collapse',
+                '& td, & th': {
+                  border: `1px solid ${GAME_COLORS.textMuted}`,
+                },
+              }}
+            >
               <TableHead>
                 <TableRow>
                   <TableCell
@@ -124,28 +272,69 @@ export default function CompletionOverview() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {days.map((day) => (
-                  <TableRow key={day.date}>
-                    <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
-                      {formatDate(day.date)}
-                    </TableCell>
-                    {day.completions.map((amount, i) => (
-                      <TableCell
-                        key={tasks[i]?.taskId}
-                        align="center"
-                        sx={{
-                          color:
-                            amount === 0
-                              ? 'text.disabled'
-                              : GAME_COLORS.textPrimary,
-                          fontWeight: amount > 0 ? 600 : 400,
-                        }}
-                      >
-                        {amount}
+                {days.map((day, dayIndex) => {
+                  const groupIndex = dayToWeek[dayIndex];
+                  const group = weekGroups[groupIndex];
+                  const isFirstInGroup = dayIndex === group.startIndex;
+
+                  return (
+                    <TableRow key={day.date}>
+                      <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
+                        {formatDate(day.date)}
                       </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                      {tasks.map((task, taskIndex) => {
+                        const isWeekly = task.goalPeriod === 'week-long';
+                        const goal = task.goalAmount ?? 0;
+
+                        if (isWeekly) {
+                          if (!isFirstInGroup)
+                            return <Fragment key={task.taskId} />;
+                          const weekTotal = group.totals[taskIndex];
+                          return (
+                            <TableCell
+                              key={task.taskId}
+                              rowSpan={group.count}
+                              sx={{ p: 0, height: '1px' }}
+                            >
+                              <Box
+                                sx={{
+                                  position: 'relative',
+                                  height: '100%',
+                                }}
+                              >
+                                <Box sx={{ position: 'absolute', inset: 0 }}>
+                                  <ProgressBar
+                                    total={weekTotal}
+                                    goal={goal}
+                                    direction="vertical"
+                                    label={`${weekTotal} / ${goal}`}
+                                  />
+                                </Box>
+                              </Box>
+                            </TableCell>
+                          );
+                        }
+
+                        const amount = day.completions[taskIndex] ?? 0;
+                        return (
+                          <TableCell
+                            key={task.taskId}
+                            sx={{ p: 0, height: '1px' }}
+                          >
+                            <ProgressBar
+                              total={amount}
+                              goal={goal}
+                              direction="horizontal"
+                              label={
+                                goal > 0 ? `${amount} / ${goal}` : `${amount}`
+                              }
+                            />
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>

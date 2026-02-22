@@ -2057,6 +2057,15 @@
             "type": "number",
             "nullable": true
           },
+          "goalPeriod": {
+            "type": "string",
+            "enum": [
+              "day-long",
+              "week-long",
+              "month-long"
+            ],
+            "nullable": true
+          },
           "amountUnit": {
             "type": "string",
             "enum": [

@@ -638,6 +638,8 @@ export interface components {
             taskName: string;
             taskIcon?: string | null;
             goalAmount?: number | null;
+            /** @enum {string|null} */
+            goalPeriod?: "day-long" | "week-long" | "month-long" | null;
             /** @enum {string} */
             amountUnit: "count" | "minutes";
         };

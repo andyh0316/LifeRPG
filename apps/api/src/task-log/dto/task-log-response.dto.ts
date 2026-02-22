@@ -13,6 +13,12 @@ export class TaskLogTaskDto {
   @ApiPropertyOptional({ type: Number, nullable: true })
   goalAmount!: number | null;
 
+  @ApiPropertyOptional({
+    enum: ['day-long', 'week-long', 'month-long'],
+    nullable: true,
+  })
+  goalPeriod!: string | null;
+
   @ApiProperty({ enum: ['count', 'minutes'] })
   amountUnit!: string;
 }
