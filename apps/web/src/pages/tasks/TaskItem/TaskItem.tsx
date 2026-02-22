@@ -40,6 +40,7 @@ export default function TaskItem({
   userCharacterId,
   index = 0,
   forDate,
+  editing,
 }: TaskItemProps) {
   const {
     attributes,
@@ -166,8 +167,9 @@ export default function TaskItem({
           boxShadow: GAME_SHADOWS.cardHover,
           transform: 'translateY(-1px)',
         },
-        '&:hover .quest-edit-btn': { opacity: 1 },
+        '& .quest-edit-btn': { display: editing ? undefined : 'none' },
         ...(goalPercent >= 100 && {
+          bgcolor: 'rgba(34,197,94,0.08)',
           border: '1px solid #4caf50',
           boxShadow: '0 0 8px rgba(76, 175, 80, 0.3)',
         }),
@@ -221,31 +223,61 @@ export default function TaskItem({
             </Typography>
           )}
           <Typography
-            sx={{ fontSize: '0.8rem', color: GAME_COLORS.textSecondary }}
+            sx={{
+              fontSize: goalPercent >= 100 ? '0.85rem' : '0.8rem',
+              color: goalPercent >= 100 ? '#15803d' : GAME_COLORS.textSecondary,
+              fontWeight: goalPercent >= 100 ? 700 : 400,
+            }}
           >
             {goalCompletedAmount ?? 0}
             {goalAmount != null && ` / ${goalAmount}`} {amountUnit}{' '}
             {goalPeriod && PERIOD_LABEL[goalPeriod]}
-            {currentStreak != null && currentStreak >= 2 && (
-              <Typography
-                component="span"
-                sx={{ fontSize: '0.8rem', color: '#ef6c00', ml: 1 }}
-              >
-                🔥 {currentStreak}
-              </Typography>
-            )}
           </Typography>
         </Box>
+
+        {currentStreak != null && currentStreak >= 2 && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: '8px',
+              bgcolor: 'rgba(239,108,0,0.08)',
+              border: '1px solid rgba(239,108,0,0.2)',
+              flexShrink: 0,
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: '1.1rem',
+                fontWeight: 800,
+                color: '#e65100',
+                lineHeight: 1.2,
+              }}
+            >
+              {currentStreak}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                color: '#ef6c00',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              streak
+            </Typography>
+          </Box>
+        )}
 
         <IconButton
           className="quest-edit-btn"
           size="small"
           onClick={() => navigate(`/tasks/${id}/edit`)}
-          sx={{
-            opacity: 0,
-            transition: 'opacity 0.15s ease',
-            color: GAME_COLORS.textMuted,
-          }}
+          sx={{ color: GAME_COLORS.textMuted }}
         >
           <EditIcon fontSize="small" />
         </IconButton>
@@ -254,8 +286,6 @@ export default function TaskItem({
           size="small"
           onClick={handleDelete}
           sx={{
-            opacity: 0,
-            transition: 'opacity 0.15s ease',
             color: GAME_COLORS.textMuted,
             '&:hover': { color: '#e53935' },
           }}
@@ -268,11 +298,8 @@ export default function TaskItem({
           className="quest-edit-btn"
           sx={{
             cursor: 'grab',
-            display: 'flex',
             alignItems: 'center',
             color: GAME_COLORS.textMuted,
-            opacity: 0,
-            transition: 'opacity 0.15s ease',
             flexShrink: 0,
           }}
         >

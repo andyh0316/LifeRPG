@@ -51,6 +51,7 @@ export default function TaskList({
   });
 
   const [goalsOpen, setGoalsOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const undoCompletion = $api.useMutation('post', '/task-completions/undo', {
     onSuccess: (data) => {
@@ -135,6 +136,8 @@ export default function TaskList({
           undoPending={undoCompletion.isPending}
           onNewQuest={() => navigate('/tasks/create')}
           onGoals={() => setGoalsOpen(true)}
+          editing={editing}
+          onToggleEdit={() => setEditing((v) => !v)}
         />
       </Box>
 
@@ -157,6 +160,7 @@ export default function TaskList({
                 goalCompletedAmount={task.goalCompletedAmount ?? 0}
                 index={index}
                 forDate={forDate}
+                editing={editing}
               />
             ))}
           </List>
