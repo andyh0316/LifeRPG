@@ -20,4 +20,5 @@ export interface TaskItemProps {
   userCharacterId: number;
   index?: number;
   forDate: string;
+  editing?: boolean;
 }

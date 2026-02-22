@@ -7,6 +7,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import UndoIcon from '@mui/icons-material/Undo';
@@ -16,6 +17,8 @@ interface TaskListMenuProps {
   undoPending: boolean;
   onNewQuest: () => void;
   onGoals: () => void;
+  editing: boolean;
+  onToggleEdit: () => void;
 }
 
 export default function TaskListMenu({
@@ -23,6 +26,8 @@ export default function TaskListMenu({
   undoPending,
   onNewQuest,
   onGoals,
+  editing,
+  onToggleEdit,
 }: TaskListMenuProps) {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
@@ -92,6 +97,13 @@ export default function TaskListMenu({
                 <TrackChangesIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Goals</ListItemText>
+            </MenuItem>
+
+            <MenuItem onClick={closeAndRun(onToggleEdit)}>
+              <ListItemIcon>
+                <EditIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{editing ? 'Done' : 'Edit'}</ListItemText>
             </MenuItem>
           </MenuList>
         </Paper>
