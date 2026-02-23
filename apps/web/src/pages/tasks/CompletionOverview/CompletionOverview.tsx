@@ -103,11 +103,13 @@ function ProgressBar({
   goal,
   direction,
   label,
+  sublabel,
 }: {
   total: number;
   goal: number;
   direction: 'horizontal' | 'vertical';
   label: string;
+  sublabel?: string;
 }) {
   const pct = goal > 0 ? Math.min(total / goal, 1) : 0;
   const met = goal > 0 && total >= goal;
@@ -139,6 +141,7 @@ function ProgressBar({
         sx={{
           position: 'relative',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
@@ -156,6 +159,18 @@ function ProgressBar({
         >
           {label}
         </Typography>
+        {sublabel && (
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6rem',
+              color: GAME_COLORS.textMuted,
+              lineHeight: 1,
+            }}
+          >
+            {sublabel}
+          </Typography>
+        )}
       </Box>
     </Box>
   );
@@ -308,6 +323,7 @@ export default function CompletionOverview() {
                                     goal={goal}
                                     direction="vertical"
                                     label={`${weekTotal} / ${goal}`}
+                                    sublabel={task.goalPeriod ?? undefined}
                                   />
                                 </Box>
                               </Box>
