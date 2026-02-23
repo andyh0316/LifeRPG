@@ -128,4 +128,38 @@ export class TaskCompletionRepository {
     }
     return map;
   }
+
+  async getXpByDay(
+    taskIds: number[],
+    startDate: string,
+    endDate: string,
+    timezone: string,
+  ): Promise<Map<string, number>> {
+    if (taskIds.length === 0) return new Map();
+
+    const tz = sql`${timezone}`;
+    const day = sql<string>`to_char((${taskCompletions.completedAt} AT TIME ZONE ${tz})::date, 'YYYY-MM-DD')`;
+
+    const rows = await this.db
+      .select({
+        day,
+        totalXp: sql<number>`coalesce(sum(${taskCompletions.xpEarned}), 0)`,
+      })
+      .from(taskCompletions)
+      .where(
+        and(
+          inArray(taskCompletions.taskId, taskIds),
+          sql`${taskCompletions.completedAt} >= (${startDate}::date)::timestamp AT TIME ZONE ${tz}`,
+          sql`${taskCompletions.completedAt} < ((${endDate}::date + interval '1 day')::timestamp) AT TIME ZONE ${tz}`,
+          isNull(taskCompletions.deletedAt),
+        ),
+      )
+      .groupBy(sql`1`);
+
+    const map = new Map<string, number>();
+    for (const row of rows) {
+      map.set(row.day, Number(row.totalXp));
+    }
+    return map;
+  }
 }

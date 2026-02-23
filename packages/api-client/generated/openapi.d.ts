@@ -646,9 +646,11 @@ export interface components {
         TaskLogDayEntryDto: {
             date: string;
             completions: number[];
+            totalXp: number;
         };
         TaskLogResponseDto: {
             tasks: components["schemas"]["TaskLogTaskDto"][];
+            goalsProgress: components["schemas"]["GoalsProgressResponseDto"];
             days: components["schemas"]["TaskLogDayEntryDto"][];
             nextCursor?: string | null;
         };
