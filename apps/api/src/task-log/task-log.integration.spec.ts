@@ -43,9 +43,9 @@ describe('Task Log Integration', () => {
     ]).returning();
 
     await db.insert(taskCompletions).values([
-      { userCharacterId: currentUserCharacterId, taskId: meditate.id, completedAt: new Date('2026-02-20T12:00:00Z'), amount: 1, xpEarned: 0, coinsEarned: 0 },
-      { userCharacterId: currentUserCharacterId, taskId: meditate.id, completedAt: new Date('2026-02-20T18:00:00Z'), amount: 1, xpEarned: 0, coinsEarned: 0 },
-      { userCharacterId: currentUserCharacterId, taskId: pushups.id, completedAt: new Date('2026-02-19T12:00:00Z'), amount: 1, xpEarned: 0, coinsEarned: 0 },
+      { userCharacterId: currentUserCharacterId, taskId: meditate.id, completedAt: new Date('2026-02-20T12:00:00Z'), amount: 1, xpEarned: 2, coinsEarned: 0 },
+      { userCharacterId: currentUserCharacterId, taskId: meditate.id, completedAt: new Date('2026-02-20T18:00:00Z'), amount: 1, xpEarned: 2, coinsEarned: 0 },
+      { userCharacterId: currentUserCharacterId, taskId: pushups.id, completedAt: new Date('2026-02-19T12:00:00Z'), amount: 1, xpEarned: 2, coinsEarned: 0 },
     ]);
     // #endregion
 
@@ -61,10 +61,13 @@ describe('Task Log Integration', () => {
       expect.objectContaining({ taskName: 'Push-ups', amountUnit: 'count' }),
     ]);
 
-    const day = (date: string) => body.days.find((d) => d.date === date)!.completions;
-    expect(day('2026-02-20')).toEqual([2, 0]);
-    expect(day('2026-02-19')).toEqual([0, 1]);
-    expect(day('2026-02-18')).toEqual([0, 0]);
+    const day = (date: string) => body.days.find((d) => d.date === date)!;
+    expect(day('2026-02-20').completions).toEqual([2, 0]);
+    expect(day('2026-02-20').totalXp).toBe(4);
+    expect(day('2026-02-19').completions).toEqual([0, 1]);
+    expect(day('2026-02-19').totalXp).toBe(2);
+    expect(day('2026-02-18').completions).toEqual([0, 0]);
+    expect(day('2026-02-18').totalXp).toBe(0);
     // #endregion
   });
 });

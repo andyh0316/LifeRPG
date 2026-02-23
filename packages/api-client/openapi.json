@@ -2091,11 +2091,15 @@
             "items": {
               "type": "number"
             }
+          },
+          "totalXp": {
+            "type": "number"
           }
         },
         "required": [
           "date",
-          "completions"
+          "completions",
+          "totalXp"
         ]
       },
       "TaskLogResponseDto": {
@@ -2106,6 +2110,9 @@
             "items": {
               "$ref": "#/components/schemas/TaskLogTaskDto"
             }
+          },
+          "goalsProgress": {
+            "$ref": "#/components/schemas/GoalsProgressResponseDto"
           },
           "days": {
             "type": "array",
@@ -2120,6 +2127,7 @@
         },
         "required": [
           "tasks",
+          "goalsProgress",
           "days"
         ]
       }

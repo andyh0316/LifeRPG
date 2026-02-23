@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { GoalsProgressResponseDto } from '../../user-character/dto/goals-progress-response.dto';
 
 export class TaskLogTaskDto {
   @ApiProperty({ type: Number })
@@ -29,11 +30,17 @@ export class TaskLogDayEntryDto {
 
   @ApiProperty({ type: [Number] })
   completions!: number[];
+
+  @ApiProperty({ type: Number })
+  totalXp!: number;
 }
 
 export class TaskLogResponseDto {
   @ApiProperty({ type: [TaskLogTaskDto] })
   tasks!: TaskLogTaskDto[];
+
+  @ApiProperty({ type: GoalsProgressResponseDto })
+  goalsProgress!: GoalsProgressResponseDto;
 
   @ApiProperty({ type: [TaskLogDayEntryDto] })
   days!: TaskLogDayEntryDto[];

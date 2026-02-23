@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import CircularProgress from '@mui/material/CircularProgress';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { Routes, Route } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@life-rpg/api-client';
@@ -21,6 +26,10 @@ import Login from './pages/login/Login';
 import { GAME_COLORS } from '@/theme/gameTheme';
 
 function App() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   // Auth gate: checks if user is authenticated via access_token cookie.
   // Called on mount, window refocus, and network reconnect.
   const queryClient = useQueryClient();
@@ -58,7 +67,12 @@ function App() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <Sidebar onLogout={() => queryClient.resetQueries()} />
+      <Sidebar
+        onLogout={() => queryClient.resetQueries()}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        isMobile={isMobile}
+      />
       <Box
         component="main"
         sx={{
@@ -68,6 +82,19 @@ function App() {
           minHeight: '100vh',
         }}
       >
+        {isMobile && (
+          <IconButton
+            onClick={() => setDrawerOpen(true)}
+            sx={{
+              alignSelf: 'flex-start',
+              mb: 1,
+              ml: -1,
+              color: GAME_COLORS.textSecondary,
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tasks" element={<Tasks />} />

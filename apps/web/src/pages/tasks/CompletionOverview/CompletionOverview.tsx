@@ -21,6 +21,9 @@ type TaskLogDay = components['schemas']['TaskLogDayEntryDto'];
 
 const PAGE_SIZE = 30;
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const COL_DATE = 150;
+const COL_WEEKLY_XP = 150;
+const COL_TASK = 100;
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
@@ -50,6 +53,7 @@ interface WeekGroup {
   startIndex: number; // index in the days array where this week starts
   count: number; // number of days in this group
   totals: number[]; // per-task weekly totals (same order as tasks array)
+  weeklyXp: number; // total XP earned in this week
 }
 
 function buildWeekGroups(days: TaskLogDay[], taskCount: number): WeekGroup[] {
@@ -59,6 +63,7 @@ function buildWeekGroups(days: TaskLogDay[], taskCount: number): WeekGroup[] {
   let currentKey = getIsoWeekKey(days[0].date);
   let startIndex = 0;
   let totals = new Array<number>(taskCount).fill(0);
+  let weeklyXp = 0;
 
   for (let i = 0; i < days.length; i++) {
     const key = getIsoWeekKey(days[i].date);
@@ -68,20 +73,24 @@ function buildWeekGroups(days: TaskLogDay[], taskCount: number): WeekGroup[] {
         startIndex,
         count: i - startIndex,
         totals,
+        weeklyXp,
       });
       currentKey = key;
       startIndex = i;
       totals = new Array<number>(taskCount).fill(0);
+      weeklyXp = 0;
     }
     for (let t = 0; t < taskCount; t++) {
       totals[t] += days[i].completions[t] ?? 0;
     }
+    weeklyXp += days[i].totalXp;
   }
   groups.push({
     weekKey: currentKey,
     startIndex,
     count: days.length - startIndex,
     totals,
+    weeklyXp,
   });
 
   return groups;
@@ -103,11 +112,13 @@ function ProgressBar({
   goal,
   direction,
   label,
+  sublabel,
 }: {
   total: number;
   goal: number;
   direction: 'horizontal' | 'vertical';
   label: string;
+  sublabel?: string;
 }) {
   const pct = goal > 0 ? Math.min(total / goal, 1) : 0;
   const met = goal > 0 && total >= goal;
@@ -139,6 +150,7 @@ function ProgressBar({
         sx={{
           position: 'relative',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
@@ -156,6 +168,18 @@ function ProgressBar({
         >
           {label}
         </Typography>
+        {sublabel && (
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: '0.6rem',
+              color: GAME_COLORS.textMuted,
+              lineHeight: 1,
+            }}
+          >
+            {sublabel}
+          </Typography>
+        )}
       </Box>
     </Box>
   );
@@ -174,6 +198,7 @@ export default function CompletionOverview() {
   const tasks: TaskLogTask[] = data?.tasks ?? [];
   const days: TaskLogDay[] = [...(data?.days ?? []), ...extraDays];
   const nextCursor = extraDays.length > 0 ? cursor : data?.nextCursor;
+  const weeklyXpTarget = data?.goalsProgress?.weekly?.target ?? 0;
 
   const weekGroups = useMemo(
     () => buildWeekGroups(days, tasks.length),
@@ -223,6 +248,8 @@ export default function CompletionOverview() {
             <Table
               size="small"
               sx={{
+                tableLayout: 'fixed',
+                width: COL_DATE + COL_WEEKLY_XP + tasks.length * COL_TASK,
                 borderCollapse: 'collapse',
                 '& td, & th': {
                   border: `1px solid ${GAME_COLORS.textMuted}`,
@@ -232,15 +259,39 @@ export default function CompletionOverview() {
               <TableHead>
                 <TableRow>
                   <TableCell
-                    sx={{ fontWeight: 700, color: GAME_COLORS.textSecondary }}
+                    sx={{
+                      fontWeight: 700,
+                      color: GAME_COLORS.textSecondary,
+                      width: COL_DATE,
+                      minWidth: COL_DATE,
+                      maxWidth: COL_DATE,
+                    }}
                   >
                     Date
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: 700,
+                      color: GAME_COLORS.textSecondary,
+                      width: COL_WEEKLY_XP,
+                      minWidth: COL_WEEKLY_XP,
+                      maxWidth: COL_WEEKLY_XP,
+                    }}
+                  >
+                    Weekly XP
                   </TableCell>
                   {tasks.map((task) => (
                     <TableCell
                       key={task.taskId}
                       align="center"
-                      sx={{ fontWeight: 700, color: GAME_COLORS.textSecondary }}
+                      sx={{
+                        fontWeight: 700,
+                        color: GAME_COLORS.textSecondary,
+                        width: COL_TASK,
+                        minWidth: COL_TASK,
+                        maxWidth: COL_TASK,
+                      }}
                     >
                       <Box
                         sx={{
@@ -279,9 +330,49 @@ export default function CompletionOverview() {
 
                   return (
                     <TableRow key={day.date}>
-                      <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      <TableCell
+                        sx={{
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap',
+                          width: COL_DATE,
+                          minWidth: COL_DATE,
+                          maxWidth: COL_DATE,
+                        }}
+                      >
                         {formatDate(day.date)}
                       </TableCell>
+                      {isFirstInGroup && (
+                        <TableCell
+                          rowSpan={group.count}
+                          sx={{
+                            p: 0,
+                            height: '1px',
+                            width: COL_WEEKLY_XP,
+                            minWidth: COL_WEEKLY_XP,
+                            maxWidth: COL_WEEKLY_XP,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              position: 'relative',
+                              height: '100%',
+                            }}
+                          >
+                            <Box sx={{ position: 'absolute', inset: 0 }}>
+                              <ProgressBar
+                                total={group.weeklyXp}
+                                goal={weeklyXpTarget}
+                                direction="vertical"
+                                label={
+                                  weeklyXpTarget > 0
+                                    ? `${group.weeklyXp} / ${weeklyXpTarget}`
+                                    : `${group.weeklyXp}`
+                                }
+                              />
+                            </Box>
+                          </Box>
+                        </TableCell>
+                      )}
                       {tasks.map((task, taskIndex) => {
                         const isWeekly = task.goalPeriod === 'week-long';
                         const goal = task.goalAmount ?? 0;
@@ -294,7 +385,13 @@ export default function CompletionOverview() {
                             <TableCell
                               key={task.taskId}
                               rowSpan={group.count}
-                              sx={{ p: 0, height: '1px' }}
+                              sx={{
+                                p: 0,
+                                height: '1px',
+                                width: COL_TASK,
+                                minWidth: COL_TASK,
+                                maxWidth: COL_TASK,
+                              }}
                             >
                               <Box
                                 sx={{
@@ -308,6 +405,7 @@ export default function CompletionOverview() {
                                     goal={goal}
                                     direction="vertical"
                                     label={`${weekTotal} / ${goal}`}
+                                    sublabel={task.goalPeriod ?? undefined}
                                   />
                                 </Box>
                               </Box>
@@ -319,7 +417,13 @@ export default function CompletionOverview() {
                         return (
                           <TableCell
                             key={task.taskId}
-                            sx={{ p: 0, height: '1px' }}
+                            sx={{
+                              p: 0,
+                              height: '1px',
+                              width: COL_TASK,
+                              minWidth: COL_TASK,
+                              maxWidth: COL_TASK,
+                            }}
                           >
                             <ProgressBar
                               total={amount}

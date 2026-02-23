@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TaskRepository } from '../task/task.repository';
 import { TaskCompletionRepository } from '../task-completion/task-completion.repository';
+import { UserCharacterService } from '../user-character/user-character.service';
 import type {
   TaskLogResponseDto,
   TaskLogDayEntryDto,
@@ -12,6 +13,7 @@ export class TaskLogService {
   constructor(
     private readonly taskRepository: TaskRepository,
     private readonly taskCompletionRepository: TaskCompletionRepository,
+    private readonly userCharacterService: UserCharacterService,
   ) {}
 
   async getTaskLog(
@@ -24,6 +26,12 @@ export class TaskLogService {
       ? subtractDays(cursor, 1)
       : todayInTimezone(timezone);
     const startDate = subtractDays(endDate, pageSize - 1);
+
+    const goalsProgress = await this.userCharacterService.getGoalsProgress(
+      userCharacterId,
+      endDate,
+      timezone,
+    );
 
     const activeTasks = await this.taskRepository.findAll({
       userCharacterId,
@@ -49,19 +57,27 @@ export class TaskLogService {
     if (activeTasks.length === 0) {
       return {
         tasks,
+        goalsProgress,
         days: buildEmptyDays(startDate, endDate),
         nextCursor: startDate,
       };
     }
 
     const taskIds = activeTasks.map((t) => t.id);
-    const completionMap =
-      await this.taskCompletionRepository.getCompletionsByDay(
+    const [completionMap, xpMap] = await Promise.all([
+      this.taskCompletionRepository.getCompletionsByDay(
         taskIds,
         startDate,
         endDate,
         timezone,
-      );
+      ),
+      this.taskCompletionRepository.getXpByDay(
+        taskIds,
+        startDate,
+        endDate,
+        timezone,
+      ),
+    ]);
 
     const days: TaskLogDayEntryDto[] = [];
     let d = endDate;
@@ -69,11 +85,11 @@ export class TaskLogService {
       const completions = activeTasks.map(
         (t) => completionMap.get(`${t.id}:${d}`) ?? 0,
       );
-      days.push({ date: d, completions });
+      days.push({ date: d, completions, totalXp: xpMap.get(d) ?? 0 });
       d = subtractDays(d, 1);
     }
 
-    return { tasks, days, nextCursor: startDate };
+    return { tasks, goalsProgress, days, nextCursor: startDate };
   }
 }
 
@@ -94,7 +110,7 @@ function buildEmptyDays(
   const days: TaskLogDayEntryDto[] = [];
   let d = endDate;
   while (d >= startDate) {
-    days.push({ date: d, completions: [] });
+    days.push({ date: d, completions: [], totalXp: 0 });
     d = subtractDays(d, 1);
   }
   return days;
