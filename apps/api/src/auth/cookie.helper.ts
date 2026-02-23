@@ -13,5 +13,10 @@ export function setSessionCookie(res: Response, token: string): void {
 }
 
 export function clearSessionCookie(res: Response): void {
-  res.clearCookie('session_token', { path: '/' });
+  res.clearCookie('session_token', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    path: '/',
+  });
 }
