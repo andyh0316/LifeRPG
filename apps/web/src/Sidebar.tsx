@@ -23,6 +23,9 @@ export { DRAWER_WIDTH };
 
 interface SidebarProps {
   onLogout: () => void;
+  open: boolean;
+  onClose: () => void;
+  isMobile: boolean;
 }
 
 const NAV_ITEMS = [
@@ -34,7 +37,12 @@ const NAV_ITEMS = [
   { label: 'Items', icon: <Inventory2Icon />, to: '/items' },
 ];
 
-export default function Sidebar({ onLogout }: SidebarProps) {
+export default function Sidebar({
+  onLogout,
+  open,
+  onClose,
+  isMobile,
+}: SidebarProps) {
   const location = useLocation();
 
   const handleLogout = async () => {
@@ -48,9 +56,11 @@ export default function Sidebar({ onLogout }: SidebarProps) {
 
   return (
     <Drawer
-      variant="permanent"
+      variant={isMobile ? 'temporary' : 'permanent'}
+      open={isMobile ? open : true}
+      onClose={onClose}
       sx={{
-        width: DRAWER_WIDTH,
+        width: isMobile ? 0 : DRAWER_WIDTH,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: DRAWER_WIDTH,
@@ -96,6 +106,7 @@ export default function Sidebar({ onLogout }: SidebarProps) {
               key={item.to}
               component={Link}
               to={item.to}
+              onClick={isMobile ? onClose : undefined}
               sx={{
                 borderRadius: '8px',
                 mb: 0.5,
@@ -137,7 +148,10 @@ export default function Sidebar({ onLogout }: SidebarProps) {
 
       <List sx={{ mt: 'auto', px: 1, pb: 1 }}>
         <ListItemButton
-          onClick={handleLogout}
+          onClick={() => {
+            handleLogout();
+            if (isMobile) onClose();
+          }}
           sx={{
             borderRadius: '8px',
             color: GAME_COLORS.sidebarTextMuted,
