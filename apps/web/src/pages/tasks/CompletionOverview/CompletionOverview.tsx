@@ -238,6 +238,8 @@ export default function CompletionOverview() {
             <Table
               size="small"
               sx={{
+                tableLayout: 'fixed',
+                width: (tasks.length + 1) * 150,
                 borderCollapse: 'collapse',
                 '& td, & th': {
                   border: `1px solid ${GAME_COLORS.textMuted}`,
@@ -247,7 +249,13 @@ export default function CompletionOverview() {
               <TableHead>
                 <TableRow>
                   <TableCell
-                    sx={{ fontWeight: 700, color: GAME_COLORS.textSecondary }}
+                    sx={{
+                      fontWeight: 700,
+                      color: GAME_COLORS.textSecondary,
+                      width: 150,
+                      minWidth: 150,
+                      maxWidth: 150,
+                    }}
                   >
                     Date
                   </TableCell>
@@ -255,7 +263,13 @@ export default function CompletionOverview() {
                     <TableCell
                       key={task.taskId}
                       align="center"
-                      sx={{ fontWeight: 700, color: GAME_COLORS.textSecondary }}
+                      sx={{
+                        fontWeight: 700,
+                        color: GAME_COLORS.textSecondary,
+                        width: 150,
+                        minWidth: 150,
+                        maxWidth: 150,
+                      }}
                     >
                       <Box
                         sx={{
@@ -294,7 +308,15 @@ export default function CompletionOverview() {
 
                   return (
                     <TableRow key={day.date}>
-                      <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      <TableCell
+                        sx={{
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap',
+                          width: 200,
+                          minWidth: 200,
+                          maxWidth: 200,
+                        }}
+                      >
                         {formatDate(day.date)}
                       </TableCell>
                       {tasks.map((task, taskIndex) => {
@@ -309,7 +331,13 @@ export default function CompletionOverview() {
                             <TableCell
                               key={task.taskId}
                               rowSpan={group.count}
-                              sx={{ p: 0, height: '1px' }}
+                              sx={{
+                                p: 0,
+                                height: '1px',
+                                width: 200,
+                                minWidth: 200,
+                                maxWidth: 200,
+                              }}
                             >
                               <Box
                                 sx={{
@@ -335,7 +363,13 @@ export default function CompletionOverview() {
                         return (
                           <TableCell
                             key={task.taskId}
-                            sx={{ p: 0, height: '1px' }}
+                            sx={{
+                              p: 0,
+                              height: '1px',
+                              width: 200,
+                              minWidth: 200,
+                              maxWidth: 200,
+                            }}
                           >
                             <ProgressBar
                               total={amount}
